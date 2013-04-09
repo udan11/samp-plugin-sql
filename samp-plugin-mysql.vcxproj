@@ -1,0 +1,165 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{465A3531-9C93-4B23-B904-82F23F189AF1}</ProjectGuid>
+    <RootNamespace>samppluginmysql</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v110</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v110_xp</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>bin\</OutDir>
+    <IntDir>bin\</IntDir>
+    <TargetExt>.dll</TargetExt>
+    <TargetName>mysql</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>plugin.def</ModuleDefinitionFile>
+      <AdditionalDependencies>lib\libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="src\log.h" />
+    <ClInclude Include="src\main.h" />
+    <ClInclude Include="src\mutex.h" />
+    <ClInclude Include="src\mysql_handler.h" />
+    <ClInclude Include="src\mysql_include\atomic\gcc_builtins.h" />
+    <ClInclude Include="src\mysql_include\atomic\generic-msvc.h" />
+    <ClInclude Include="src\mysql_include\atomic\nolock.h" />
+    <ClInclude Include="src\mysql_include\atomic\rwlock.h" />
+    <ClInclude Include="src\mysql_include\atomic\x86-gcc.h" />
+    <ClInclude Include="src\mysql_include\base64.h" />
+    <ClInclude Include="src\mysql_include\config-win.h" />
+    <ClInclude Include="src\mysql_include\decimal.h" />
+    <ClInclude Include="src\mysql_include\errmsg.h" />
+    <ClInclude Include="src\mysql_include\hash.h" />
+    <ClInclude Include="src\mysql_include\keycache.h" />
+    <ClInclude Include="src\mysql_include\lf.h" />
+    <ClInclude Include="src\mysql_include\myisampack.h" />
+    <ClInclude Include="src\mysql_include\mysql.h" />
+    <ClInclude Include="src\mysql_include\mysqld_error.h" />
+    <ClInclude Include="src\mysql_include\mysql_com.h" />
+    <ClInclude Include="src\mysql_include\mysql_time.h" />
+    <ClInclude Include="src\mysql_include\mysql_version.h" />
+    <ClInclude Include="src\mysql_include\mysys\rijndael.h" />
+    <ClInclude Include="src\mysql_include\mysys_err.h" />
+    <ClInclude Include="src\mysql_include\my_aes.h" />
+    <ClInclude Include="src\mysql_include\my_alarm.h" />
+    <ClInclude Include="src\mysql_include\my_alloc.h" />
+    <ClInclude Include="src\mysql_include\my_atomic.h" />
+    <ClInclude Include="src\mysql_include\my_attribute.h" />
+    <ClInclude Include="src\mysql_include\my_base.h" />
+    <ClInclude Include="src\mysql_include\my_bit.h" />
+    <ClInclude Include="src\mysql_include\my_bitmap.h" />
+    <ClInclude Include="src\mysql_include\my_charsets.h" />
+    <ClInclude Include="src\mysql_include\my_config.h" />
+    <ClInclude Include="src\mysql_include\my_dbug.h" />
+    <ClInclude Include="src\mysql_include\my_dir.h" />
+    <ClInclude Include="src\mysql_include\my_getopt.h" />
+    <ClInclude Include="src\mysql_include\my_global.h" />
+    <ClInclude Include="src\mysql_include\my_libwrap.h" />
+    <ClInclude Include="src\mysql_include\my_list.h" />
+    <ClInclude Include="src\mysql_include\my_md5.h" />
+    <ClInclude Include="src\mysql_include\my_net.h" />
+    <ClInclude Include="src\mysql_include\my_nosys.h" />
+    <ClInclude Include="src\mysql_include\my_no_pthread.h" />
+    <ClInclude Include="src\mysql_include\my_pthread.h" />
+    <ClInclude Include="src\mysql_include\my_stacktrace.h" />
+    <ClInclude Include="src\mysql_include\my_sys.h" />
+    <ClInclude Include="src\mysql_include\my_time.h" />
+    <ClInclude Include="src\mysql_include\my_tree.h" />
+    <ClInclude Include="src\mysql_include\my_trie.h" />
+    <ClInclude Include="src\mysql_include\my_uctype.h" />
+    <ClInclude Include="src\mysql_include\my_vle.h" />
+    <ClInclude Include="src\mysql_include\my_xml.h" />
+    <ClInclude Include="src\mysql_include\m_ctype.h" />
+    <ClInclude Include="src\mysql_include\m_string.h" />
+    <ClInclude Include="src\mysql_include\queues.h" />
+    <ClInclude Include="src\mysql_include\service_versions.h" />
+    <ClInclude Include="src\mysql_include\sha1.h" />
+    <ClInclude Include="src\mysql_include\sha2.h" />
+    <ClInclude Include="src\mysql_include\sql_common.h" />
+    <ClInclude Include="src\mysql_include\sslopt-case.h" />
+    <ClInclude Include="src\mysql_include\sslopt-longopts.h" />
+    <ClInclude Include="src\mysql_include\sslopt-vars.h" />
+    <ClInclude Include="src\mysql_include\thr_alarm.h" />
+    <ClInclude Include="src\mysql_include\thr_lock.h" />
+    <ClInclude Include="src\mysql_include\typelib.h" />
+    <ClInclude Include="src\mysql_include\t_ctype.h" />
+    <ClInclude Include="src\mysql_include\violite.h" />
+    <ClInclude Include="src\mysql_include\waiting_threads.h" />
+    <ClInclude Include="src\mysql_include\wqueue.h" />
+    <ClInclude Include="src\mysql_query.h" />
+    <ClInclude Include="src\mysql_utils.h" />
+    <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\SDK\amx\amx.h" />
+    <ClInclude Include="src\SDK\amx\sclinux.h" />
+    <ClInclude Include="src\SDK\plugincommon.h" />
+    <ClInclude Include="src\SDK\string.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\log.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\mutex.cpp" />
+    <ClCompile Include="src\mysql_handler.cpp" />
+    <ClCompile Include="src\mysql_query.cpp" />
+    <ClCompile Include="src\mysql_utils.cpp" />
+    <ClCompile Include="src\natives.cpp" />
+    <ClCompile Include="src\SDK\amxplugin.cpp" />
+    <ClCompile Include="src\SDK\string.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
