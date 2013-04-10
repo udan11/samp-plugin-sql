@@ -1,6 +1,6 @@
 #include "natives.h"
 
-cell AMX_NATIVE_CALL Natives::mysql_debug(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_debug(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -11,7 +11,7 @@ cell AMX_NATIVE_CALL Natives::mysql_debug(AMX* amx, cell* params) {
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_connect(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
 	if (params[0] / 4 < 5) {
 		return 0;
 	}
@@ -40,7 +40,7 @@ cell AMX_NATIVE_CALL Natives::mysql_connect(AMX* amx, cell* params) {
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -57,7 +57,7 @@ cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX* amx, cell* params) {
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_ping(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_ping(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return -1;
 	}
@@ -73,7 +73,7 @@ cell AMX_NATIVE_CALL Natives::mysql_ping(AMX* amx, cell* params) {
 	return ping;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return -1;
 	}
@@ -99,7 +99,7 @@ cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX* amx, cell* params) {
 	return len;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_query(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 	if (params[0] / 4 < 5) {
 		return 0;
 	}
@@ -165,7 +165,7 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX* amx, cell* params) {
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -183,7 +183,7 @@ cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX* amx, cell* params) {
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_store_result(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_store_result(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -201,7 +201,7 @@ cell AMX_NATIVE_CALL Natives::mysql_store_result(AMX* amx, cell* params) {
 	return 1;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_insert_id(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_insert_id(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -216,7 +216,7 @@ cell AMX_NATIVE_CALL Natives::mysql_insert_id(AMX* amx, cell* params) {
 	return insert_id;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_affected_rows(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_affected_rows(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -231,7 +231,7 @@ cell AMX_NATIVE_CALL Natives::mysql_affected_rows(AMX* amx, cell* params) {
 	return affected_rows;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_error(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_error(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -246,12 +246,12 @@ cell AMX_NATIVE_CALL Natives::mysql_error(AMX* amx, cell* params) {
 	return error;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_error_string(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_error_string(AMX *amx, cell *params) {
 	// TODO
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -266,7 +266,7 @@ cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX* amx, cell* params) {
 	return num_rows;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_num_fields(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_num_fields(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return 0;
 	}
@@ -281,7 +281,7 @@ cell AMX_NATIVE_CALL Natives::mysql_num_fields(AMX* amx, cell* params) {
 	return num_fields;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX* amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 	if (params[0] / 4 < 4) {
 		return 0;
 	}
@@ -310,8 +310,28 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX* amx, cell* params) {
 	return len;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_num(AMX* amx, cell* params) {
-	if (params[0] / 4 < 5) {
+cell AMX_NATIVE_CALL Natives::mysql_next_row(AMX *amx, cell* params) {
+	if (params[0] / 4 < 2) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int query_id = params[1];
+	if (!is_valid_query(query_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	struct mysql_query *query = queries[query_id];
+	if (!is_valid_handler(query->handler)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	int ret = handlers[query->handler]->seek_row(query, params[2]);
+	Mutex::getInstance()->unlock();
+	return ret;
+}
+
+cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
+	if (params[0] / 4 < 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -326,21 +346,23 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_num(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *dest = NULL;
-	int dest_len = params[5], len = handlers[query->handler]->fetch_num(query, params[2], params[3], dest);
+	int dest_len = params[4], len = handlers[query->handler]->fetch_num(query, params[2], dest);
 	if (len != 0) {
 		if (dest_len < 2) {
-			amx_SetString_(amx, params[4], dest, len);
+			amx_SetString_(amx, params[3], dest, len);
 		} else {
-			amx_SetString_(amx, params[4], dest, dest_len);
+			amx_SetString_(amx, params[3], dest, dest_len);
 		}
 		free(dest);
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", query_id, params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc(AMX* amx, cell* params) {
-	if (params[0] / 4 < 5) {
+cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
+	if (params[0] / 4 < 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -355,22 +377,24 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *fieldname = NULL, *dest = NULL;
-	amx_GetString_(amx, params[3], fieldname);
-	int dest_len = params[5], len = handlers[query->handler]->fetch_assoc(query, params[2], fieldname, dest);
+	amx_GetString_(amx, params[2], fieldname);
+	int dest_len = params[4], len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
 	if (len != 0) {
 		if (dest_len < 2) {
-			amx_SetString_(amx, params[4], dest, len);
+			amx_SetString_(amx, params[3], dest, len);
 		} else {
-			amx_SetString_(amx, params[4], dest, dest_len);
+			amx_SetString_(amx, params[3], dest, dest_len);
 		}
 		free(dest);
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s.", query_id, fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_num_int(AMX* amx, cell* params) {
-	if (params[0] / 4 < 3) {
+cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -385,19 +409,21 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_num_int(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *dest = NULL;
-	int dest_len = params[5], len = handlers[query->handler]->fetch_num(query, params[2], params[3], dest);
+	int len = handlers[query->handler]->fetch_num(query, params[2], dest);
 	if (len != 0) {
 		int val = atoi(dest);
 		free(dest);
 		Mutex::getInstance()->unlock();
 		return val;
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", query_id, params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc_int(AMX* amx, cell* params) {
-	if (params[0] / 4 < 3) {
+cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -412,20 +438,22 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc_int(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *fieldname = NULL, *dest = NULL;
-	amx_GetString_(amx, params[3], fieldname);
-	int dest_len = params[5], len = handlers[query->handler]->fetch_assoc(query, params[2], fieldname, dest);
+	amx_GetString_(amx, params[2], fieldname);
+	int len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
 	if (len != 0) {
 		int val = atoi(dest);
 		free(dest);
 		Mutex::getInstance()->unlock();
 		return val;
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", query_id, fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_num_float(AMX* amx, cell* params) {
-	if (params[0] / 4 < 3) {
+cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -440,19 +468,21 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_num_float(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *dest = NULL;
-	int dest_len = params[5], len = handlers[query->handler]->fetch_num(query, params[2], params[3], dest);
+	int len = handlers[query->handler]->fetch_num(query, params[2], dest);
 	if (len != 0) {
 		float val = (float) atof(dest);
 		free(dest);
 		Mutex::getInstance()->unlock();
 		return amx_ftoc(val);
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field_float: Can't find field %d.", query_id, params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
 }
 
-cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc_float(AMX* amx, cell* params) {
-	if (params[0] / 4 < 3) {
+cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -467,13 +497,15 @@ cell AMX_NATIVE_CALL Natives::mysql_fetch_assoc_float(AMX* amx, cell* params) {
 		return 0;
 	}
 	char *fieldname = NULL, *dest = NULL;
-	amx_GetString_(amx, params[3], fieldname);
-	int dest_len = params[5], len = handlers[query->handler]->fetch_assoc(query, params[2], fieldname, dest);
+	amx_GetString_(amx, params[2], fieldname);
+	int len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
 	if (len != 0) {
 		float val = (float) atof(dest);
 		free(dest);
 		Mutex::getInstance()->unlock();
 		return amx_ftoc(val);
+	} else {
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_float: Can't find field %s.", query_id, fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;

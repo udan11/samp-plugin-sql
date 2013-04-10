@@ -17,7 +17,8 @@ struct mysql_query {
 	std::vector<float> params_f;
 	std::vector<char*> params_s;
 	MYSQL_RES *result;
-	int insert_id, affected_rows, num_rows, num_fields;
+	MYSQL_ROW last_row;
+	int last_row_idx, insert_id, affected_rows, num_rows, num_fields;
 	std::vector<char*> field_names;
 	std::vector<std::vector<char*> > cache;
 };

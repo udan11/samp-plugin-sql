@@ -36,7 +36,7 @@
 	typedef unsigned int UINT;
 #endif
 
-#define PLUGIN_VERSION					"v0.1 BETA"
+#define PLUGIN_VERSION					"v0.2 BETA"
 #define PLUGIN_AUTHOR					"Dan"
 
 #define QUERY_ERROR_CALLBACK			"OnMySQLError"

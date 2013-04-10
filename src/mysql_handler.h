@@ -38,10 +38,12 @@ class MySQL_Handler {
 		int get_num_fields(struct mysql_query *query);
 		// Fetches the name of a field.
 		int fetch_field(struct mysql_query *query, int fieldix, char *&dest);
+		// Seeks a row in the result.
+		int seek_row(struct mysql_query *query, int row);
 		// Fetches a cell by it's index.
-		int fetch_num(struct mysql_query *query, int row, int fieldidx, char *&dest);
+		int fetch_num(struct mysql_query *query, int fieldidx, char *&dest);
 		// Fetches a cell by it's name.
-		int fetch_assoc(struct mysql_query *query, int row, char *fieldname, char *&dest);
+		int fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest);
 	private:
 		// The MySQL client socket.
 		MYSQL *conn;

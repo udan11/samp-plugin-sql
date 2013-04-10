@@ -19,13 +19,14 @@ class Natives {
 		static cell AMX_NATIVE_CALL mysql_error_string(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_num_rows(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_num_fields(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_field_name(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_next_row(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_get_field(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_num(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_assoc(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_num_int(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_assoc_int(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_num_float(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_fetch_assoc_float(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_field_assoc(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_field_int(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_field_assoc_int(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_field_float(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_field_assoc_float(AMX* amx, cell* params);
 	private:
 		Natives();
 		~Natives();

@@ -28,13 +28,14 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"mysql_error_string", Natives::mysql_error_string},
 	{"mysql_num_rows", Natives::mysql_num_rows},
 	{"mysql_num_fields", Natives::mysql_num_fields},
+	{"mysql_field_name", Natives::mysql_field_name},
+	{"mysql_next_row", Natives::mysql_next_row},
 	{"mysql_get_field", Natives::mysql_get_field},
-	{"mysql_fetch_num", Natives::mysql_fetch_num},
-	{"mysql_fetch_assoc", Natives::mysql_fetch_assoc},
-	{"mysql_fetch_num_int", Natives::mysql_fetch_num_int},
-	{"mysql_fetch_assoc_int", Natives::mysql_fetch_assoc_int},
-	{"mysql_fetch_num_float", Natives::mysql_fetch_num_float},
-	{"mysql_fetch_assoc_float", Natives::mysql_fetch_assoc_float},
+	{"mysql_get_field_assoc", Natives::mysql_get_field_assoc},
+	{"mysql_get_field_int", Natives::mysql_get_field_int},
+	{"mysql_get_field_assoc_int", Natives::mysql_get_field_assoc_int},
+	{"mysql_get_field_float", Natives::mysql_get_field_float},
+	{"mysql_get_field_assoc_float", Natives::mysql_get_field_assoc_float},
 	{NULL, NULL}
 };
 
