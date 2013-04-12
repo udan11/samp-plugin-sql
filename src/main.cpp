@@ -3,6 +3,7 @@
 void **ppPluginData;
 extern void *pAMXFunctions;
 
+bool running = false;
 int last_handler = 1, last_query = 1;
 std::map<int, class MySQL_Handler*> handlers;
 std::map<int, struct mysql_query*> queries;
@@ -51,7 +52,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 		exit(0);
 		return 0;
 	}
-	log(LOG_INFO, "MySQL plugin " PLUGIN_VERSION " successfully loaded.");
+	running = true;
 	#ifdef WIN32
 		HANDLE threadHandle;
 		DWORD dwThreadId = 0;
@@ -62,9 +63,10 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		int error = pthread_create(&threadHandle, &attr, &ProcessQueryThread, NULL);
+		pthread_create(&threadHandle, &attr, &ProcessQueryThread, NULL);
 	#endif
 	Mutex::getInstance();
+	log(LOG_INFO, "MySQL plugin " PLUGIN_VERSION " successfully loaded.");
 	return 1;
 }
 
@@ -87,7 +89,16 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
+	Mutex::getInstance()->lock();
 	log(LOG_INFO, "Plugin is being unloaded...");
+	for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+		++next;
+		struct mysql_query *query = it->second;
+		free_query(query);
+		queries.erase(it);
+	}
+	queries.clear();
+	handlers.clear();
 	delete Mutex::getInstance();
 	log(LOG_INFO, "Plugin succesfully unloaded!");
 }
@@ -98,10 +109,9 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		++next;
 		struct mysql_query *query = it->second;
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
-			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->error = %d)...", query->error);
+			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->status = QUERY_STATUS_PROCESSED;
 			execute_query_callback(query);
-			log(LOG_DEBUG, "ProccessTick(): Scheduling it for deletion...");
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
 			log(LOG_DEBUG, "ProccessTick(): The handler isn't valid or the query (%d) was already processed. Erasing thq query...", query->id);
@@ -119,7 +129,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 	void *ProcessQueryThread(void *lpParam)
 #endif
 {
-	while (true) {
+	while (running) {
 		Mutex::getInstance()->lock();
 		for (std::map<int, struct mysql_query*>::iterator it = queries.begin(); it != queries.end(); ++it) {
 			struct mysql_query *query = it->second;
@@ -131,4 +141,5 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		Mutex::getInstance()->unlock();
 		SLEEP(50);
 	}
+	return 0;
 }

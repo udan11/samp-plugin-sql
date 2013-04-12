@@ -128,13 +128,10 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 			case 'D':
 			case 'i':
 			case 'I':
-				amx_GetAddr(amx, params[p], &ptr);
-				query->params_i.push_back((int) *ptr);
-				break;
 			case 'f': 
 			case 'F':
 				amx_GetAddr(amx, params[p], &ptr);
-				query->params_f.push_back(amx_ctof(*ptr));
+				query->params_c.push_back(*ptr);
 				break;
 			case 'r':
 			case 'R':
@@ -305,6 +302,8 @@ cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 			amx_SetString_(amx, params[3], dest, dest_len);
 		}
 		free(dest);
+	} else {
+		log(LOG_WARNING, "Natives::mysql_field_name: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -355,7 +354,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
 		}
 		free(dest);
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", query_id, params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -387,7 +386,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
 		}
 		free(dest);
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s.", query_id, fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s.", fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -416,7 +415,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return val;
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", query_id, params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
@@ -446,7 +445,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) 
 		Mutex::getInstance()->unlock();
 		return val;
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", query_id, fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
@@ -475,7 +474,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return amx_ftoc(val);
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_float: Can't find field %d.", query_id, params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field_float: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;
@@ -505,7 +504,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params
 		Mutex::getInstance()->unlock();
 		return amx_ftoc(val);
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc_float: Can't find field %s.", query_id, fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_float: Can't find field %s.", fieldname);
 	}
 	Mutex::getInstance()->unlock();
 	return 0;

@@ -28,15 +28,15 @@
 #include "natives.h"
 
 #ifdef WIN32
-	#define SLEEP(x) { Sleep(x); }
+	#define SLEEP(x) Sleep(x);
 #else
 	#include <unistd.h>
-	#define SLEEP(x) { usleep(x * 1000); }
+	#define SLEEP(x) usleep(x * 1000);
 	typedef unsigned long DWORD;
 	typedef unsigned int UINT;
 #endif
 
-#define PLUGIN_VERSION					"v0.2 BETA"
+#define PLUGIN_VERSION					"v0.3 BETA"
 #define PLUGIN_AUTHOR					"Dan"
 
 #define QUERY_ERROR_CALLBACK			"OnMySQLError"

@@ -114,6 +114,9 @@ int MySQL_Handler::seek_row(struct mysql_query *query, int row) {
 	if (row == -1) {
 		row = query->last_row_idx + 1;
 	}
+	if (query->last_row_idx == row) {
+		return 1;
+	}
 	if ((0 <= row) && (row < query->num_rows)) {
 		if (!(query->flags & QUERY_CACHED)) {
 			mysql_data_seek(query->result, row);
@@ -150,7 +153,7 @@ int MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&des
 						dest = (char*) malloc(sizeof(char) * 5); // NULL\0
 					}
 					strcpy(dest, "NULL");
-					return 5; // strlen(NULL)
+					return 5;
 				}
 			}
 		}
@@ -164,6 +167,5 @@ int MySQL_Handler::fetch_assoc(struct mysql_query *query, char *fieldname, char 
 			return fetch_num(query, i, dest);
 		}
 	}
-	log(LOG_WARNING, "MySQL_Handler::fetch_assoc(%d) can't find field %s.", query->id, fieldname);
 	return 0;
 }

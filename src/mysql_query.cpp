@@ -4,8 +4,7 @@ void free_query(struct mysql_query *&query) {
 	free(query->query);
 	free(query->callback);
 	free(query->format);
-	query->params_i.clear();
-	query->params_f.clear();
+	query->params_c.clear();
 	for (int i = 0, size = query->params_s.size(); i != size; ++i) {
 		free(query->params_s[i]);
 	}
@@ -33,7 +32,7 @@ int execute_query_callback(struct mysql_query *query) {
 	int funcidx;
 	if (query->error == 0) {
 		if (!amx_FindPublic(amx, query->callback, &funcidx)) {
-			int i_idx = query->params_i.size() - 1, f_idx = query->params_f.size() - 1, s_idx = query->params_s.size() - 1;
+			int c_idx = query->params_c.size() - 1, s_idx = query->params_s.size() - 1;
 			for (int i = strlen(query->format) - 1; i >= 0; --i) {
 				switch (query->format[i]) {
 					case 'c':
@@ -42,11 +41,9 @@ int execute_query_callback(struct mysql_query *query) {
 					case 'D':
 					case 'i':
 					case 'I':
-						amx_Push(amx, query->params_i[i_idx--]);
-						break;
-					case 'f': 
+					case 'f':
 					case 'F':
-						amx_Push(amx, amx_ftoc(query->params_f[f_idx--]));
+						amx_Push(amx, query->params_c[c_idx--]);
 						break;
 					case 'r':
 					case 'R':

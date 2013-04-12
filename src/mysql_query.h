@@ -13,8 +13,7 @@ struct mysql_query {
 	int id, handler, flags, status, error;
 	char *query, *callback, *format;
 	const char *error_msg;
-	std::vector<int> params_i;
-	std::vector<float> params_f;
+	std::vector<cell> params_c;
 	std::vector<char*> params_s;
 	MYSQL_RES *result;
 	MYSQL_ROW last_row;
