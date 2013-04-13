@@ -36,12 +36,20 @@ int MySQL_Handler::ping() {
 	return mysql_ping(conn);
 }
 
-const char* MySQL_Handler::get_info() {
-	return mysql_get_host_info(conn);
+const char* MySQL_Handler::get_stat() {
+	return mysql_stat(conn);
+}
+
+const char* MySQL_Handler::get_charset() {
+	return mysql_character_set_name(conn);
+}
+
+bool MySQL_Handler::set_charset(char *charset) {
+	return mysql_set_character_set(conn, charset) == 0 ? true : false;
 }
 
 int MySQL_Handler::escape_string(const char *src, char *&dest) {
-	return mysql_escape_string(dest, src, strlen(src));
+	return mysql_real_escape_string(conn, dest, src, strlen(src));
 }
 
 void MySQL_Handler::execute_query(struct mysql_query *&query) {
@@ -65,11 +73,12 @@ void MySQL_Handler::execute_query(struct mysql_query *&query) {
 				if (query->flags & QUERY_CACHED) {
 					query->cache.resize(query->num_rows);
 					for (int i = 0; i != query->num_rows; ++i) {
-						MYSQL_ROW row = mysql_fetch_row(query->result);
 						query->cache[i].resize(query->num_fields);
+						MYSQL_ROW row = mysql_fetch_row(query->result);
+						unsigned long *lengths = mysql_fetch_lengths(query->result);
 						for (int j = 0; j != query->num_fields; ++j) {
 							if (row[j]) {
-								query->cache[i][j] = (char*) malloc(sizeof(char) * (strlen(row[j]) + 1));
+								query->cache[i][j] = (char*) malloc(sizeof(char) * (lengths[j] + 1));
 								strcpy(query->cache[i][j], row[j]);
 							} else {
 								query->cache[i][j] = (char*) malloc(sizeof(char) * 5); // NULL + \0
@@ -105,6 +114,7 @@ int MySQL_Handler::fetch_field(struct mysql_query *query, int fieldidx, char *&d
 			dest = (char*) malloc(sizeof(char) * len);
 		}
 		strcpy(dest, query->field_names[fieldidx]);
+		// TODO: Get rid of strcpy.
 		return len;
 	}
 	return 0;
@@ -128,44 +138,47 @@ int MySQL_Handler::seek_row(struct mysql_query *query, int row) {
 	return 0;
 }
 
-int MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&dest) {
+bool MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&dest, int &len) {
 	if (query->flags & QUERY_CACHED) {
-		if ((0 <= fieldidx) && (fieldidx < query->num_fields)) {
-			int len = strlen(query->cache[query->last_row_idx][fieldidx]) + 1;
-			if (dest == NULL) {
-				dest = (char*) malloc(sizeof(char) * len);
-			}
-			strcpy(dest, query->cache[query->last_row_idx][fieldidx]);
-			return len;
+		if (dest == NULL) {
+			len = strlen(query->cache[query->last_row_idx][fieldidx]);
+			dest = query->cache[query->last_row_idx][fieldidx];
+			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
+		} else {
+			memcpy(dest, query->cache[query->last_row_idx][fieldidx], len);
+			return true;
 		}
 	} else {
-		if ((0 <= fieldidx) && (fieldidx < query->num_fields)) {
-			if (query->last_row != NULL) {
+		if (query->last_row != NULL) {
+			if (dest == NULL) {
 				if (query->last_row[fieldidx]) {
-					int len = strlen(query->last_row[fieldidx]) + 1;
-					if (dest == NULL) {
-						dest = (char*) malloc(sizeof(char) * len);
-					}
-					strcpy(dest, query->last_row[fieldidx]);
-					return len;
+					len = strlen(query->last_row[fieldidx]) + 1;
+					dest = (char*) malloc(sizeof(char) * len);
+					memcpy(dest, query->last_row[fieldidx], len);
 				} else {
-					if (dest == NULL) {
-						dest = (char*) malloc(sizeof(char) * 5); // NULL\0
-					}
+					len = 5; // NULL\0
+					dest = (char*) malloc(sizeof(char) * 5);
 					strcpy(dest, "NULL");
-					return 5;
+				}
+			} else {
+				if (query->last_row[fieldidx]) {
+					memcpy(dest, query->last_row[fieldidx], len);
+				} else {
+					strncpy(dest, "NULL", len);
 				}
 			}
+			return true;
 		}
 	}
-	return 0;
+	len = 0;
+	return true;
 }
 
-int MySQL_Handler::fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest) {
+bool MySQL_Handler::fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest, int &len) {
 	for (int i = 0, size = query->field_names.size(); i != size; ++i) {
 		if (strcmp(query->field_names[i], fieldname) == 0) {
-			return fetch_num(query, i, dest);
+			return fetch_num(query, i, dest, len);
 		}
 	}
-	return 0;
+	return true;
 }

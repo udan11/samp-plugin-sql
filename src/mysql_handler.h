@@ -23,7 +23,11 @@ class MySQL_Handler {
 		// Pings the servers.
 		int ping();
 		// Gets server's information.
-		const char *get_info();
+		const char* get_stat();
+		// Gets default character set.
+		const char* get_charset();
+		// Sets default character set.
+		bool set_charset(char *charset);
 		// Escapes a string and returns the new length.
 		int escape_string(const char *src, char *&dest);
 		// Executes a query.
@@ -41,9 +45,9 @@ class MySQL_Handler {
 		// Seeks a row in the result.
 		int seek_row(struct mysql_query *query, int row);
 		// Fetches a cell by it's index.
-		int fetch_num(struct mysql_query *query, int fieldidx, char *&dest);
+		bool fetch_num(struct mysql_query *query, int fieldidx, char *&dest, int &len);
 		// Fetches a cell by it's name.
-		int fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest);
+		bool fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest, int &len);
 	private:
 		// The MySQL client socket.
 		MYSQL *conn;

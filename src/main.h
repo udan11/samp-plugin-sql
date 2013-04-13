@@ -14,11 +14,11 @@
 	#include "pthread.h"
 #endif
 
+#include "mysql_include/mysql.h"
+
 #include "SDK/amx/amx.h"
 #include "SDK/plugincommon.h"
 #include "SDK/string.h"
-
-#include "mysql_include/mysql.h"
 
 #include "log.h"
 #include "mutex.h"
@@ -36,9 +36,7 @@
 	typedef unsigned int UINT;
 #endif
 
-#define PLUGIN_VERSION					"v0.3 BETA"
-#define PLUGIN_AUTHOR					"Dan"
-
+#define PLUGIN_VERSION					"v0.4 BETA"
 #define QUERY_ERROR_CALLBACK			"OnMySQLError"
 
 extern int last_handler, last_query;

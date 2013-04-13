@@ -1,10 +1,10 @@
 #include "log.h"
 
 logprintf_t logprintf;
-int log_level = LOG_DEBUG;
+int log_level_file = LOG_ALL, log_level_console = LOG_WARNING;
 
 void log(int level, char *format, ...) {
-	if (level < log_level) {
+	if ((level < log_level_file) && (level < log_level_console)) {
 		return;
 	}
 	va_list args;
@@ -16,16 +16,18 @@ void log(int level, char *format, ...) {
 		struct tm *timeinfo;
 		time(&rawtime);
 		timeinfo = localtime(&rawtime);
-		char timestamp[TIME_X_LEN];
+		char timestamp[16];
 		strftime(timestamp, sizeof(timestamp), "%X", timeinfo);
 		vsprintf(msg, format, args);
-		if (level > LOG_INFO) {
-			logprintf("plugin.mysql: %s", msg);
+		if (level >= log_level_file) {
+			FILE *logFile = fopen(LOG_FILE, "a");
+			if (logFile != NULL) {
+				fprintf(logFile, "[%s] %s\n", timestamp, msg);
+				fclose(logFile);
+			}
 		}
-		FILE *logFile = fopen(LOG_FILE, "a");
-		if (logFile != NULL) {
-			fprintf(logFile, "[%s] %s\n", timestamp, msg);
-			fclose(logFile);
+		if (level >= log_level_console) {
+			logprintf("plugin.mysql: %s", msg);
 		}
 		free(msg);
 	}

@@ -1,5 +1,5 @@
 /**
- * MySQL plugin v0.3 BETA
+ * MySQL plugin v0.4 BETA
  *
  * <remarks>
  * 		Data types:
@@ -81,6 +81,16 @@
 #define QUERY_CACHED					2
 
 /**
+ * <summary>Log levels. (@see mysql_debug)</summary>
+ */
+#define LOG_ALL							0
+#define LOG_DEBUG						1
+#define LOG_INFO						2
+#define LOG_WARNING						3
+#define LOG_ERROR						4
+#define LOG_NONE						5
+
+/**
  * <summary>Checks if a string is null.</summary>
  */
 #if !defined isnull
@@ -120,6 +130,14 @@
 forward OnMySQLError(MySQL:handle, errorid, const error[], const query[], const callback[]);
 
 /**
+ * <summary>Sets the minimum level of logged messages.</summary>
+ * <param name="file">The minimum level of the file (mysql_log.txt) logs.</param>
+ * <param name="console">The minimum level of the console logs.</param>
+ * <returns>No return value.</returns>
+ */
+native mysql_debug(file = LOG_ALL, console = LOG_WARNING);
+
+/**
  * <summary>Creates a new handle and connects to a MySQL server.</summary>
  * <param name="host">The MySQL hostname.</param>
  * <param name="user">The MySQL username.</param>
@@ -138,11 +156,35 @@ native MySQL:mysql_connect(const host[], const user[], const pass[], const db[],
 native mysql_disconnect(MySQL:handle);
 
 /**
+ * <summary>Sets default character set.</sumarry>
+ * <param name="handle">The MySQL handle.</param>
+ * <param name="charset">New default character set.</param>
+ * <returns>True if succesful.</returns>
+ */
+native mysql_set_charset(MySQL:handle, const charset[]);
+
+/**
+ * <summary>Gets default character set.</sumarry>
+ * <param name="dest">The destination where the character set will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+ * <returns>True if succesful.</returns>
+ */
+native mysql_get_charset(MySQL:handle, dest[], dest_len = sizeof(dest));
+
+/**
  * <summary>Pings the MySQL server.</summary>
  * <param name="handle">The MySQL handle which has to be disconnected.</param>
  * <returns>Returns a MySQL client error (if any) or 0 if the connection is alive.</returns>
  */
 native mysql_ping(MySQL:handle);
+
+/**
+ * <summary>Gets statistics from MySQL server.</sumarry>
+ * <param name="dest">The destination where the information will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+ * <returns>True if succesful.</returns>
+ */
+native mysql_get_stat(MySQL:handle, dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Pings the MySQL server.</summary>

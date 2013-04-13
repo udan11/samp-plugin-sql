@@ -18,7 +18,10 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"mysql_debug", Natives::mysql_debug},
 	{"mysql_connect", Natives::mysql_connect},
 	{"mysql_disconnect", Natives::mysql_disconnect},
+	{"mysql_set_charset", Natives::mysql_set_charset},
+	{"mysql_get_charset", Natives::mysql_get_charset},
 	{"mysql_ping", Natives::mysql_ping},
+	{"mysql_get_stat", Natives::mysql_get_stat},
 	{"mysql_escape_string", Natives::mysql_escape_string},
 	{"mysql_query", Natives::mysql_query},
 	{"mysql_store_result", Natives::mysql_store_result},
@@ -48,25 +51,25 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	if (mysql_library_init(0, NULL, NULL)) {
-		log(LOG_ERROR, "Coudln't initalize the MySQL library (libmysql). It's probably missing.");
+		logprintf("  >> Coudln't initalize the MySQL library (libmysql). It's probably missing.");
 		exit(0);
 		return 0;
 	}
 	running = true;
-	#ifdef WIN32
-		HANDLE threadHandle;
-		DWORD dwThreadId = 0;
-		threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) ProcessQueryThread, NULL, 0, &dwThreadId);
-		CloseHandle(threadHandle);
-	#else
-		pthread_t threadHandle;
-		pthread_attr_t attr;
-		pthread_attr_init(&attr);
-		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		pthread_create(&threadHandle, &attr, &ProcessQueryThread, NULL);
-	#endif
+#ifdef WIN32
+	HANDLE threadHandle;
+	DWORD dwThreadId = 0;
+	threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) ProcessQueryThread, NULL, 0, &dwThreadId);
+	CloseHandle(threadHandle);
+#else
+	pthread_t threadHandle;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	pthread_create(&threadHandle, &attr, &ProcessQueryThread, NULL);
+#endif
 	Mutex::getInstance();
-	log(LOG_INFO, "MySQL plugin " PLUGIN_VERSION " successfully loaded.");
+	logprintf("  >> MySQL plugin " PLUGIN_VERSION " successfully loaded.");
 	return 1;
 }
 
@@ -89,8 +92,16 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
-	Mutex::getInstance()->lock();
 	log(LOG_INFO, "Plugin is being unloaded...");
+	running = false;
+	Mutex::getInstance()->lock();
+	for (std::map<int, class MySQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
+		++next;
+		MySQL_Handler *handler = it->second;
+		delete handler;
+		handlers.erase(it);
+	}
+	handlers.clear();
 	for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
 		++next;
 		struct mysql_query *query = it->second;
@@ -98,7 +109,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 		queries.erase(it);
 	}
 	queries.clear();
-	handlers.clear();
+	Mutex::getInstance()->unlock();
 	delete Mutex::getInstance();
 	log(LOG_INFO, "Plugin succesfully unloaded!");
 }
@@ -114,10 +125,9 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 			execute_query_callback(query);
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
-			log(LOG_DEBUG, "ProccessTick(): The handler isn't valid or the query (%d) was already processed. Erasing thq query...", query->id);
+			log(LOG_DEBUG, "ProccessTick(): Erasing query (query->id = %d)...", query->id);
 			free_query(query);
 			queries.erase(it);
-			continue;
 		}
 	}
 	Mutex::getInstance()->unlock();
@@ -131,10 +141,11 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 {
 	while (running) {
 		Mutex::getInstance()->lock();
-		for (std::map<int, struct mysql_query*>::iterator it = queries.begin(); it != queries.end(); ++it) {
+		for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+			++next;
 			struct mysql_query *query = it->second;
-			if ((query->status == QUERY_STATUS_NONE) && (query->flags & QUERY_THREADED)) {
-				log(LOG_DEBUG, "ProcessQueryThread(): Executing query->id = %d...", query->id);
+			if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_NONE)) {
+				log(LOG_DEBUG, "ProcessQueryThread(): Executing query (query->id = %d, query->query = %d)...", query->id, query->query);
 				handlers[query->handler]->execute_query(query);
 			}
 		}

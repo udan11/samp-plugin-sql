@@ -7,8 +7,10 @@ class Natives {
 		static cell AMX_NATIVE_CALL mysql_debug(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_connect(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_disconnect(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_set_charset(AMX *amx, cell *params);
+		static cell AMX_NATIVE_CALL mysql_get_charset(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL mysql_ping(AMX* amx, cell* params);
-		static cell AMX_NATIVE_CALL mysql_get_info(AMX* amx, cell* params);
+		static cell AMX_NATIVE_CALL mysql_get_stat(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_escape_string(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_query(AMX* amx, cell* params);
 		static cell AMX_NATIVE_CALL mysql_free_result(AMX* amx, cell* params);

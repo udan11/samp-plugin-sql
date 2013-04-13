@@ -1,12 +1,13 @@
 #include "natives.h"
 
 cell AMX_NATIVE_CALL Natives::mysql_debug(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] / 4 < 2) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
-	log_level = params[1];
-	log(LOG_WARNING, "Natives::mysql_debug: Switching the log level to %d...", log_level);
+	log_level_file = params[1];
+	log_level_console = params[2];
+	log(LOG_WARNING, "Natives::mysql_debug: Switching the log levels to (%d, %d)...", log_level_file, log_level_console);
 	Mutex::getInstance()->unlock();
 	return 1;
 }
@@ -28,7 +29,12 @@ cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
 	amx_GetString_(amx, params[4], db);
 	int port = (int) params[5];
 	log(LOG_INFO, "Natives::mysql_connect: Connecting to %s:***@%s:%d/%s...", user, host, port, db);
-	if (handler->connect(host, user, pass, db, port)) {
+	bool connected = handler->connect(host, user, pass, db, port);
+	free(host);
+	free(user);
+	free(pass);
+	free(db);
+	if (connected) {
 		log(LOG_INFO, "Natives::mysql_connect: Connection was succesful!");
 		handlers[handler->id] = handler;
 		Mutex::getInstance()->unlock();
@@ -57,6 +63,44 @@ cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX *amx, cell *params) {
 	return 1;
 }
 
+cell AMX_NATIVE_CALL Natives::mysql_set_charset(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int handler_id = params[1];
+	if (!is_valid_handler(handler_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	char *charset = NULL;
+	amx_GetString_(amx, params[2], charset);
+	bool ret = handlers[handler_id]->set_charset(charset);
+	free(charset);
+	Mutex::getInstance()->unlock();
+	return ret;
+}
+
+cell AMX_NATIVE_CALL Natives::mysql_get_charset(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int handler_id = params[1];
+	if (!is_valid_handler(handler_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	char *tmp = (char*) handlers[handler_id]->get_charset();
+	int dest_len = params[3], len = strlen(tmp);
+	if (dest_len < 2) {
+		amx_SetString_(amx, params[2], tmp, len);
+	} else {
+		amx_SetString_(amx, params[2], tmp, dest_len);
+	}
+	return 1;
+}
+
 cell AMX_NATIVE_CALL Natives::mysql_ping(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return -1;
@@ -73,6 +117,26 @@ cell AMX_NATIVE_CALL Natives::mysql_ping(AMX *amx, cell *params) {
 	return ping;
 }
 
+cell AMX_NATIVE_CALL Natives::mysql_get_stat(AMX *amx, cell *params) {
+	if (params[0] / 4 < 2) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int handler_id = params[1];
+	if (!is_valid_handler(handler_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	char *tmp = (char*) handlers[handler_id]->get_stat();
+	int dest_len = params[3], len = strlen(tmp);
+	if (dest_len < 2) {
+		amx_SetString_(amx, params[2], tmp, len);
+	} else {
+		amx_SetString_(amx, params[2], tmp, dest_len);
+	}
+	return 1;
+}
+
 cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
 	if (params[0] / 4 < 1) {
 		return -1;
@@ -85,8 +149,9 @@ cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
 	}
 	char *src = NULL;
 	amx_GetString_(amx, params[2], src);
-	char *dest = (char*) malloc(2 * sizeof(char) *  strlen(src));
+	char *dest = (char*) malloc(sizeof(char) *  strlen(src) * 2); // *2 in case every character is escaped
 	int dest_len = params[4], len = handlers[handler_id]->escape_string(src, dest);
+	free(src);
 	if (len != 0) {
 		if (dest_len < 2) {
 			amx_SetString_(amx, params[3], dest, len);
@@ -159,7 +224,7 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 		return id;
 	}
 	Mutex::getInstance()->unlock();
-	return 0;
+	return id;
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX *amx, cell *params) {
@@ -244,8 +309,32 @@ cell AMX_NATIVE_CALL Natives::mysql_error(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_error_string(AMX *amx, cell *params) {
-	// TODO
-	return 0;
+	if (params[0] / 4 < 3) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int query_id = params[1];
+	if (!is_valid_query(query_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	struct mysql_query *query = queries[query_id];
+	if (!is_valid_handler(query->handler)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	int dest_len = params[3], len = strlen(query->error_msg);
+	if (len != 0) {
+		char *error = (char*) malloc(sizeof(char) * len);
+		strcpy(error, query->error_msg);
+		if (dest_len < 2) {
+			amx_SetString_(amx, params[2], error, len);
+		} else {
+			amx_SetString_(amx, params[2], error, dest_len);
+		}
+	}
+	Mutex::getInstance()->unlock();
+	return len;
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX *amx, cell *params) {
@@ -293,15 +382,15 @@ cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *dest = NULL;
-	int dest_len = params[5], len = handlers[query->handler]->fetch_field(query, params[2], dest);
+	char *tmp = NULL;
+	int dest_len = params[5], len = handlers[query->handler]->fetch_field(query, params[2], tmp);
 	if (len != 0) {
 		if (dest_len < 2) {
-			amx_SetString_(amx, params[3], dest, len);
+			amx_SetString_(amx, params[3], tmp, len);
 		} else {
-			amx_SetString_(amx, params[3], dest, dest_len);
+			amx_SetString_(amx, params[3], tmp, dest_len);
 		}
-		free(dest);
+		free(tmp);
 	} else {
 		log(LOG_WARNING, "Natives::mysql_field_name: Can't find field %d.", params[2]);
 	}
@@ -344,17 +433,20 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *dest = NULL;
-	int dest_len = params[4], len = handlers[query->handler]->fetch_num(query, params[2], dest);
+	int fieldidx = params[2], dest_len = params[4], len;
+	char *tmp = NULL;
+	bool isCopy = handlers[query->handler]->fetch_num(query, fieldidx, tmp, len);
 	if (len != 0) {
-		if (dest_len < 2) {
-			amx_SetString_(amx, params[3], dest, len);
+		if (dest_len < 2) { // Probably a multi-dimensional array.
+			amx_SetString_(amx, params[3], tmp, len);
 		} else {
-			amx_SetString_(amx, params[3], dest, dest_len);
+			amx_SetString_(amx, params[3], tmp, dest_len);
 		}
-		free(dest);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", fieldidx);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -375,19 +467,23 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *fieldname = NULL, *dest = NULL;
+	char *fieldname = NULL, *tmp = NULL;
 	amx_GetString_(amx, params[2], fieldname);
-	int dest_len = params[4], len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
+	int dest_len = params[4], len;
+	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) {
-			amx_SetString_(amx, params[3], dest, len);
+			amx_SetString_(amx, params[3], tmp, len);
 		} else {
-			amx_SetString_(amx, params[3], dest, dest_len);
+			amx_SetString_(amx, params[3], tmp, dest_len);
 		}
-		free(dest);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
 		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s.", fieldname);
 	}
+	free(fieldname);
 	Mutex::getInstance()->unlock();
 	return len;
 }
@@ -407,18 +503,19 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *dest = NULL;
-	int len = handlers[query->handler]->fetch_num(query, params[2], dest);
+	int fieldidx = params[2], len, val = 0;
+	char *tmp = NULL;
+	bool isCopy = handlers[query->handler]->fetch_num(query, fieldidx, tmp, len);
 	if (len != 0) {
-		int val = atoi(dest);
-		free(dest);
-		Mutex::getInstance()->unlock();
-		return val;
+		val = atoi(tmp);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
 		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
-	return 0;
+	return val;
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) {
@@ -436,19 +533,21 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) 
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *fieldname = NULL, *dest = NULL;
+	char *fieldname = NULL, *tmp = NULL;
 	amx_GetString_(amx, params[2], fieldname);
-	int len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
+	int len, val = 0;
+	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
-		int val = atoi(dest);
-		free(dest);
-		Mutex::getInstance()->unlock();
-		return val;
+		val = atoi(tmp);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
 		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", fieldname);
 	}
+	free(fieldname);
 	Mutex::getInstance()->unlock();
-	return 0;
+	return val;
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
@@ -466,18 +565,20 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *dest = NULL;
-	int len = handlers[query->handler]->fetch_num(query, params[2], dest);
+	int fieldidx = params[2], len;
+	char *tmp = NULL;
+	bool isCopy = handlers[query->handler]->fetch_num(query, fieldidx, tmp, len);
+	float val = 0.0;
 	if (len != 0) {
-		float val = (float) atof(dest);
-		free(dest);
-		Mutex::getInstance()->unlock();
-		return amx_ftoc(val);
+		val = (float) atof(tmp);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_float: Can't find field %d.", params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
-	return 0;
+	return amx_ftoc(val);
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params) {
@@ -495,17 +596,20 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	char *fieldname = NULL, *dest = NULL;
+	char *fieldname = NULL, *tmp = NULL;
 	amx_GetString_(amx, params[2], fieldname);
-	int len = handlers[query->handler]->fetch_assoc(query, fieldname, dest);
+	int len;
+	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
+	float val = 0.0;
 	if (len != 0) {
-		float val = (float) atof(dest);
-		free(dest);
-		Mutex::getInstance()->unlock();
-		return amx_ftoc(val);
+		val = (float) atof(tmp);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc_float: Can't find field %s.", fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", fieldname);
 	}
+	free(fieldname);
 	Mutex::getInstance()->unlock();
-	return 0;
+	return amx_ftoc(val);
 }
