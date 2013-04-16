@@ -1,3 +1,21 @@
+/**
+ * SA:MP Plugin - MySQL
+ * Copyright (C) 2013 Dan
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *  
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mysql_handler.h"
 
 AMX *amx;
@@ -61,14 +79,18 @@ void MySQL_Handler::execute_query(struct mysql_query *&query) {
 			query->last_row_idx = 0;
 			query->insert_id = (int) mysql_insert_id(conn);
 			query->affected_rows = (int) mysql_affected_rows(conn);
+			query->num_rows = 0;
+			query->num_fields = 0;
 			if (query->result != NULL) {
 				query->num_rows = (int) mysql_num_rows(query->result);
 				query->num_fields = (int) mysql_num_fields(query->result);
 				query->field_names.resize(query->num_fields);
 				MYSQL_FIELD *field;
 				for (int i = 0; field = mysql_fetch_field(query->result); ++i) {
-					query->field_names[i] = (char*) malloc(sizeof(char) * (strlen(field->name) + 1));
-					strcpy(query->field_names[i], field->name);
+					int len = strlen(field->name) + 1;
+					query->field_names[i].first = (char*) malloc(sizeof(char) * len);
+					strcpy(query->field_names[i].first, field->name);
+					query->field_names[i].second = len;
 				}
 				if (query->flags & QUERY_CACHED) {
 					query->cache.resize(query->num_rows);
@@ -77,17 +99,20 @@ void MySQL_Handler::execute_query(struct mysql_query *&query) {
 						MYSQL_ROW row = mysql_fetch_row(query->result);
 						unsigned long *lengths = mysql_fetch_lengths(query->result);
 						for (int j = 0; j != query->num_fields; ++j) {
-							if (row[j]) {
-								query->cache[i][j] = (char*) malloc(sizeof(char) * (lengths[j] + 1));
-								strcpy(query->cache[i][j], row[j]);
+							if (lengths[j]) {
+								query->cache[i][j].first = (char*) malloc(sizeof(char) * (lengths[j] + 1));
+								strcpy(query->cache[i][j].first, row[j]);
+								query->cache[i][j].second = lengths[j] + 1;
 							} else {
-								query->cache[i][j] = (char*) malloc(sizeof(char) * 5); // NULL + \0
-								strcpy(query->cache[i][j], "NULL");
+								query->cache[i][j].first = (char*) malloc(sizeof(char) * 5); // NULL + \0
+								strcpy(query->cache[i][j].first, "NULL");
+								query->cache[i][j].second = 5;
 							}
 						}
 					}
 				} else {
 					query->last_row = mysql_fetch_row(query->result);
+					query->last_row_lengths = mysql_fetch_lengths(query->result);
 				}
 			}
 		} else {
@@ -107,67 +132,72 @@ int MySQL_Handler::get_num_fields(struct mysql_query *query) {
 	return query->num_fields;
 }
 
-int MySQL_Handler::fetch_field(struct mysql_query *query, int fieldidx, char *&dest) {
+bool MySQL_Handler::fetch_field(struct mysql_query *query, int fieldidx, char *&dest, int &len) {
 	if ((0 <= fieldidx) && (fieldidx < query->num_fields)) {
-		int len = strlen(query->field_names[fieldidx]) + 1;
 		if (dest == NULL) {
-			dest = (char*) malloc(sizeof(char) * len);
+			dest = query->field_names[fieldidx].first;
+			len = query->field_names[fieldidx].second;
+			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
+		} else {
+			strncpy(dest, query->field_names[fieldidx].first, len);
+			return true;
 		}
-		strcpy(dest, query->field_names[fieldidx]);
-		// TODO: Get rid of strcpy.
-		return len;
 	}
-	return 0;
+	len = 0;
+	return true;
 }
 
-int MySQL_Handler::seek_row(struct mysql_query *query, int row) {
+bool MySQL_Handler::seek_row(struct mysql_query *query, int row) {
 	if (row == -1) {
 		row = query->last_row_idx + 1;
 	}
 	if (query->last_row_idx == row) {
-		return 1;
+		return true;
 	}
 	if ((0 <= row) && (row < query->num_rows)) {
 		if (!(query->flags & QUERY_CACHED)) {
 			mysql_data_seek(query->result, row);
 			query->last_row = mysql_fetch_row(query->result);
+			query->last_row_lengths = mysql_fetch_lengths(query->result);
 		}
 		query->last_row_idx = row;
-		return 1;
+		return true;
 	}
-	return 0;
+	return false;
 }
 
 bool MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&dest, int &len) {
-	if (query->flags & QUERY_CACHED) {
-		if (dest == NULL) {
-			len = strlen(query->cache[query->last_row_idx][fieldidx]);
-			dest = query->cache[query->last_row_idx][fieldidx];
-			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
-		} else {
-			memcpy(dest, query->cache[query->last_row_idx][fieldidx], len);
-			return true;
-		}
-	} else {
-		if (query->last_row != NULL) {
+	if ((0 <= fieldidx) && (fieldidx < query->num_fields)) {
+		if (query->flags & QUERY_CACHED) {
 			if (dest == NULL) {
-				if (query->last_row[fieldidx]) {
-					len = strlen(query->last_row[fieldidx]) + 1;
-					dest = (char*) malloc(sizeof(char) * len);
-					memcpy(dest, query->last_row[fieldidx], len);
-				} else {
-					len = 5; // NULL\0
-					dest = (char*) malloc(sizeof(char) * 5);
-					strcpy(dest, "NULL");
-				}
+				len = query->cache[query->last_row_idx][fieldidx].second;
+				dest = query->cache[query->last_row_idx][fieldidx].first;
+				return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
 			} else {
-				if (query->last_row[fieldidx]) {
-					memcpy(dest, query->last_row[fieldidx], len);
-				} else {
-					strncpy(dest, "NULL", len);
-				}
+				memcpy(dest, query->cache[query->last_row_idx][fieldidx].first, len);
+				return true;
 			}
-			return true;
+		} else {
+			if (query->last_row != NULL) {
+				if (query->last_row_lengths[fieldidx]) {
+					if (dest == NULL) {
+						len = query->last_row_lengths[fieldidx] + 1;
+						dest = (char*) malloc(sizeof(char) * len);
+						memcpy(dest, query->last_row[fieldidx], len);
+					} else {
+						memcpy(dest, query->last_row[fieldidx], len);
+					}
+				} else {
+					if (dest == NULL) {
+						len = 5; // NULL\0
+						dest = (char*) malloc(sizeof(char) * 5);
+						strcpy(dest, "NULL");
+					} else {
+						strncpy(dest, "NULL", len);
+					}
+				}
+				return true;
+			}
 		}
 	}
 	len = 0;
@@ -176,7 +206,7 @@ bool MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&de
 
 bool MySQL_Handler::fetch_assoc(struct mysql_query *query, char *fieldname, char *&dest, int &len) {
 	for (int i = 0, size = query->field_names.size(); i != size; ++i) {
-		if (strcmp(query->field_names[i], fieldname) == 0) {
+		if (strcmp(query->field_names[i].first, fieldname) == 0) {
 			return fetch_num(query, i, dest, len);
 		}
 	}

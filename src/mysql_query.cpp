@@ -1,3 +1,21 @@
+/**
+ * SA:MP Plugin - MySQL
+ * Copyright (C) 2013 Dan
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *  
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "mysql_query.h"
 
 void free_query(struct mysql_query *&query) {
@@ -13,12 +31,12 @@ void free_query(struct mysql_query *&query) {
 		mysql_free_result(query->result);
 	}
 	for (int i = 0, size = query->field_names.size(); i != size; ++i) {
-		free(query->field_names[i]);
+		free(query->field_names[i].first);
 	}
 	query->field_names.clear();
 	for (int i = 0, size = query->cache.size(); i != size; ++i) {
 		for (int j = 0, size = query->cache[i].size(); j != size; ++j) {
-			free(query->cache[i][j]);
+			free(query->cache[i][j].first);
 		}
 		query->cache[i].clear();
 	}

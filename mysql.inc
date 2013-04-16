@@ -1,10 +1,27 @@
 /**
- * MySQL plugin v0.4 BETA
- *
+ * SA:MP Plugin - MySQL
+ * Copyright (C) 2013 Dan
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *  
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+ 
+/**
+ * <version>0.5 BETA</version>
  * <remarks>
- * 		Data types:
- * 			MySQL 	- a handle to one database connection
- * 			Result 	- the result of a query, whether it returns or not rows
+ * Data types:
+ * 		MySQL	- a handle to one database
+ * 		Result	- the result of a query, whether it returns or not rows
  * </remarks>
  */
 
@@ -127,7 +144,7 @@
  * <param name="callback">Callback which should have been called normally.</param>
  * <returns>No return value is expected.</returns>
  */
-forward OnMySQLError(MySQL:handle, errorid, const error[], const query[], const callback[]);
+forward OnMySQLError(MySQL:handle, errorid, error[], query[], callback[]);
 
 /**
  * <summary>Sets the minimum level of logged messages.</summary>
@@ -146,7 +163,7 @@ native mysql_debug(file = LOG_ALL, console = LOG_WARNING);
  * <param name="port">The port on which the MySQL server listens.</param>
  * <returns>The ID of the handle.</returns>
  */
-native MySQL:mysql_connect(const host[], const user[], const pass[], const db[], port = 3306);
+native MySQL:mysql_connect(host[], user[], pass[], db[], port = 3306);
 
 /**
  * <summary>Destroys the handle and disconnects from the MySQL server.</summary>
@@ -156,15 +173,15 @@ native MySQL:mysql_connect(const host[], const user[], const pass[], const db[],
 native mysql_disconnect(MySQL:handle);
 
 /**
- * <summary>Sets default character set.</sumarry>
+ * <summary>Sets default character set.</summary>
  * <param name="handle">The MySQL handle.</param>
  * <param name="charset">New default character set.</param>
  * <returns>True if succesful.</returns>
  */
-native mysql_set_charset(MySQL:handle, const charset[]);
+native mysql_set_charset(MySQL:handle, charset[]);
 
 /**
- * <summary>Gets default character set.</sumarry>
+ * <summary>Gets default character set.</summary>
  * <param name="dest">The destination where the character set will be stored.</param>
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>True if succesful.</returns>
@@ -179,7 +196,7 @@ native mysql_get_charset(MySQL:handle, dest[], dest_len = sizeof(dest));
 native mysql_ping(MySQL:handle);
 
 /**
- * <summary>Gets statistics from MySQL server.</sumarry>
+ * <summary>Gets statistics from MySQL server.</summary>
  * <param name="dest">The destination where the information will be stored.</param>
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>True if succesful.</returns>
@@ -194,7 +211,7 @@ native mysql_get_stat(MySQL:handle, dest[], dest_len = sizeof(dest));
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The length of the escaped string.</returns>
  */
-native mysql_escape_string(MySQL:handle, const src[], dest[], dest_len = sizeof(dest));
+native mysql_escape_string(MySQL:handle, src[], dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Executes a MySQL query and returns the result.</summary>
@@ -205,7 +222,7 @@ native mysql_escape_string(MySQL:handle, const src[], dest[], dest_len = sizeof(
  * <param name="format">The format of the callback (b, B = boolean; c, C = character; d, D, i, I = integer; s, S = string; r, R = result).</param>
  * <returns>The ID of the result.</returns>
  */
-native Result:mysql_query(MySQL:handle, const query[], flag = QUERY_NONE, const callback[] = "", const format[] = "", {Float,_}:...);
+native Result:mysql_query(MySQL:handle, query[], flag = QUERY_NONE, callback[] = "", format[] = "", {Float,_}:...);
 
 /**
  * <summary>Stores the result for later use (if query is threaded).</summary>
@@ -294,7 +311,7 @@ native mysql_get_field(Result:result, field, dest[], dest_len = sizeof(dest));
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The length of the string.</returns>
  */
-native mysql_get_field_assoc(Result:result, const field[], dest[], dest_len = sizeof(dest));
+native mysql_get_field_assoc(Result:result, field[], dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Fetches a cell containing an integer value by field index.</summary>
@@ -310,7 +327,7 @@ native mysql_get_field_int(Result:result, field);
  * <param name="field">The name of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native mysql_get_field_assoc_int(Result:result, const field[]);
+native mysql_get_field_assoc_int(Result:result, field[]);
 
 /**
  * <summary>Fetches a cell containing a float value by field index.</summary>
@@ -326,4 +343,4 @@ native Float:mysql_get_field_float(Result:result, field);
  * <param name="field">The name of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native Float:mysql_get_field_assoc_float(Result:result, const field[]);
+native Float:mysql_get_field_assoc_float(Result:result, field[]);

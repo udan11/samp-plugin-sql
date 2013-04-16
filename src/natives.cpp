@@ -1,3 +1,21 @@
+/**
+ * SA:MP Plugin - MySQL
+ * Copyright (C) 2013 Dan
+ *  
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *  
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *  
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include "natives.h"
 
 cell AMX_NATIVE_CALL Natives::mysql_debug(AMX *amx, cell *params) {
@@ -382,15 +400,18 @@ cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
+	int dest_len = params[5], len;
 	char *tmp = NULL;
-	int dest_len = params[5], len = handlers[query->handler]->fetch_field(query, params[2], tmp);
+	bool isCopy = handlers[query->handler]->fetch_field(query, params[2], tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) {
 			amx_SetString_(amx, params[3], tmp, len);
 		} else {
 			amx_SetString_(amx, params[3], tmp, dest_len);
 		}
-		free(tmp);
+		if (isCopy) {
+			free(tmp);
+		}
 	} else {
 		log(LOG_WARNING, "Natives::mysql_field_name: Can't find field %d.", params[2]);
 	}
