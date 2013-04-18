@@ -19,7 +19,7 @@
 #include "natives.h"
 
 cell AMX_NATIVE_CALL Natives::mysql_debug(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -31,7 +31,7 @@ cell AMX_NATIVE_CALL Natives::mysql_debug(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
-	if (params[0] / 4 < 5) {
+	if (params[0] < 5 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -65,7 +65,7 @@ cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -82,7 +82,7 @@ cell AMX_NATIVE_CALL Natives::mysql_disconnect(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_set_charset(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -100,7 +100,7 @@ cell AMX_NATIVE_CALL Natives::mysql_set_charset(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_charset(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -120,7 +120,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_charset(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_ping(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return -1;
 	}
 	Mutex::getInstance()->lock();
@@ -136,7 +136,7 @@ cell AMX_NATIVE_CALL Natives::mysql_ping(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_stat(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -156,7 +156,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_stat(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return -1;
 	}
 	Mutex::getInstance()->lock();
@@ -183,12 +183,11 @@ cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
-	if (params[0] / 4 < 5) {
+	if (params[0] < 5 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
-	struct mysql_query *query;
-	query = (struct mysql_query*) malloc(sizeof(struct mysql_query));
+	struct mysql_query *query = (struct mysql_query*) malloc(sizeof(struct mysql_query));
 	memset(query, 0, sizeof(struct mysql_query));
 	int id = last_query++;
 	query->id = id;
@@ -203,8 +202,21 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 	amx_GetString_(amx, params[4], query->callback);
 	amx_GetString_(amx, params[5], query->format);
 	for (int i = 0, len = strlen(query->format), p = 6; i != len; ++i, ++p) {
-		cell *ptr;
 		switch (query->format[i]) {
+			case 'a':
+			case 'A':
+				cell *ptr_arr, *ptr_len, *arr, len;
+				amx_GetAddr(amx, params[p], &ptr_arr);
+				amx_GetAddr(amx, params[p + 1], &ptr_len);
+				len = sizeof(cell) * (*ptr_len);
+				arr = (cell*) malloc(len);
+				if (arr != NULL) {
+					memcpy(arr, ptr_arr, len);
+					query->params_a.push_back(std::make_pair(arr, *ptr_len));
+				}
+				break;
+			case 'b':
+			case 'B':
 			case 'c':
 			case 'C':
 			case 'd':
@@ -213,19 +225,22 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 			case 'I':
 			case 'f': 
 			case 'F':
+				cell *ptr;
 				amx_GetAddr(amx, params[p], &ptr);
 				query->params_c.push_back(*ptr);
 				break;
 			case 'r':
 			case 'R':
-				// We didn't read any param.
-				--p;
+				--p; // We didn't read any parameter.
 				break;
 			case 's':
 			case 'S':
 				char *str;
 				amx_GetString_(amx, params[p], str);
 				query->params_s.push_back(str);
+				break;
+			default: 
+				log(LOG_WARNING, "Format '%c' is not recognized.", query->format[i]);
 				break;
 		}
 	}
@@ -246,7 +261,7 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -264,7 +279,7 @@ cell AMX_NATIVE_CALL Natives::mysql_free_result(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_store_result(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -282,7 +297,7 @@ cell AMX_NATIVE_CALL Natives::mysql_store_result(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_insert_id(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -297,7 +312,7 @@ cell AMX_NATIVE_CALL Natives::mysql_insert_id(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_affected_rows(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -312,7 +327,7 @@ cell AMX_NATIVE_CALL Natives::mysql_affected_rows(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_error(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 1 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -327,7 +342,7 @@ cell AMX_NATIVE_CALL Natives::mysql_error(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_error_string(AMX *amx, cell *params) {
-	if (params[0] / 4 < 3) {
+	if (params[0] < 3 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -356,7 +371,7 @@ cell AMX_NATIVE_CALL Natives::mysql_error_string(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -371,7 +386,7 @@ cell AMX_NATIVE_CALL Natives::mysql_num_rows(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_num_fields(AMX *amx, cell *params) {
-	if (params[0] / 4 < 1) {
+	if (params[0] < 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -386,7 +401,7 @@ cell AMX_NATIVE_CALL Natives::mysql_num_fields(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
-	if (params[0] / 4 < 4) {
+	if (params[0] < 4 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -420,7 +435,7 @@ cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_next_row(AMX *amx, cell* params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -440,7 +455,7 @@ cell AMX_NATIVE_CALL Natives::mysql_next_row(AMX *amx, cell* params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
-	if (params[0] / 4 < 4) {
+	if (params[0] < 4 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -474,7 +489,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
-	if (params[0] / 4 < 4) {
+	if (params[0] < 4 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -510,7 +525,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -540,7 +555,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -572,7 +587,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) 
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();
@@ -603,7 +618,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params) {
-	if (params[0] / 4 < 2) {
+	if (params[0] < 2 * 4) {
 		return 0;
 	}
 	Mutex::getInstance()->lock();

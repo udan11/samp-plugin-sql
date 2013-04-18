@@ -31,6 +31,7 @@ struct mysql_query {
 	int id, handler, flags, status, error;
 	char *query, *callback, *format;
 	const char *error_msg;
+	std::vector<std::pair<cell*, int> > params_a;
 	std::vector<cell> params_c;
 	std::vector<char*> params_s;
 	MYSQL_RES *result;

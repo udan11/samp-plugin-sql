@@ -45,7 +45,7 @@ void log(int level, char *format, ...) {
 			}
 		}
 		if (level >= log_level_console) {
-			logprintf("plugin.mysql: %s", msg);
+			logprintf("[plugin.mysql] %s", msg);
 		}
 		free(msg);
 	}

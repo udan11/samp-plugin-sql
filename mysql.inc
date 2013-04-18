@@ -17,7 +17,7 @@
  */
  
 /**
- * <version>0.5 BETA</version>
+ * <version>0.6 BETA</version>
  * <remarks>
  * Data types:
  * 		MySQL	- a handle to one database
@@ -219,7 +219,11 @@ native mysql_escape_string(MySQL:handle, src[], dest[], dest_len = sizeof(dest))
  * <param name="query">The query.</param>
  * <param name="flag">Query's flags.</param>
  * <param name="callback">The callback which has to be called after the query was sucesfully executed.</param>
- * <param name="format">The format of the callback (b, B = boolean; c, C = character; d, D, i, I = integer; s, S = string; r, R = result).</param>
+ * <param name="format">The format of the callback.
+ * 		a, A = arrays (must be followed by an integer: size;
+ * 		b, B = boolean; c, C = character; d, D, i, I = integer;
+ * 		s, S = string; r, R = result
+ * </param>
  * <returns>The ID of the result.</returns>
  */
 native Result:mysql_query(MySQL:handle, query[], flag = QUERY_NONE, callback[] = "", format[] = "", {Float,_}:...);

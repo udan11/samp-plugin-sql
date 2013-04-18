@@ -22,6 +22,10 @@ void free_query(struct mysql_query *&query) {
 	free(query->query);
 	free(query->callback);
 	free(query->format);
+	for (int i = 0, size = query->params_a.size(); i != size; ++i) {
+		free(query->params_a[i].first);
+	}
+	query->params_a.clear();
 	query->params_c.clear();
 	for (int i = 0, size = query->params_s.size(); i != size; ++i) {
 		free(query->params_s[i]);
@@ -50,9 +54,18 @@ int execute_query_callback(struct mysql_query *query) {
 	int funcidx;
 	if (query->error == 0) {
 		if (!amx_FindPublic(amx, query->callback, &funcidx)) {
-			int c_idx = query->params_c.size() - 1, s_idx = query->params_s.size() - 1;
-			for (int i = strlen(query->format) - 1; i >= 0; --i) {
+			int a_idx = query->params_a.size(), c_idx = query->params_c.size(), s_idx = query->params_s.size();
+			for (int i = strlen(query->format) - 1; i != -1; --i) {
 				switch (query->format[i]) {
+					case 'a':
+					case 'A':
+						if (amx_addr < NULL) {
+							amx_addr = NULL;
+						}
+						amx_PushArray(amx, &amx_addr, NULL, query->params_a[--a_idx].first, query->params_a[a_idx].second);
+						break;
+					case 'b':
+					case 'B':
 					case 'c':
 					case 'C':
 					case 'd':
@@ -61,7 +74,7 @@ int execute_query_callback(struct mysql_query *query) {
 					case 'I':
 					case 'f':
 					case 'F':
-						amx_Push(amx, query->params_c[c_idx--]);
+						amx_Push(amx, query->params_c[--c_idx]);
 						break;
 					case 'r':
 					case 'R':
@@ -72,7 +85,7 @@ int execute_query_callback(struct mysql_query *query) {
 						if (amx_addr < NULL) {
 							amx_addr = NULL;
 						}
-						amx_PushString(amx, &amx_addr, NULL, query->params_s[s_idx--], NULL, NULL);
+						amx_PushString(amx, &amx_addr, NULL, query->params_s[--s_idx], NULL, NULL);
 						break;
 				}
 			}

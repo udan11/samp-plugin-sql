@@ -28,8 +28,13 @@
 
 #if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
 	#include "windows.h"
+	#define SLEEP(x) Sleep(x);
 #else
 	#include "pthread.h"
+	#include <unistd.h>
+	#define SLEEP(x) usleep(x * 1000);
+	typedef unsigned long DWORD;
+	typedef unsigned int UINT;
 #endif
 
 #include "mysql_include/mysql.h"
@@ -45,16 +50,7 @@
 #include "mysql_utils.h"
 #include "natives.h"
 
-#ifdef WIN32
-	#define SLEEP(x) Sleep(x);
-#else
-	#include <unistd.h>
-	#define SLEEP(x) usleep(x * 1000);
-	typedef unsigned long DWORD;
-	typedef unsigned int UINT;
-#endif
-
-#define PLUGIN_VERSION					"v0.5 BETA"
+#define PLUGIN_VERSION					"v0.6 BETA"
 #define QUERY_ERROR_CALLBACK			"OnMySQLError"
 
 extern int last_handler, last_query;

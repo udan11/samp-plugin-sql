@@ -88,7 +88,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 #endif
 	Mutex::getInstance();
 	logprintf("  >> MySQL plugin " PLUGIN_VERSION " successfully loaded.");
-	return 1;
+	return true;
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
