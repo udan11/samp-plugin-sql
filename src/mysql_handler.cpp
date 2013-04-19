@@ -167,7 +167,7 @@ bool MySQL_Handler::seek_row(struct mysql_query *query, int row) {
 }
 
 bool MySQL_Handler::fetch_num(struct mysql_query *query, int fieldidx, char *&dest, int &len) {
-	if ((0 <= fieldidx) && (fieldidx < query->num_fields)) {
+	if ((query->num_rows != 0) && (0 <= fieldidx) && (fieldidx < query->num_fields)) {
 		if (query->flags & QUERY_CACHED) {
 			if (dest == NULL) {
 				len = query->cache[query->last_row_idx][fieldidx].second;
@@ -210,5 +210,6 @@ bool MySQL_Handler::fetch_assoc(struct mysql_query *query, char *fieldname, char
 			return fetch_num(query, i, dest, len);
 		}
 	}
+	len = 0;
 	return true;
 }

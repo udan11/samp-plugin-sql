@@ -17,10 +17,10 @@
  */
  
 /**
- * <version>0.6 BETA</version>
+ * <version>0.7 BETA</version>
  * <remarks>
  * Data types:
- * 		MySQL	- a handle to one database
+ * 		MySQL	- a MySQL database handle
  * 		Result	- the result of a query, whether it returns or not rows
  * </remarks>
  */
@@ -220,9 +220,9 @@ native mysql_escape_string(MySQL:handle, src[], dest[], dest_len = sizeof(dest))
  * <param name="flag">Query's flags.</param>
  * <param name="callback">The callback which has to be called after the query was sucesfully executed.</param>
  * <param name="format">The format of the callback.
- * 		a, A = arrays (must be followed by an integer: size;
+ * 		a, A = arrays (must be followed by an integer: array's szie);
  * 		b, B = boolean; c, C = character; d, D, i, I = integer;
- * 		s, S = string; r, R = result
+ * 		r, R = result; s, S = string
  * </param>
  * <returns>The ID of the result.</returns>
  */

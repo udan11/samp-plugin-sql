@@ -50,7 +50,7 @@
 #include "mysql_utils.h"
 #include "natives.h"
 
-#define PLUGIN_VERSION					"v0.6 BETA"
+#define PLUGIN_VERSION					"v0.7 BETA"
 #define QUERY_ERROR_CALLBACK			"OnMySQLError"
 
 extern int last_handler, last_query;

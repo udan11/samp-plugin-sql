@@ -188,6 +188,10 @@ cell AMX_NATIVE_CALL Natives::mysql_query(AMX *amx, cell *params) {
 	}
 	Mutex::getInstance()->lock();
 	struct mysql_query *query = (struct mysql_query*) malloc(sizeof(struct mysql_query));
+	if (query == NULL) {
+		log(LOG_WARNING, "Cannot allocate memory.");
+		return 0;
+	}
 	memset(query, 0, sizeof(struct mysql_query));
 	int id = last_query++;
 	query->id = id;
@@ -428,7 +432,7 @@ cell AMX_NATIVE_CALL Natives::mysql_field_name(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_field_name: Can't find field %d.", params[2]);
+		log(LOG_WARNING, "Natives::mysql_field_name: Can't find field %d or result is empty.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -482,7 +486,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d.", fieldidx);
+		log(LOG_WARNING, "Natives::mysql_get_field: Can't find field %d or result is empty.", fieldidx);
 	}
 	Mutex::getInstance()->unlock();
 	return len;
@@ -517,7 +521,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s.", fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
 	Mutex::getInstance()->unlock();
@@ -548,7 +552,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_int(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d or result is empty.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return val;
@@ -579,7 +583,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_int(AMX *amx, cell *params) 
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
 	Mutex::getInstance()->unlock();
@@ -611,7 +615,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_float(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d.", params[2]);
+		log(LOG_WARNING, "Natives::mysql_get_field_int: Can't find field %d or result is empty.", params[2]);
 	}
 	Mutex::getInstance()->unlock();
 	return amx_ftoc(val);
@@ -643,7 +647,7 @@ cell AMX_NATIVE_CALL Natives::mysql_get_field_assoc_float(AMX *amx, cell *params
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s.", fieldname);
+		log(LOG_WARNING, "Natives::mysql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
 	Mutex::getInstance()->unlock();
