@@ -204,7 +204,7 @@ native mysql_ping(MySQL:handle);
 native mysql_get_stat(MySQL:handle, dest[], dest_len = sizeof(dest));
 
 /**
- * <summary>Pings the MySQL server.</summary>
+ * <summary>Escapes a string to be used further in queries.</summary>
  * <param name="handle">The MySQL handle used for escaping the string.</param>
  * <param name="src">The source of the unescaped string.</param>
  * <param name="dest">The destination where the escaped string will be stored.</param>
