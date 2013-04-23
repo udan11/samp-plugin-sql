@@ -24,8 +24,6 @@ class MySQL_Handler {
 	public:
 		// The AMX machine hosting this handler.
 		AMX *amx;
-		// The ID of this handler.
-		int id;
 		// Constructor.
 		MySQL_Handler();
 		// Destructor.
@@ -37,13 +35,13 @@ class MySQL_Handler {
 		// Gets latest error ID.
 		int get_errno();
 		// Gets latest error message.
-		const char* get_error();
+		const char *get_error();
 		// Pings the servers.
 		int ping();
 		// Gets server's information.
-		const char* get_stat();
+		const char *get_stat();
 		// Gets default character set.
-		const char* get_charset();
+		const char *get_charset();
 		// Sets default character set.
 		bool set_charset(char *charset);
 		// Escapes a string and returns the new length.

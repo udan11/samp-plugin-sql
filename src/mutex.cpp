@@ -35,12 +35,12 @@ Mutex::Mutex() {
 }
 
 Mutex::~Mutex() {
+	isEnabled = false;
 #ifdef WIN32
 	CloseHandle(handle);
 #else
 	pthread_mutex_destroy(&handle);
 #endif
-	isEnabled = false;
 	singleton = NULL;
 }
 
@@ -53,20 +53,20 @@ Mutex *Mutex::getInstance() {
 
 void Mutex::lock() {
 	if (isEnabled) {
-	#ifdef WIN32
+#ifdef WIN32
 		WaitForSingleObject(handle, INFINITE);
-	#else
+#else
 		pthread_mutex_lock(&handle);
-	#endif
+#endif
 	}
 }
 
 void Mutex::unlock() {
 	if (isEnabled) {
-	#ifdef WIN32
+#ifdef WIN32
 		ReleaseMutex(handle);
-	#else
+#else
 		pthread_mutex_unlock(&handle);
-	#endif
+#endif
 	}
 }

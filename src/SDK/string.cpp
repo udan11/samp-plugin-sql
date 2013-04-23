@@ -1,6 +1,6 @@
 #include "string.h"
 
-int amx_GetString_(AMX* amx, cell param, char *&dest) {
+int amx_GetString_(AMX *amx, cell param, char *&dest) {
 	cell *ptr;
 	int len;
 	amx_GetAddr(amx, param, &ptr);
@@ -14,7 +14,7 @@ int amx_GetString_(AMX* amx, cell param, char *&dest) {
 	return 0;
 }
 
-void amx_SetString_(AMX* amx, cell param, char *str, int len) {
+void amx_SetString_(AMX *amx, cell param, char *str, int len) {
 	cell *dest;
 	amx_GetAddr(amx, param, &dest);
 	amx_SetString(dest, str, 0, 0, len);

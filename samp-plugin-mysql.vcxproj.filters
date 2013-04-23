@@ -225,7 +225,6 @@
     <ClInclude Include="src\SDK\amx\amx.h">
       <Filter>SDK\amx</Filter>
     </ClInclude>
-    <ClInclude Include="src\main.h" />
     <ClInclude Include="src\log.h" />
     <ClInclude Include="src\mutex.h" />
     <ClInclude Include="src\mysql_handler.h" />
@@ -235,12 +234,13 @@
     <ClInclude Include="src\SDK\string.h">
       <Filter>SDK</Filter>
     </ClInclude>
+    <ClInclude Include="src\resource.h" />
+    <ClInclude Include="src\main.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\SDK\amxplugin.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
-    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\log.cpp" />
     <ClCompile Include="src\mutex.cpp" />
     <ClCompile Include="src\mysql_handler.cpp" />
@@ -250,5 +250,9 @@
     <ClCompile Include="src\SDK\string.cpp">
       <Filter>SDK</Filter>
     </ClCompile>
+    <ClCompile Include="src\main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\plugin.rc" />
   </ItemGroup>
 </Project>

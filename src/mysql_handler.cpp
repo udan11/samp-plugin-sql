@@ -18,13 +18,8 @@
 
 #include "mysql_handler.h"
 
-AMX *amx;
-int id;
-MYSQL *conn;
-
 MySQL_Handler::MySQL_Handler() {
 	amx = NULL;
-	id = 0;
 	conn = mysql_init(NULL);
 	int arg = 1;
 	mysql_options(conn, MYSQL_OPT_RECONNECT, &arg);
@@ -46,7 +41,7 @@ int MySQL_Handler::get_errno() {
 	return mysql_errno(conn);
 }
 
-const char* MySQL_Handler::get_error() {
+const char *MySQL_Handler::get_error() {
 	return mysql_error(conn);
 }
 
@@ -54,11 +49,11 @@ int MySQL_Handler::ping() {
 	return mysql_ping(conn);
 }
 
-const char* MySQL_Handler::get_stat() {
+const char *MySQL_Handler::get_stat() {
 	return mysql_stat(conn);
 }
 
-const char* MySQL_Handler::get_charset() {
+const char *MySQL_Handler::get_charset() {
 	return mysql_character_set_name(conn);
 }
 

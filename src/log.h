@@ -29,7 +29,7 @@
 #define LOG_ERROR						4
 #define LOG_NONE						5
 
-typedef void (*logprintf_t) (char* format, ...);
+typedef void (*logprintf_t) (char *format, ...);
 extern logprintf_t logprintf;
 extern int log_level_file, log_level_console;
 

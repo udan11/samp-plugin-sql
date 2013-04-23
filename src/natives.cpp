@@ -39,7 +39,6 @@ cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
 	handler = new MySQL_Handler();
 	handler->amx = amx;
 	int id = last_handler++;
-	handler->id = id;
 	char *host = NULL, *user = NULL, *pass = NULL, *db = NULL;
 	amx_GetString_(amx, params[1], host);
 	amx_GetString_(amx, params[2], user);
@@ -54,7 +53,7 @@ cell AMX_NATIVE_CALL Natives::mysql_connect(AMX *amx, cell *params) {
 	free(db);
 	if (connected) {
 		log(LOG_INFO, "Natives::mysql_connect: Connection was succesful!");
-		handlers[handler->id] = handler;
+		handlers[id] = handler;
 		Mutex::getInstance()->unlock();
 		return id;
 	}
@@ -167,7 +166,7 @@ cell AMX_NATIVE_CALL Natives::mysql_escape_string(AMX *amx, cell *params) {
 	}
 	char *src = NULL;
 	amx_GetString_(amx, params[2], src);
-	char *dest = (char*) malloc(sizeof(char) *  strlen(src) * 2); // *2 in case every character is escaped
+	char *dest = (char*) malloc(sizeof(char) * strlen(src) * 2); // *2 in case every character is escaped
 	int dest_len = params[4], len = handlers[handler_id]->escape_string(src, dest);
 	free(src);
 	if (len != 0) {

@@ -52,7 +52,7 @@ extern "C" {
 #endif
 
 #define GEN_YASSL_SHA2_BRIDGE(size) \
-unsigned char* SHA##size(const unsigned char *input_ptr, size_t input_length, \
+unsigned char *SHA##size(const unsigned char *input_ptr, size_t input_length, \
                char unsigned *output_ptr);
 
 GEN_YASSL_SHA2_BRIDGE(512);

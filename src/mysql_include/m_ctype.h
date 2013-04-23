@@ -441,7 +441,7 @@ ulonglong my_strntoull10rnd_ucs2(CHARSET_INFO *cs,
                                  const char *str, size_t length,
                                  int unsigned_fl, char **endptr, int *error);
 
-void my_fill_8bit(CHARSET_INFO *cs, char* to, size_t l, int fill);
+void my_fill_8bit(CHARSET_INFO *cs, char *to, size_t l, int fill);
 
 my_bool  my_like_range_simple(CHARSET_INFO *cs,
 			      const char *ptr, size_t ptr_length,

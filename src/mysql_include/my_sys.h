@@ -425,7 +425,7 @@ typedef struct st_io_cache_share
 
 typedef struct st_io_cache		/* Used when cacheing files */
 {
-  /* Offset in file corresponding to the first byte of uchar* buffer. */
+  /* Offset in file corresponding to the first byte of uchar *buffer. */
   my_off_t pos_in_file;
   /*
     The offset of end of file for READ_CACHE and WRITE_CACHE.
@@ -446,8 +446,8 @@ typedef struct st_io_cache		/* Used when cacheing files */
   /*
     Only used in SEQ_READ_APPEND, and points to the current read position
     in the write buffer. Note that reads in SEQ_READ_APPEND caches can
-    happen from both read buffer (uchar* buffer) and write buffer
-    (uchar* write_buffer).
+    happen from both read buffer (uchar *buffer) and write buffer
+    (uchar *write_buffer).
   */
   uchar *append_read_pos;
   /* Points to current write position in the write buffer */
@@ -803,7 +803,7 @@ extern void handle_recived_signals(void);
 
 extern sig_handler my_set_alarm_variable(int signo);
 extern void my_string_ptr_sort(uchar *base,uint items,size_t size);
-extern void radixsort_for_str_ptr(uchar* base[], uint number_of_elements,
+extern void radixsort_for_str_ptr(uchar *base[], uint number_of_elements,
 				  size_t size_of_element,uchar *buffer[]);
 extern qsort_t my_qsort(void *base_ptr, size_t total_elems, size_t size,
                         qsort_cmp cmp);
@@ -845,8 +845,8 @@ extern size_t my_b_fill(IO_CACHE *info);
 extern void my_b_seek(IO_CACHE *info,my_off_t pos);
 extern size_t my_b_gets(IO_CACHE *info, char *to, size_t max_length);
 extern my_off_t my_b_filelength(IO_CACHE *info);
-extern size_t my_b_printf(IO_CACHE *info, const char* fmt, ...);
-extern size_t my_b_vprintf(IO_CACHE *info, const char* fmt, va_list ap);
+extern size_t my_b_printf(IO_CACHE *info, const char *fmt, ...);
+extern size_t my_b_vprintf(IO_CACHE *info, const char *fmt, va_list ap);
 extern my_bool open_cached_file(IO_CACHE *cache,const char *dir,
 				 const char *prefix, size_t cache_size,
 				 myf cache_myflags);
@@ -1070,7 +1070,7 @@ int my_security_attr_create(SECURITY_ATTRIBUTES **psa, const char **perror,
 void my_security_attr_free(SECURITY_ATTRIBUTES *sa);
 
 /* implemented in my_conio.c */
-char* my_cgets(char *string, size_t clen, size_t* plen);
+char *my_cgets(char *string, size_t clen, size_t* plen);
 
 #endif
 #ifdef __NETWARE__

@@ -35,9 +35,9 @@ class Mutex {
 		Mutex();
 	private:
 		static Mutex *singleton;
-		#ifdef WIN32
-			HANDLE handle;
-		#else
-			pthread_mutex_t handle;
-		#endif
+#ifdef WIN32
+		HANDLE handle;
+#else
+		pthread_mutex_t handle;
+#endif
 };

@@ -17,7 +17,7 @@
  */
  
 /**
- * <version>0.7 BETA</version>
+ * <version>1.0</version>
  * <remarks>
  * Data types:
  * 		MySQL	- a MySQL database handle

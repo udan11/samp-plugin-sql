@@ -76,7 +76,7 @@ my_bool	vio_should_retry(Vio *vio);
 /* Check that operation was timed out */
 my_bool	vio_was_interrupted(Vio *vio);
 /* Short text description of the socket for those, who are curious.. */
-const char* vio_description(Vio *vio);
+const char *vio_description(Vio *vio);
 /* Return the type of the connection */
 enum enum_vio_type vio_type(Vio* vio);
 /* Return last error number */

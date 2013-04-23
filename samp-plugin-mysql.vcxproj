@@ -25,8 +25,6 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v110_xp</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -47,19 +45,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
+      <DebugInformationFormat>OldStyle</DebugInformationFormat>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-    </ClCompile>
+    <ClCompile />
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -142,6 +135,7 @@
     <ClInclude Include="src\mysql_query.h" />
     <ClInclude Include="src\mysql_utils.h" />
     <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\SDK\amx\amx.h" />
     <ClInclude Include="src\SDK\amx\sclinux.h" />
     <ClInclude Include="src\SDK\plugincommon.h" />
@@ -157,6 +151,9 @@
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\SDK\amxplugin.cpp" />
     <ClCompile Include="src\SDK\string.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="src\plugin.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

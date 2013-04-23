@@ -27,9 +27,9 @@ std::map<int, class MySQL_Handler*> handlers;
 std::map<int, struct mysql_query*> queries;
 
 #ifdef WIN32
-	DWORD __stdcall ProcessQueryThread(LPVOID lpParam);
+DWORD __stdcall ProcessQueryThread(LPVOID lpParam);
 #else
-	void *ProcessQueryThread(void *lpParam);
+void *ProcessQueryThread(void *lpParam);
 #endif
 
 const AMX_NATIVE_INFO NATIVES[] = {
@@ -69,7 +69,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	if (mysql_library_init(0, NULL, NULL)) {
-		logprintf("  >> Coudln't initalize the MySQL library (libmysql). It's probably missing.");
+		logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
 		exit(0);
 		return 0;
 	}
@@ -110,7 +110,6 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
-	log(LOG_INFO, "Plugin is being unloaded...");
 	running = false;
 	Mutex::getInstance()->lock();
 	for (std::map<int, class MySQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
@@ -129,7 +128,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 	queries.clear();
 	Mutex::getInstance()->unlock();
 	delete Mutex::getInstance();
-	log(LOG_INFO, "Plugin succesfully unloaded!");
+	logprintf("[plugin.mysql] Plugin succesfully unloaded!");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
@@ -152,11 +151,10 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 }
 
 #ifdef WIN32
-	DWORD __stdcall ProcessQueryThread(LPVOID lpParam)
+DWORD __stdcall ProcessQueryThread(LPVOID lpParam) {
 #else
-	void *ProcessQueryThread(void *lpParam)
+void *ProcessQueryThread(void *lpParam) {
 #endif
-{
 	while (running) {
 		Mutex::getInstance()->lock();
 		for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
