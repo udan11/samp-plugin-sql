@@ -23,28 +23,80 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pgsql_handler.h"
 
-#if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
-	#include "windows.h"
-#else
-	#include "pthread.h"
-#endif
+PgSQL_Handler::PgSQL_Handler() {
+	// TODO
+}
 
-class Mutex {
-	public:
-		static bool isEnabled;
-		static Mutex *getInstance();
-		void lock();
-		void unlock();
-		~Mutex();
-	protected:
-		Mutex();
-	private:
-		static Mutex *singleton;
-#ifdef WIN32
-		HANDLE handle;
-#else
-		pthread_mutex_t handle;
-#endif
-};
+PgSQL_Handler::~PgSQL_Handler() {
+	// TODO
+}
+
+bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
+	// TODO
+	return false;
+}
+
+void PgSQL_Handler::disconnect() {
+	// TODO
+}
+
+int PgSQL_Handler::get_errno() {
+	// TODO
+	return 0;
+}
+
+const char *PgSQL_Handler::get_error() {
+	// TODO
+	return 0;
+}
+
+int PgSQL_Handler::ping() {
+	// TODO
+	return 0;
+}
+
+const char *PgSQL_Handler::get_stat() {
+	// TODO
+	return 0;
+}
+
+const char *PgSQL_Handler::get_charset() {
+	// TODO
+	return 0;
+}
+
+bool PgSQL_Handler::set_charset(char *charset) {
+	// TODO
+	return false;
+}
+
+int PgSQL_Handler::escape_string(const char *src, char *&dest) {
+	// TODO
+	return 0;
+}
+
+void PgSQL_Handler::execute_query(class SQL_Query *query) {
+	// TODO
+}
+
+bool PgSQL_Handler::fetch_field(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
+	// TODO
+	return false;
+}
+
+bool PgSQL_Handler::seek_row(class SQL_Query *query, int row) {
+	// TODO
+	return false;
+}
+
+bool PgSQL_Handler::fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
+	// TODO
+	return false;
+}
+
+bool PgSQL_Handler::fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len) {
+	// TODO
+	return false;
+}

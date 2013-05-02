@@ -1,26 +1,33 @@
 /**
- * SA:MP Plugin - MySQL
- * Copyright (C) 2013 Dan
- *  
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *  
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2013, Dan
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
  
 /**
- * <version>1.0</version>
+ * <version>2.0</version>
  * <remarks>
  * Data types:
- * 		MySQL	- a MySQL database handle
+ * 		SQL	- a SQL database handle
  * 		Result	- the result of a query, whether it returns or not rows
  * </remarks>
  */
@@ -83,6 +90,16 @@
 #define CR_NO_STMT_METADATA						 	2052
 
 /**
+ * <summary>MySQL</summary>
+ */
+#define SQL_HANDLER_MYSQL				1
+
+/**
+ * <summary>Postgre SQL</summary>
+ */
+#define SQL_HANDLER_POSTGRESQL			2
+
+/**
  * <summary>The query will be executed in server's thread and the result is fetched on demand.</summary>
  */
 #define QUERY_NONE						0
@@ -98,7 +115,7 @@
 #define QUERY_CACHED					2
 
 /**
- * <summary>Log levels. (@see mysql_debug)</summary>
+ * <summary>Log levels. (@see sql_debug)</summary>
  */
 #define LOG_ALL							0
 #define LOG_DEBUG						1
@@ -116,69 +133,69 @@
 #endif
 
 /**
- * <summary>Checks if a cell from a MySQL table is null.</summary>
+ * <summary>Checks if a cell from a SQL table is null.</summary>
  */
-#if !defined ismysqlnull
-	#define ismysqlnull(%1) \
+#if !defined issqlnull
+	#define issqlnull(%1) \
 		((isnull(%1)) || (strcmp(%1, "NULL", false) == 0))
 #endif
 	
 /**
  * <summary>Aliases of natives defined below.</summary>
  */
-#define mysql_open						mysql_connect
-#define mysql_close						mysql_disconnect
-#define mysql_fetch_num					mysql_get_field
-#define mysql_fetch_assoc				mysql_get_field_assoc
-#define mysql_fetch_num_int				mysql_get_field_int
-#define mysql_fetch_assoc_int			mysql_get_field_assoc_int
-#define mysql_fetch_num_float			mysql_get_field_int_float
-#define mysql_fetch_assoc_float			mysql_get_field_assoc_float
+#define sql_open						sql_connect
+#define sql_close						sql_disconnect
+#define sql_fetch_num					sql_get_field
+#define sql_fetch_assoc					sql_get_field_assoc
+#define sql_fetch_num_int				sql_get_field_int
+#define sql_fetch_assoc_int				sql_get_field_assoc_int
+#define sql_fetch_num_float				sql_get_field_int_float
+#define sql_fetch_assoc_float			sql_get_field_assoc_float
 
 /**
- * <summary>Called when a MySQL error occurs during the execution of a query.</summary>
- * <param name="handle">The MySQL handle used for execution of the query.</param>
- * <param name="errorid">The ID of the error (@see "C.4. Client Error Codes and Messages" from "MySQL Reference Manual").</param>
+ * <summary>Called when a SQL error occurs during the execution of a query.</summary>
+ * <param name="handle">The SQL handle used for execution of the query.</param>
+ * <param name="errorid">The ID of the error (@see "C.4. Client Error Codes and Messages" from "SQL Reference Manual").</param>
  * <param name="error">The message of the error.</param>
  * <param name="query">Query which caused the error.</param>
  * <param name="callback">Callback which should have been called normally.</param>
  * <returns>No return value is expected.</returns>
  */
-forward OnMySQLError(MySQL:handle, errorid, error[], query[], callback[]);
+forward OnSQLError(SQL:handle, errorid, error[], query[], callback[]);
 
 /**
  * <summary>Sets the minimum level of logged messages.</summary>
- * <param name="file">The minimum level of the file (mysql_log.txt) logs.</param>
+ * <param name="file">The minimum level of the file (sql_log.txt) logs.</param>
  * <param name="console">The minimum level of the console logs.</param>
  * <returns>No return value.</returns>
  */
-native mysql_debug(file = LOG_ALL, console = LOG_WARNING);
+native sql_debug(file = LOG_ALL, console = LOG_WARNING);
 
 /**
- * <summary>Creates a new handle and connects to a MySQL server.</summary>
- * <param name="host">The MySQL hostname.</param>
- * <param name="user">The MySQL username.</param>
- * <param name="pass">The MySQL password assigned to the user used.</param>
+ * <summary>Creates a new handle and connects to a SQL server.</summary>
+ * <param name="host">The SQL hostname.</param>
+ * <param name="user">The SQL username.</param>
+ * <param name="pass">The SQL password assigned to the user used.</param>
  * <param name="db">The name of the targeted database.</param>
- * <param name="port">The port on which the MySQL server listens.</param>
+ * <param name="port">The port on which the SQL server listens.</param>
  * <returns>The ID of the handle.</returns>
  */
-native MySQL:mysql_connect(host[], user[], pass[], db[], port = 3306);
+native SQL:sql_connect(sql_type, host[], user[], pass[], db[], port = 3306);
 
 /**
- * <summary>Destroys the handle and disconnects from the MySQL server.</summary>
- * <param name="handle">The MySQL handle which has to be disconnected.</param>
+ * <summary>Destroys the handle and disconnects from the SQL server.</summary>
+ * <param name="handle">The SQL handle which has to be disconnected.</param>
  * <returns>No return value.</returns>
  */
-native mysql_disconnect(MySQL:handle);
+native sql_disconnect(SQL:handle);
 
 /**
  * <summary>Sets default character set.</summary>
- * <param name="handle">The MySQL handle.</param>
+ * <param name="handle">The SQL handle.</param>
  * <param name="charset">New default character set.</param>
  * <returns>True if succesful.</returns>
  */
-native mysql_set_charset(MySQL:handle, charset[]);
+native sql_set_charset(SQL:handle, charset[]);
 
 /**
  * <summary>Gets default character set.</summary>
@@ -186,36 +203,36 @@ native mysql_set_charset(MySQL:handle, charset[]);
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>True if succesful.</returns>
  */
-native mysql_get_charset(MySQL:handle, dest[], dest_len = sizeof(dest));
+native sql_get_charset(SQL:handle, dest[], dest_len = sizeof(dest));
 
 /**
- * <summary>Pings the MySQL server.</summary>
- * <param name="handle">The MySQL handle which has to be disconnected.</param>
- * <returns>Returns a MySQL client error (if any) or 0 if the connection is alive.</returns>
+ * <summary>Pings the SQL server.</summary>
+ * <param name="handle">The SQL handle which has to be disconnected.</param>
+ * <returns>Returns a SQL client error (if any) or 0 if the connection is alive.</returns>
  */
-native mysql_ping(MySQL:handle);
+native sql_ping(SQL:handle);
 
 /**
- * <summary>Gets statistics from MySQL server.</summary>
+ * <summary>Gets statistics from SQL server.</summary>
  * <param name="dest">The destination where the information will be stored.</param>
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>True if succesful.</returns>
  */
-native mysql_get_stat(MySQL:handle, dest[], dest_len = sizeof(dest));
+native sql_get_stat(SQL:handle, dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Escapes a string to be used further in queries.</summary>
- * <param name="handle">The MySQL handle used for escaping the string.</param>
+ * <param name="handle">The SQL handle used for escaping the string.</param>
  * <param name="src">The source of the unescaped string.</param>
  * <param name="dest">The destination where the escaped string will be stored.</param>
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The length of the escaped string.</returns>
  */
-native mysql_escape_string(MySQL:handle, src[], dest[], dest_len = sizeof(dest));
+native sql_escape_string(SQL:handle, src[], dest[], dest_len = sizeof(dest));
 
 /**
- * <summary>Executes a MySQL query and returns the result.</summary>
- * <param name="handle">The MySQL handle used for execution of the query.</param>
+ * <summary>Executes a SQL query and returns the result.</summary>
+ * <param name="handle">The SQL handle used for execution of the query.</param>
  * <param name="query">The query.</param>
  * <param name="flag">Query's flags.</param>
  * <param name="callback">The callback which has to be called after the query was sucesfully executed.</param>
@@ -226,35 +243,35 @@ native mysql_escape_string(MySQL:handle, src[], dest[], dest_len = sizeof(dest))
  * </param>
  * <returns>The ID of the result.</returns>
  */
-native Result:mysql_query(MySQL:handle, query[], flag = QUERY_NONE, callback[] = "", format[] = "", {Float,_}:...);
+native Result:sql_query(SQL:handle, query[], flag = QUERY_NONE, callback[] = "", format[] = "", {Float,_}:...);
 
 /**
  * <summary>Stores the result for later use (if query is threaded).</summary>
  * <param name="result">The ID of the result which has to be stored.</param>
  * <returns>No return value.</returns>
  */
-native mysql_store_result(Result:result);
+native sql_store_result(Result:result);
 
 /**
  * <summary>Frees the result for later use (if the query was stored or is not threaded).</summary>
  * <param name="result">The ID of the result which has to be freed.</param>
  * <returns>No return value.</returns>
  */
-native mysql_free_result(Result:result);
+native sql_free_result(Result:result);
 
 /**
  * <summary>Gets the ID of the last insert query.</summary>
  * <param name="result">The ID of the result.</param>
  * <returns>The ID of the latest inserted row.</returns>
  */
-native mysql_insert_id(Result:result);
+native sql_insert_id(Result:result);
 
 /**
  * <summary>Gets the ID of the error returned by this result.</summary>
  * <param name="result">The ID of the result.</param>
  * <returns>The ID of the error.</returns>
  */
-native mysql_error(Result:result);
+native sql_error(Result:result);
 
 /**
  * <summary>Gets the message of the error returned by this result.</summary>
@@ -263,21 +280,21 @@ native mysql_error(Result:result);
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The ID of the error.</returns>
  */
-native mysql_error_string(Result:result, dest[], dest_len = sizeof(dest));
+native sql_error_string(Result:result, dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Gets the count of rows contained in a result.</summary>
  * <param name="result">The ID of the result.</param>
  * <returns>The count of rows contained in the result.</returns>
  */
-native mysql_num_rows(Result:result);
+native sql_num_rows(Result:result);
 
 /**
  * <summary>Gets the count of fields contained in a result.</summary>
  * <param name="result">The ID of the result.</param>
  * <returns>The count of fields contained in the result.</returns>
  */
-native mysql_num_fields(Result:result);
+native sql_num_fields(Result:result);
 
 /**
  * <summary>Fetches the name of a field.</summary>
@@ -287,7 +304,7 @@ native mysql_num_fields(Result:result);
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The count of fields contained in the result.</returns>
  */
-native mysql_field_name(Result:result, field, dest[], dest_len = sizeof(dest));
+native sql_field_name(Result:result, field, dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Seeks a specific row.</summary>
@@ -295,7 +312,7 @@ native mysql_field_name(Result:result, field, dest[], dest_len = sizeof(dest));
  * <param name="row">The index of the row. If -1 is specified, next row will be seeked.</param>
  * <returns>No return value.</returns>
  */
-native mysql_next_row(Result:result, row = -1);
+native sql_next_row(Result:result, row = -1);
 
 /**
  * <summary>Fetches a cell containing a string by field index.</summary>
@@ -305,7 +322,7 @@ native mysql_next_row(Result:result, row = -1);
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The length of the string.</returns>
  */
-native mysql_get_field(Result:result, field, dest[], dest_len = sizeof(dest));
+native sql_get_field(Result:result, field, dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Fetches a cell containing a string by field name.</summary>
@@ -315,7 +332,7 @@ native mysql_get_field(Result:result, field, dest[], dest_len = sizeof(dest));
  * <param name="dest_len">The capacity of the destination.</param>
  * <returns>The length of the string.</returns>
  */
-native mysql_get_field_assoc(Result:result, field[], dest[], dest_len = sizeof(dest));
+native sql_get_field_assoc(Result:result, field[], dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Fetches a cell containing an integer value by field index.</summary>
@@ -323,7 +340,7 @@ native mysql_get_field_assoc(Result:result, field[], dest[], dest_len = sizeof(d
  * <param name="field">The index of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native mysql_get_field_int(Result:result, field);
+native sql_get_field_int(Result:result, field);
 
 /**
  * <summary>Fetches a cell containing an integer value by field name.</summary>
@@ -331,7 +348,7 @@ native mysql_get_field_int(Result:result, field);
  * <param name="field">The name of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native mysql_get_field_assoc_int(Result:result, field[]);
+native sql_get_field_assoc_int(Result:result, field[]);
 
 /**
  * <summary>Fetches a cell containing a float value by field index.</summary>
@@ -339,7 +356,7 @@ native mysql_get_field_assoc_int(Result:result, field[]);
  * <param name="field">The index of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native Float:mysql_get_field_float(Result:result, field);
+native Float:sql_get_field_float(Result:result, field);
 
 /**
  * <summary>Fetches a cell containing a float value by field name.</summary>
@@ -347,4 +364,4 @@ native Float:mysql_get_field_float(Result:result, field);
  * <param name="field">The name of the field.</param>
  * <returns>The value of the cell.</returns>
  */
-native Float:mysql_get_field_assoc_float(Result:result, field[]);
+native Float:sql_get_field_assoc_float(Result:result, field[]);

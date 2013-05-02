@@ -23,28 +23,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "pgsql_query.h"
 
-#if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
-	#include "windows.h"
-#else
-	#include "pthread.h"
-#endif
-
-class Mutex {
-	public:
-		static bool isEnabled;
-		static Mutex *getInstance();
-		void lock();
-		void unlock();
-		~Mutex();
-	protected:
-		Mutex();
-	private:
-		static Mutex *singleton;
-#ifdef WIN32
-		HANDLE handle;
-#else
-		pthread_mutex_t handle;
-#endif
-};
+PgSQL_Query::~PgSQL_Query() {
+	// TODO
+}

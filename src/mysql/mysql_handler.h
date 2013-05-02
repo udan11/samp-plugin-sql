@@ -25,26 +25,27 @@
 
 #pragma once
 
-#if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
-	#include "windows.h"
-#else
-	#include "pthread.h"
-#endif
+#include "../main.h"
 
-class Mutex {
+class MySQL_Handler : public SQL_Handler {
 	public:
-		static bool isEnabled;
-		static Mutex *getInstance();
-		void lock();
-		void unlock();
-		~Mutex();
-	protected:
-		Mutex();
+		MySQL_Handler();
+		~MySQL_Handler();
+		bool connect(const char *host, const char *user, const char *pass, const char *db, int port);
+		void disconnect();
+		int get_errno();
+		const char *get_error();
+		int ping();
+		const char *get_stat();
+		const char *get_charset();
+		bool set_charset(char *charset);
+		int escape_string(const char *src, char *&dest);
+		void execute_query(class SQL_Query *query);
+		bool fetch_field(class SQL_Query *query, int fieldix, char *&dest, int &len);
+		bool seek_row(class SQL_Query *query, int row);
+		bool fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len);
+		bool fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len);
 	private:
-		static Mutex *singleton;
-#ifdef WIN32
-		HANDLE handle;
-#else
-		pthread_mutex_t handle;
-#endif
+		// The MySQL client socket.
+		MYSQL *conn;
 };

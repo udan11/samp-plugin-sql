@@ -25,26 +25,11 @@
 
 #pragma once
 
-#if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
-	#include "windows.h"
-#else
-	#include "pthread.h"
-#endif
+#include "../main.h"
 
-class Mutex {
+class MySQL_Query : public SQL_Query {
 	public:
-		static bool isEnabled;
-		static Mutex *getInstance();
-		void lock();
-		void unlock();
-		~Mutex();
-	protected:
-		Mutex();
-	private:
-		static Mutex *singleton;
-#ifdef WIN32
-		HANDLE handle;
-#else
-		pthread_mutex_t handle;
-#endif
+		~MySQL_Query();
+		MYSQL_RES *result;
+		MYSQL_ROW last_row;
 };

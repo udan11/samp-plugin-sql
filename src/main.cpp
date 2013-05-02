@@ -1,19 +1,26 @@
 /**
- * SA:MP Plugin - MySQL
- * Copyright (C) 2013 Dan
- *  
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *  
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *  
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * Copyright (c) 2013, Dan
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ *
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #include "main.h"
@@ -23,8 +30,8 @@ extern void *pAMXFunctions;
 
 bool running = false;
 int last_handler = 1, last_query = 1;
-std::map<int, class MySQL_Handler*> handlers;
-std::map<int, struct mysql_query*> queries;
+std::map<int, class SQL_Handler*> handlers;
+std::map<int, class SQL_Query*> queries;
 
 #ifdef WIN32
 DWORD __stdcall ProcessQueryThread(LPVOID lpParam);
@@ -33,32 +40,32 @@ void *ProcessQueryThread(void *lpParam);
 #endif
 
 const AMX_NATIVE_INFO NATIVES[] = {
-	{"mysql_debug", Natives::mysql_debug},
-	{"mysql_connect", Natives::mysql_connect},
-	{"mysql_disconnect", Natives::mysql_disconnect},
-	{"mysql_set_charset", Natives::mysql_set_charset},
-	{"mysql_get_charset", Natives::mysql_get_charset},
-	{"mysql_ping", Natives::mysql_ping},
-	{"mysql_get_stat", Natives::mysql_get_stat},
-	{"mysql_escape_string", Natives::mysql_escape_string},
-	{"mysql_query", Natives::mysql_query},
-	{"mysql_store_result", Natives::mysql_store_result},
-	{"mysql_free_result", Natives::mysql_free_result},
-	{"mysql_insert_id", Natives::mysql_insert_id},
-	{"mysql_affected_rows", Natives::mysql_affected_rows},
-	{"mysql_error", Natives::mysql_error},
-	{"mysql_error_string", Natives::mysql_error_string},
-	{"mysql_num_rows", Natives::mysql_num_rows},
-	{"mysql_num_fields", Natives::mysql_num_fields},
-	{"mysql_field_name", Natives::mysql_field_name},
-	{"mysql_next_row", Natives::mysql_next_row},
-	{"mysql_get_field", Natives::mysql_get_field},
-	{"mysql_get_field_assoc", Natives::mysql_get_field_assoc},
-	{"mysql_get_field_int", Natives::mysql_get_field_int},
-	{"mysql_get_field_assoc_int", Natives::mysql_get_field_assoc_int},
-	{"mysql_get_field_float", Natives::mysql_get_field_float},
-	{"mysql_get_field_assoc_float", Natives::mysql_get_field_assoc_float},
-	{NULL, NULL}
+	{"sql_debug", Natives::sql_debug},
+	{"sql_connect", Natives::sql_connect},
+	{"sql_disconnect", Natives::sql_disconnect},
+	{"sql_set_charset", Natives::sql_set_charset},
+	{"sql_get_charset", Natives::sql_get_charset},
+	{"sql_ping", Natives::sql_ping},
+	{"sql_get_stat", Natives::sql_get_stat},
+	{"sql_escape_string", Natives::sql_escape_string},
+	{"sql_query", Natives::sql_query},
+	{"sql_store_result", Natives::sql_store_result},
+	{"sql_free_result", Natives::sql_free_result},
+	{"sql_insert_id", Natives::sql_insert_id},
+	{"sql_affected_rows", Natives::sql_affected_rows},
+	{"sql_error", Natives::sql_error},
+	{"sql_error_string", Natives::sql_error_string},
+	{"sql_num_rows", Natives::sql_num_rows},
+	{"sql_num_fields", Natives::sql_num_fields},
+	{"sql_field_name", Natives::sql_field_name},
+	{"sql_next_row", Natives::sql_next_row},
+	{"sql_get_field", Natives::sql_get_field},
+	{"sql_get_field_assoc", Natives::sql_get_field_assoc},
+	{"sql_get_field_int", Natives::sql_get_field_int},
+	{"sql_get_field_assoc_int", Natives::sql_get_field_assoc_int},
+	{"sql_get_field_float", Natives::sql_get_field_float},
+	{"sql_get_field_assoc_float", Natives::sql_get_field_assoc_float},
+	{0, 0}
 };
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
@@ -68,7 +75,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
-	if (mysql_library_init(0, NULL, NULL)) {
+	if (mysql_library_init(0, 0, 0)) {
 		logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
 		exit(0);
 		return 0;
@@ -77,14 +84,14 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 #ifdef WIN32
 	HANDLE threadHandle;
 	DWORD dwThreadId = 0;
-	threadHandle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE) ProcessQueryThread, NULL, 0, &dwThreadId);
+	threadHandle = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) ProcessQueryThread, 0, 0, &dwThreadId);
 	CloseHandle(threadHandle);
 #else
 	pthread_t threadHandle;
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_create(&threadHandle, &attr, &ProcessQueryThread, NULL);
+	pthread_create(&threadHandle, &attr, &ProcessQueryThread, 0);
 #endif
 	Mutex::getInstance();
 	logprintf("  >> MySQL plugin " PLUGIN_VERSION " successfully loaded.");
@@ -97,12 +104,20 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 	Mutex::getInstance()->lock();
-	for (std::map<int, class MySQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
+	for (std::map<int, class SQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
 		++next;
-		MySQL_Handler *handler = it->second;
+		SQL_Handler *handler = it->second;
 		if (handler->amx == amx) {
 			delete handler;
-			free(handler);
+			handlers.erase(it);
+		}
+	}
+	for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+		++next;
+		SQL_Query *query = it->second;
+		if (query->amx == amx) {
+			delete query;
+			queries.erase(it);
 		}
 	}
 	Mutex::getInstance()->unlock();
@@ -112,17 +127,17 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 	running = false;
 	Mutex::getInstance()->lock();
-	for (std::map<int, class MySQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
+	for (std::map<int, class SQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
 		++next;
-		MySQL_Handler *handler = it->second;
+		SQL_Handler *handler = it->second;
 		delete handler;
 		handlers.erase(it);
 	}
 	handlers.clear();
-	for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+	for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
 		++next;
-		struct mysql_query *query = it->second;
-		free_query(query);
+		SQL_Query *query = it->second;
+		delete query;
 		queries.erase(it);
 	}
 	queries.clear();
@@ -133,17 +148,17 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 	Mutex::getInstance()->lock();
-	for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+	for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
 		++next;
-		struct mysql_query *query = it->second;
+		SQL_Query *query = it->second;
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
 			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->status = QUERY_STATUS_PROCESSED;
-			execute_query_callback(query);
+			query->execute_callback();
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
 			log(LOG_DEBUG, "ProccessTick(): Erasing query (query->id = %d)...", query->id);
-			free_query(query);
+			delete query;
 			queries.erase(it);
 		}
 	}
@@ -157,11 +172,11 @@ void *ProcessQueryThread(void *lpParam) {
 #endif
 	while (running) {
 		Mutex::getInstance()->lock();
-		for (std::map<int, struct mysql_query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
+		for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
 			++next;
-			struct mysql_query *query = it->second;
+			SQL_Query *query = it->second;
 			if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_NONE)) {
-				log(LOG_DEBUG, "ProcessQueryThread(): Executing query (query->id = %d, query->query = %d)...", query->id, query->query);
+				log(LOG_DEBUG, "ProcessQueryThread(): Executing query (query->id = %d, query->query = %s)...", query->id, query->query);
 				handlers[query->handler]->execute_query(query);
 			}
 		}
