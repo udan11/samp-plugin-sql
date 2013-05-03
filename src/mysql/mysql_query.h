@@ -29,7 +29,8 @@
 
 class MySQL_Query : public SQL_Query {
 	public:
-		~MySQL_Query();
 		MYSQL_RES *result;
 		MYSQL_ROW last_row;
+		MySQL_Query();
+		~MySQL_Query();
 };

@@ -24,3 +24,9 @@
  */
 
 #include "sql_handler.h"
+
+SQL_Handler::SQL_Handler() {
+	amx = 0;
+	id = 0;
+	handler_type = 0;
+}

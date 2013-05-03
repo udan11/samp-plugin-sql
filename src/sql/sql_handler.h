@@ -36,6 +36,8 @@ class SQL_Handler {
 		AMX *amx;
 		// Handler's ID & type.
 		int id, handler_type;
+		// Constructor.
+		SQL_Handler();
 		// Connects to a MySQL server and returns handler's ID.
 		virtual bool connect(const char *host, const char *user, const char *pass, const char *db, int port) = 0;
 		// Disconnects from the MySQL server.

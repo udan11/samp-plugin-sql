@@ -24,6 +24,31 @@
  */
 
 #include "sql_query.h"
+#include "../log.h"
+
+SQL_Query::SQL_Query() {
+	amx = 0;
+	id = 0;
+	handler = 0;
+	flags = 0;
+	status = 0;
+	error = 0;
+	query = 0;
+	callback = 0;
+	format = 0;
+	error_msg = 0;
+	params_a.clear();
+	params_c.clear();
+	params_s.clear();
+	last_row_lengths = 0;
+	last_row_idx = 0;
+	insert_id = 0;
+	affected_rows = 0;
+	num_rows = 0;
+	num_fields = 0;
+	field_names.clear();
+	cache.clear();
+}
 
 SQL_Query::~SQL_Query() {
 	free(query);
@@ -49,7 +74,6 @@ SQL_Query::~SQL_Query() {
 		cache[i].clear();
 	}
 	cache.clear();
-	free(query);
 }
 
 int SQL_Query::execute_callback() {

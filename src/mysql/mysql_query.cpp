@@ -25,6 +25,10 @@
 
 #include "mysql_query.h"
 
+MySQL_Query::MySQL_Query() {
+	result = 0;
+}
+
 MySQL_Query::~MySQL_Query() {
 	if (result != 0) {
 		mysql_free_result(result);

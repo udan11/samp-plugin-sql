@@ -32,6 +32,24 @@ void log(int level, char *format, ...) {
 	if ((level < log_level_file) && (level < log_level_console)) {
 		return;
 	}
+	char prefix[32];
+#define LOG_ALL							0
+#define LOG_DEBUG						1
+#define LOG_INFO						2
+#define LOG_WARNING						3
+#define LOG_ERROR						4
+#define LOG_NONE						5
+	if (level == LOG_DEBUG) {
+		strcpy(prefix, "[debug]");
+	} else if (level == LOG_INFO) {
+		strcpy(prefix, "[info]");
+	} else if (level == LOG_WARNING) {
+		strcpy(prefix, "[warning]");
+	} else if (level == LOG_ERROR) {
+		strcpy(prefix, "[error]");
+	} else {
+		strcpy(prefix, "");
+	}
 	va_list args;
 	va_start(args, format);
 	int len = vsnprintf(0, 0, format, args);
@@ -47,12 +65,12 @@ void log(int level, char *format, ...) {
 		if (level >= log_level_file) {
 			FILE *logFile = fopen(LOG_FILE, "a");
 			if (logFile != 0) {
-				fprintf(logFile, "[%s] %s\n", timestamp, msg);
+				fprintf(logFile, "[%s]%s %s\n", timestamp, prefix, msg);
 				fclose(logFile);
 			}
 		}
 		if (level >= log_level_console) {
-			logprintf("[plugin.mysql] %s", msg);
+			logprintf("[plugin.mysql]%s %s", prefix, msg);
 		}
 		free(msg);
 	}

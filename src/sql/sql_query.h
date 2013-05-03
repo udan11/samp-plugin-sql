@@ -40,6 +40,7 @@
 
 class SQL_Query {
 	public:
+		SQL_Query();
 		virtual ~SQL_Query();
 		AMX *amx;
 		int id, handler, flags, status, error;

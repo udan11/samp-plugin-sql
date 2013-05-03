@@ -26,9 +26,9 @@
 #include "mysql_handler.h"
 
 MySQL_Handler::MySQL_Handler() {
-	amx = 0;
+	handler_type = SQL_HANDLER_MYSQL;
 	conn = mysql_init(0);
-	int arg = 1;
+	int arg = true;
 	mysql_options(conn, MYSQL_OPT_RECONNECT, &arg);
 }
 
