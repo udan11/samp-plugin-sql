@@ -13,6 +13,9 @@ endif
 
 all:
 	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/mysql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/pgsql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/*.cpp
 	$(GPP) -fshort-wchar -shared -o $(OUTFILE) *.o $(COMPILE_FLAGS_2) -lpthread
 	rm -f *.o

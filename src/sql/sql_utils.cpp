@@ -23,7 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sqL_utils.h"
+#include "sql_utils.h"
 
 bool is_valid_handler(int id) {
 	return handlers.find(id) != handlers.end();
