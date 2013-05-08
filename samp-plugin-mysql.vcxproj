@@ -58,7 +58,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <ModuleDefinitionFile>src\plugin.def</ModuleDefinitionFile>
-      <AdditionalDependencies>lib\mysql\libmysql.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>lib\mysql\libmysql.lib;lib\pgsql\libpq.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -134,6 +134,8 @@
     <ClInclude Include="src\mysql\mysql_handler.h" />
     <ClInclude Include="src\mysql\mysql_query.h" />
     <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\pgsql\connector\libpq-fe.h" />
+    <ClInclude Include="src\pgsql\connector\postgres_ext.h" />
     <ClInclude Include="src\pgsql\pgsql_handler.h" />
     <ClInclude Include="src\pgsql\pgsql_query.h" />
     <ClInclude Include="src\resource.h" />

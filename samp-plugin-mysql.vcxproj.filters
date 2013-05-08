@@ -237,6 +237,12 @@
     <ClInclude Include="src\pgsql\pgsql_query.h">
       <Filter>pgsql</Filter>
     </ClInclude>
+    <ClInclude Include="src\pgsql\connector\postgres_ext.h">
+      <Filter>pgsql\connector</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pgsql\connector\libpq-fe.h">
+      <Filter>pgsql\connector</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\log.cpp" />
@@ -295,6 +301,9 @@
     </Filter>
     <Filter Include="pgsql">
       <UniqueIdentifier>{046f4e2e-6246-41d0-a037-55b36c65fe23}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pgsql\connector">
+      <UniqueIdentifier>{320373d9-11a9-4938-ba0d-c4ccb537595c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

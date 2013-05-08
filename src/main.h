@@ -56,7 +56,7 @@
 #include "mysql/mysql_handler.h"
 #include "mysql/mysql_query.h"
 
-//#include "pgsql/libpq/libpq-fe.h"
+#include "pgsql/connector/libpq-fe.h"
 #include "pgsql/pgsql_handler.h"
 #include "pgsql/pgsql_query.h"
 
