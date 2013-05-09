@@ -44,6 +44,10 @@
 	typedef unsigned int UINT;
 #endif
 
+#if _MSC_VER
+	#define snprintf _snprintf
+#endif
+
 #include "sdk/amx/amx.h"
 #include "sdk/plugincommon.h"
 #include "sdk/string.h"

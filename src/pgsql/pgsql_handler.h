@@ -46,5 +46,6 @@ class PgSQL_Handler : public SQL_Handler {
 		bool fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len);
 		bool fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len);
 	private:
-		
+		// The MySQL client socket.
+		PGconn *conn;
 };

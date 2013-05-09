@@ -26,20 +26,23 @@
 #include "pgsql_handler.h"
 
 PgSQL_Handler::PgSQL_Handler() {
-	// TODO
+	conn = NULL;
 }
 
 PgSQL_Handler::~PgSQL_Handler() {
 	// TODO
 }
 
-bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
-	// TODO
-	return false;
+bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 5432) {
+	int len = snprintf(0, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port);
+	char *conninfo = (char*) malloc(len + 1);
+	conn = PQconnectdb(conninfo);
+	free(conninfo);
+	return PQstatus(conn) == CONNECTION_OK;
 }
 
 void PgSQL_Handler::disconnect() {
-	// TODO
+	PQfinish(conn);
 }
 
 int PgSQL_Handler::get_errno() {
