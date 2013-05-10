@@ -28,8 +28,5 @@
 #include "../main.h"
 
 class PgSQL_Query : public SQL_Query {
-	public:
-		PGresult *result;
-		PgSQL_Query();
-		~PgSQL_Query();
+	
 };

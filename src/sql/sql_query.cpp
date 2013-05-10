@@ -24,7 +24,6 @@
  */
 
 #include "sql_query.h"
-#include "../log.h"
 
 SQL_Query::SQL_Query() {
 	amx = 0;
@@ -33,6 +32,7 @@ SQL_Query::SQL_Query() {
 	flags = 0;
 	status = 0;
 	error = 0;
+	last_result = 0;
 	query = 0;
 	callback = 0;
 	format = 0;
@@ -40,14 +40,7 @@ SQL_Query::SQL_Query() {
 	params_a.clear();
 	params_c.clear();
 	params_s.clear();
-	last_row_lengths = 0;
-	last_row_idx = 0;
-	insert_id = 0;
-	affected_rows = 0;
-	num_rows = 0;
-	num_fields = 0;
-	field_names.clear();
-	cache.clear();
+	results.clear();
 }
 
 SQL_Query::~SQL_Query() {
@@ -63,17 +56,10 @@ SQL_Query::~SQL_Query() {
 		free(params_s[i]);
 	}
 	params_s.clear();
-	for (int i = 0, size = field_names.size(); i != size; ++i) {
-		free(field_names[i].first);
+	for (int i = 0, size = results.size(); i != size; ++i) {
+		free(results[i]);
 	}
-	field_names.clear();
-	for (int i = 0, size = cache.size(); i != size; ++i) {
-		for (int j = 0, size = cache[i].size(); j != size; ++j) {
-			free(cache[i][j].first);
-		}
-		cache[i].clear();
-	}
-	cache.clear();
+	results.clear();
 }
 
 int SQL_Query::execute_callback() {

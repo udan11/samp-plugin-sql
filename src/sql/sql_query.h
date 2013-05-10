@@ -40,18 +40,15 @@
 
 class SQL_Query {
 	public:
-		SQL_Query();
-		virtual ~SQL_Query();
 		AMX *amx;
-		int id, handler, flags, status, error;
+		int id, handler, flags, status, error, last_result;
 		char *query, *callback, *format;
 		const char *error_msg;
+		SQL_Query();
+		virtual ~SQL_Query();
 		std::vector<std::pair<cell*, int> > params_a;
 		std::vector<cell> params_c;
 		std::vector<char*> params_s;
-		unsigned long *last_row_lengths;
-		int last_row_idx, insert_id, affected_rows, num_rows, num_fields;
-		std::vector<std::pair<char*, int > > field_names;
-		std::vector<std::vector<std::pair<char*, int> > > cache;
+		std::vector<class SQL_Result*> results;
 		int execute_callback();
 };

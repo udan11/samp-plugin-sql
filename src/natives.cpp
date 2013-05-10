@@ -44,15 +44,16 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	Mutex::getInstance()->lock();
 	SQL_Handler *handler;
 	switch (params[1]) {
-		case SQL_HANDLER_MYSQL: {
+		case SQL_HANDLER_MYSQL:
 			handler = new MySQL_Handler();
 			break;
-		}
-		default: {
+		case SQL_HANDLER_PGSQL:
+			handler = new PgSQL_Handler();
+			break;
+		default:
 			log(LOG_INFO, "Natives::sql_connect: Unknown SQL type (%d)!", params[1]);
 			Mutex::getInstance()->unlock();
 			return 0;
-		}
 	}
 	int id = last_handler++;
 	handler->id = id;
@@ -64,6 +65,16 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	amx_GetString_(amx, params[4], pass);
 	amx_GetString_(amx, params[5], db);
 	int port = params[6];
+	if (port == 0) {
+		switch (params[1]) {
+			case SQL_HANDLER_MYSQL:
+				port = 3306;
+				break;
+			case SQL_HANDLER_PGSQL:
+				port = 5432;
+				break;
+		}
+	}
 	log(LOG_INFO, "Natives::sql_connect: Connecting to %s:***@%s:%d/%s...", user, host, port, db);
 	bool connected = handler->connect(host, user, pass, db, port);
 	free(host);
@@ -112,6 +123,7 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	char *charset = 0;
 	amx_GetString_(amx, params[2], charset);
 	bool ret = handlers[handler_id]->set_charset(charset);
+	log(LOG_INFO, "Natives::sql_set_charset: Charset %s was set (%d)!", charset, ret);
 	free(charset);
 	Mutex::getInstance()->unlock();
 	return ret;
@@ -128,6 +140,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) handlers[handler_id]->get_charset();
+	log(LOG_DEBUG, "Natives::sql_get_charset: charset = %s", tmp);
 	int dest_len = params[3], len = strlen(tmp);
 	if (dest_len < 2) {
 		amx_SetString_(amx, params[2], tmp, len);
@@ -147,8 +160,8 @@ cell AMX_NATIVE_CALL Natives::sql_ping(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return -1;
 	}
-	log(LOG_DEBUG, "Natives::sql_ping: Pinging handled %d...", handler_id);
 	int ping = handlers[handler_id]->ping();
+	log(LOG_DEBUG, "Natives::sql_ping: Pinging handler %d, recieved result %d.", handler_id, ping);
 	Mutex::getInstance()->unlock();
 	return ping;
 }
@@ -164,6 +177,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) handlers[handler_id]->get_stat();
+	log(LOG_DEBUG, "Natives::sql_get_stat: stat = %s", tmp);
 	int dest_len = params[3], len = strlen(tmp);
 	if (dest_len < 2) {
 		amx_SetString_(amx, params[2], tmp, len);
@@ -212,14 +226,15 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	}
 	SQL_Query *query;
 	switch (handlers[handler_id]->handler_type) {
-		case SQL_HANDLER_MYSQL: {
+		case SQL_HANDLER_MYSQL:
 			query = new MySQL_Query();
 			break;
-		}
-		default: {
+		case SQL_HANDLER_PGSQL:
+			query = new PgSQL_Query();
+			break;
+		default:
 			Mutex::getInstance()->unlock();
 			return 0;
-		}
 	}
 	int id = last_query++;
 	query->amx = amx;
@@ -335,7 +350,8 @@ cell AMX_NATIVE_CALL Natives::sql_insert_id(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	int insert_id = queries[query_id]->insert_id;
+	SQL_Query *query = queries[query_id];
+	int insert_id = query->results[query->last_result]->insert_id;
 	Mutex::getInstance()->unlock();
 	return insert_id;
 }
@@ -350,7 +366,8 @@ cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	int affected_rows = queries[query_id]->affected_rows;
+	SQL_Query *query = queries[query_id];
+	int affected_rows = query->results[query->last_result]->affected_rows;
 	Mutex::getInstance()->unlock();
 	return affected_rows;
 }
@@ -409,7 +426,8 @@ cell AMX_NATIVE_CALL Natives::sql_num_rows(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	int num_rows = queries[query_id]->num_rows;
+	SQL_Query *query = queries[query_id];
+	int num_rows = query->results[query->last_result]->num_rows;
 	Mutex::getInstance()->unlock();
 	return num_rows;
 }
@@ -424,9 +442,30 @@ cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	int num_fields = queries[query_id]->num_fields;
+	SQL_Query *query = queries[query_id];
+	int num_fields = query->results[query->last_result]->num_fields;
 	Mutex::getInstance()->unlock();
 	return num_fields;
+}
+
+cell AMX_NATIVE_CALL Natives::sql_next_result(AMX *amx, cell* params) {
+	if (params[0] < 2 * 4) {
+		return 0;
+	}
+	Mutex::getInstance()->lock();
+	int query_id = params[1];
+	if (!is_valid_query(query_id)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	class SQL_Query *query = queries[query_id];
+	if (!is_valid_handler(query->handler)) {
+		Mutex::getInstance()->unlock();
+		return 0;
+	}
+	int ret = handlers[query->handler]->seek_result(query, params[2]);
+	Mutex::getInstance()->unlock();
+	return ret;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {

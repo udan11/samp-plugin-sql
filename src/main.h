@@ -54,15 +54,18 @@
 
 #include "sql/sql_handler.h"
 #include "sql/sql_query.h"
+#include "sql/sql_result.h"
 #include "sql/sql_utils.h"
 
 #include "mysql/connector/mysql.h"
 #include "mysql/mysql_handler.h"
 #include "mysql/mysql_query.h"
+#include "mysql/mysql_result.h"
 
 #include "pgsql/connector/libpq-fe.h"
 #include "pgsql/pgsql_handler.h"
 #include "pgsql/pgsql_query.h"
+#include "pgsql/pgsql_result.h"
 
 #include "log.h"
 #include "mutex.h"

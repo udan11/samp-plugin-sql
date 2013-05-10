@@ -46,6 +46,7 @@ class Natives {
 		static cell AMX_NATIVE_CALL sql_error_string(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_num_rows(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_num_fields(AMX *amx, cell *params);
+		static cell AMX_NATIVE_CALL sql_next_result(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_field_name(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_next_row(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_get_field(AMX *amx, cell *params);

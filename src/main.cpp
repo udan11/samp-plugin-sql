@@ -25,7 +25,6 @@
 
 #include "main.h"
 
-void **ppPluginData;
 extern void *pAMXFunctions;
 
 bool running = false;
@@ -57,6 +56,7 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_error_string", Natives::sql_error_string},
 	{"sql_num_rows", Natives::sql_num_rows},
 	{"sql_num_fields", Natives::sql_num_fields},
+	{"sql_next_result", Natives::sql_next_result},
 	{"sql_field_name", Natives::sql_field_name},
 	{"sql_next_row", Natives::sql_next_row},
 	{"sql_get_field", Natives::sql_get_field},

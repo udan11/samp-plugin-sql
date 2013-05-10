@@ -41,13 +41,11 @@ class MySQL_Handler : public SQL_Handler {
 		bool set_charset(char *charset);
 		int escape_string(const char *src, char *&dest);
 		void execute_query(class SQL_Query *query);
-		bool next_result();
-		void handle_result(class SQL_Query *query);
+		bool seek_result(class SQL_Query *query, int result);
 		bool fetch_field(class SQL_Query *query, int fieldix, char *&dest, int &len);
 		bool seek_row(class SQL_Query *query, int row);
 		bool fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len);
 		bool fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len);
 	private:
-		// The MySQL client socket.
 		MYSQL *conn;
 };

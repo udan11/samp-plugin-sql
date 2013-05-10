@@ -58,10 +58,8 @@ class SQL_Handler {
 		virtual int escape_string(const char *src, char *&dest) = 0;
 		// Executes a query.
 		virtual void execute_query(class SQL_Query *query) = 0;
-		// Retrieves next result.
-		virtual bool next_result() = 0;
-		// Handles current result.
-		virtual void handle_result(class SQL_Query *query) = 0;
+		// Seeks a result.
+		virtual bool seek_result(class SQL_Query *query, int result) = 0;
 		// Fetches the name of a field.
 		virtual bool fetch_field(class SQL_Query *query, int fieldix, char *&dest, int &len) = 0;
 		// Seeks a row in the result.

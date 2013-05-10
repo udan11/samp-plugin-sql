@@ -180,7 +180,7 @@ native sql_debug(file = LOG_ALL, console = LOG_WARNING);
  * <param name="port">The port on which the SQL server listens.</param>
  * <returns>The ID of the handle.</returns>
  */
-native SQL:sql_connect(sql_type, host[], user[], pass[], db[], port = 3306);
+native SQL:sql_connect(sql_type, host[], user[], pass[], db[], port = 0);
 
 /**
  * <summary>Destroys the handle and disconnects from the SQL server.</summary>
@@ -295,6 +295,14 @@ native sql_num_rows(Result:result);
  * <returns>The count of fields contained in the result.</returns>
  */
 native sql_num_fields(Result:result);
+
+/**
+ * <summary>Seeks a specific result set.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="idx">The index of the result set / statement. If -1 is specified, next result set / statement will be seeked.</param>
+ * <returns>No return value.</returns>
+ */
+native sql_next_result(Result:result, idx = -1);
 
 /**
  * <summary>Fetches the name of a field.</summary>

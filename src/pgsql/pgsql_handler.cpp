@@ -26,6 +26,7 @@
 #include "pgsql_handler.h"
 
 PgSQL_Handler::PgSQL_Handler() {
+	handler_type = SQL_HANDLER_PGSQL;
 	conn = NULL;
 }
 
@@ -33,7 +34,7 @@ PgSQL_Handler::~PgSQL_Handler() {
 	disconnect();
 }
 
-bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 5432) {
+bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
 	int len = snprintf(0, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port);
 	char *conninfo = (char*) malloc(len + 1);
 	conn = PQconnectdb(conninfo);
@@ -84,97 +85,113 @@ void PgSQL_Handler::execute_query(class SQL_Query *query) {
 		log(LOG_ERROR, "PgSQL_Handler::execute_query: Invalid dynamic cast.");
 		return;
 	}
-	int status = PQstatus(conn);
-	if (status == CONNECTION_OK) {
-		q->status = QUERY_STATUS_EXECUTED;
-		q->result = PQexec(conn, query->query);
-		if (PQresultStatus(q->result) == PGRES_COMMAND_OK) {
+	q->status = QUERY_STATUS_EXECUTED;
+	if (PQstatus(conn) == CONNECTION_OK) {
+		PgSQL_Result *r = new PgSQL_Result();
+		r->result = PQexec(conn, query->query);
+		if (PQresultStatus(r->result) == PGRES_COMMAND_OK) {
 			q->error = 0;
-			q->last_row_idx = 0;
-			q->insert_id = PQoidValue(q->result);
-			q->affected_rows = 0;
-			if (strlen(PQcmdTuples(q->result))) {
-				q->affected_rows = atoi(PQcmdTuples(q->result));
-			}
-			q->num_rows = 0;
-			q->num_fields = 0;
-			if (PQresultStatus(q->result) == PGRES_TUPLES_OK) {
-				q->num_rows = PQntuples(q->result);
-				q->num_fields = PQnfields(q->result);
-				q->field_names.resize(q->num_fields);
-				MYSQL_FIELD *field;
-				for (int i = 0; i != q->num_fields; ++i) {
-					int len = strlen(PQfname(q->result, i)) + 1;
-					q->field_names[i].first = (char*) malloc(sizeof(char) * len);
-					strcpy(q->field_names[i].first, PQfname(q->result, i));
-					q->field_names[i].second = len;
+			r->insert_id = PQoidValue(r->result);
+			// TODO: Affected rows.
+			if (PQresultStatus(r->result) == PGRES_TUPLES_OK) {
+				r->num_rows = PQntuples(r->result);
+				r->num_fields = PQnfields(r->result);
+				r->field_names.resize(r->num_fields);
+				for (int i = 0; i != r->num_fields; ++i) {
+					int len = strlen(PQfname(r->result, i)) + 1;
+					r->field_names[i].first = (char*) malloc(sizeof(char) * len);
+					strcpy(r->field_names[i].first, PQfname(r->result, i));
+					r->field_names[i].second = len;
 				}
-				if (q->flags & QUERY_CACHED) {
-					q->cache.resize(q->num_rows);
-					for (int i = 0; i != q->num_rows; ++i) {
-						q->cache[i].resize(q->num_fields);
-						for (int j = 0; j != q->num_fields; ++j) {
-							char *cell = PQgetvalue(q->result, i, j);
+				if (query->flags & QUERY_CACHED) {
+					r->cache.resize(r->num_rows);
+					for (int i = 0; i != r->num_rows; ++i) {
+						r->cache[i].resize(r->num_fields);
+						for (int j = 0; j != r->num_fields; ++j) {
+							char *cell = PQgetvalue(r->result, i, j);
 							int len = strlen(cell);
 							if (len) {
-								q->cache[i][j].first = (char*) malloc(sizeof(char) * (len + 1));
-								strcpy(q->cache[i][j].first, cell);
-								q->cache[i][j].second = len + 1;
+								r->cache[i][j].first = (char*) malloc(sizeof(char) * (len + 1));
+								strcpy(r->cache[i][j].first, cell);
+								r->cache[i][j].second = len + 1;
 							} else {
-								q->cache[i][j].first = (char*) malloc(sizeof(char) * 5); // NULL + \0
-								strcpy(q->cache[i][j].first, "NULL");
-								q->cache[i][j].second = 5;
+								r->cache[i][j].first = (char*) malloc(sizeof(char) * 5); // NULL + \0
+								strcpy(r->cache[i][j].first, "NULL");
+								r->cache[i][j].second = 5;
 							}
 						}
 					}
 				}
 			}
+			// TODO: Multiple results.
+			query->results.push_back(r);
 		} else {
-			q->error = get_errno();
-			q->error_msg = get_error();
+			query->error = get_errno();
+			query->error_msg = get_error();
 		}
+	} else {
+		query->error = get_errno();
+		query->error_msg = get_error();
 	}
 }
 
-bool PgSQL_Handler::next_result() {
-	// TODO.
+bool PgSQL_Handler::seek_result(class SQL_Query *query, int result) {
+	if (result == -1) {
+		result = query->last_result + 1;
+	}
+	if (query->last_result == result) {
+		return true;
+	}
+	if ((0 <= result) && (result < query->results.size())) {
+		query->last_result = result;
+		return true;
+	}
 	return false;
-}
-
-void PgSQL_Handler::handle_result(class SQL_Query *query) {
-	// TODO.
 }
 
 bool PgSQL_Handler::fetch_field(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	// TODO
-	return false;
+	SQL_Result *r = query->results[query->last_result];
+	if ((0 <= fieldidx) && (fieldidx < r->num_fields)) {
+		if (dest == 0) {
+			dest = r->field_names[fieldidx].first;
+			len = r->field_names[fieldidx].second;
+			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
+		} else {
+			strncpy(dest, r->field_names[fieldidx].first, len);
+			return true;
+		}
+	}
+	len = 0;
+	return true;
 }
 
 bool PgSQL_Handler::seek_row(class SQL_Query *query, int row) {
-	MySQL_Query *q = dynamic_cast<MySQL_Query*>(query);
-	if (q == 0) {
-		log(LOG_ERROR, "MySQL_Handler::seek_row: Invalid dynamic cast.");
-		return true;
-	}
+	SQL_Result *r = query->results[query->last_result];
 	if (row == -1) {
-		row = q->last_row_idx + 1;
+		row = r->last_row_idx + 1;
 	}
-	if (q->last_row_idx == row) {
+	if (r->last_row_idx == row) {
 		return true;
 	}
-	if ((0 <= row) && (row < q->num_rows)) {
-		q->last_row_idx = row;
+	if ((0 <= row) && (row < r->num_rows)) {
+		r->last_row_idx = row;
 		return true;
 	}
 	return false;
 }
 
 bool PgSQL_Handler::fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	// TODO
-	return false;
+	// TODO.
+	return true;
 }
 
 bool PgSQL_Handler::fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len) {
-	// TODO
-	return false;
+	SQL_Result *r = query->results[query->last_result];
+	for (int i = 0, size = r->field_names.size(); i != size; ++i) {
+		if (strcmp(r->field_names[i].first, fieldname) == 0) {
+			return fetch_num(query, i, dest, len);
+		}
+	}
+	len = 0;
+	return true;
 }

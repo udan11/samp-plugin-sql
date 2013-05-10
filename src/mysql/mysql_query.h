@@ -28,9 +28,5 @@
 #include "../main.h"
 
 class MySQL_Query : public SQL_Query {
-	public:
-		MYSQL_RES *result;
-		MYSQL_ROW last_row;
-		MySQL_Query();
-		~MySQL_Query();
+	
 };

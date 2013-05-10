@@ -24,13 +24,3 @@
  */
 
 #include "pgsql_query.h"
-
-PgSQL_Query::PgSQL_Query() {
-	result = 0;
-}
-
-PgSQL_Query::~PgSQL_Query() {
-	if (result != 0) {
-		PQclear(result);
-	}
-}

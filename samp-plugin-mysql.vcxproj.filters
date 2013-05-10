@@ -231,6 +231,12 @@
     <ClInclude Include="src\sql\sql_utils.h">
       <Filter>sql</Filter>
     </ClInclude>
+    <ClInclude Include="src\sql\sql_result.h">
+      <Filter>sql</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mysql\mysql_result.h">
+      <Filter>mysql</Filter>
+    </ClInclude>
     <ClInclude Include="src\pgsql\pgsql_handler.h">
       <Filter>pgsql</Filter>
     </ClInclude>
@@ -242,6 +248,9 @@
     </ClInclude>
     <ClInclude Include="src\pgsql\connector\libpq-fe.h">
       <Filter>pgsql\connector</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pgsql\pgsql_result.h">
+      <Filter>pgsql</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -270,10 +279,19 @@
     <ClCompile Include="src\sql\sql_utils.cpp">
       <Filter>sql</Filter>
     </ClCompile>
+    <ClCompile Include="src\sql\sql_result.cpp">
+      <Filter>sql</Filter>
+    </ClCompile>
+    <ClCompile Include="src\mysql\mysql_result.cpp">
+      <Filter>mysql</Filter>
+    </ClCompile>
     <ClCompile Include="src\pgsql\pgsql_handler.cpp">
       <Filter>pgsql</Filter>
     </ClCompile>
     <ClCompile Include="src\pgsql\pgsql_query.cpp">
+      <Filter>pgsql</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pgsql\pgsql_result.cpp">
       <Filter>pgsql</Filter>
     </ClCompile>
   </ItemGroup>
@@ -300,10 +318,10 @@
       <UniqueIdentifier>{0a84604b-2bd4-49ce-b298-37c03b9ac22b}</UniqueIdentifier>
     </Filter>
     <Filter Include="pgsql">
-      <UniqueIdentifier>{046f4e2e-6246-41d0-a037-55b36c65fe23}</UniqueIdentifier>
+      <UniqueIdentifier>{4c9d3761-1701-4248-a7cc-6789bcabc48b}</UniqueIdentifier>
     </Filter>
     <Filter Include="pgsql\connector">
-      <UniqueIdentifier>{320373d9-11a9-4938-ba0d-c4ccb537595c}</UniqueIdentifier>
+      <UniqueIdentifier>{078fcd33-4708-46fb-a59e-459241596783}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
