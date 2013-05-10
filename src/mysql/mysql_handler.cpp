@@ -28,8 +28,8 @@
 MySQL_Handler::MySQL_Handler() {
 	handler_type = SQL_HANDLER_MYSQL;
 	conn = mysql_init(0);
-	int arg = true;
-	mysql_options(conn, MYSQL_OPT_RECONNECT, &arg);
+	bool reconnect = true;
+	mysql_options(conn, MYSQL_OPT_RECONNECT, &reconnect);
 }
 
 MySQL_Handler::~MySQL_Handler() {
@@ -37,7 +37,7 @@ MySQL_Handler::~MySQL_Handler() {
 }
 
 bool MySQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
-	return mysql_real_connect(conn, host, user, pass, db, port, 0, 0) ? true : false;
+	return mysql_real_connect(conn, host, user, pass, db, port, 0, CLIENT_MULTI_STATEMENTS) ? true : false;
 }
 
 void MySQL_Handler::disconnect() {
@@ -79,19 +79,19 @@ void MySQL_Handler::execute_query(class SQL_Query *query) {
 		return;
 	}
 	int ping = this->ping();
-	q->status = QUERY_STATUS_EXECUTED;
 	if (!ping) {
+		q->status = QUERY_STATUS_EXECUTED;
 		if (!mysql_query(conn, q->query)) {
 			q->error = 0;
 			q->result = mysql_store_result(conn);
 			q->last_row_idx = 0;
-			q->insert_id = (int) mysql_insert_id(conn);
-			q->affected_rows = (int) mysql_affected_rows(conn);
+			q->insert_id = mysql_insert_id(conn);
+			q->affected_rows = mysql_affected_rows(conn);
 			q->num_rows = 0;
 			q->num_fields = 0;
 			if (q->result != 0) {
-				q->num_rows = (int) mysql_num_rows(q->result);
-				q->num_fields = (int) mysql_num_fields(q->result);
+				q->num_rows = mysql_num_rows(q->result);
+				q->num_fields = mysql_num_fields(q->result);
 				q->field_names.resize(q->num_fields);
 				MYSQL_FIELD *field;
 				for (int i = 0; field = mysql_fetch_field(q->result); ++i) {
@@ -130,6 +130,15 @@ void MySQL_Handler::execute_query(class SQL_Query *query) {
 	} else {
 		q->error = ping;
 	}
+}
+
+bool MySQL_Handler::next_result() {
+	// TODO.
+	return false;
+}
+
+void MySQL_Handler::handle_result(class SQL_Query *query) {
+	// TODO.
 }
 
 bool MySQL_Handler::fetch_field(class SQL_Query *query, int fieldidx, char *&dest, int &len) {

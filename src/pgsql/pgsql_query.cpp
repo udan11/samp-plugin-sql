@@ -25,6 +25,12 @@
 
 #include "pgsql_query.h"
 
+PgSQL_Query::PgSQL_Query() {
+	result = 0;
+}
+
 PgSQL_Query::~PgSQL_Query() {
-	// TODO
+	if (result != 0) {
+		PQclear(result);
+	}
 }

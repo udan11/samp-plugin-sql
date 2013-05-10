@@ -30,7 +30,7 @@ PgSQL_Handler::PgSQL_Handler() {
 }
 
 PgSQL_Handler::~PgSQL_Handler() {
-	// TODO
+	disconnect();
 }
 
 bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 5432) {
@@ -51,12 +51,11 @@ int PgSQL_Handler::get_errno() {
 }
 
 const char *PgSQL_Handler::get_error() {
-	// TODO
-	return 0;
+	return PQerrorMessage(conn);
 }
 
 int PgSQL_Handler::ping() {
-	// TODO
+	// TODO: return PQping(conn);
 	return 0;
 }
 
@@ -76,12 +75,74 @@ bool PgSQL_Handler::set_charset(char *charset) {
 }
 
 int PgSQL_Handler::escape_string(const char *src, char *&dest) {
-	// TODO
-	return 0;
+	return PQescapeStringConn(conn, dest, src, strlen(src), 0);
 }
 
 void PgSQL_Handler::execute_query(class SQL_Query *query) {
-	// TODO
+	PgSQL_Query *q = dynamic_cast<PgSQL_Query*>(query);
+	if (q == 0) {
+		log(LOG_ERROR, "PgSQL_Handler::execute_query: Invalid dynamic cast.");
+		return;
+	}
+	int status = PQstatus(conn);
+	if (status == CONNECTION_OK) {
+		q->status = QUERY_STATUS_EXECUTED;
+		q->result = PQexec(conn, query->query);
+		if (PQresultStatus(q->result) == PGRES_COMMAND_OK) {
+			q->error = 0;
+			q->last_row_idx = 0;
+			q->insert_id = PQoidValue(q->result);
+			q->affected_rows = 0;
+			if (strlen(PQcmdTuples(q->result))) {
+				q->affected_rows = atoi(PQcmdTuples(q->result));
+			}
+			q->num_rows = 0;
+			q->num_fields = 0;
+			if (PQresultStatus(q->result) == PGRES_TUPLES_OK) {
+				q->num_rows = PQntuples(q->result);
+				q->num_fields = PQnfields(q->result);
+				q->field_names.resize(q->num_fields);
+				MYSQL_FIELD *field;
+				for (int i = 0; i != q->num_fields; ++i) {
+					int len = strlen(PQfname(q->result, i)) + 1;
+					q->field_names[i].first = (char*) malloc(sizeof(char) * len);
+					strcpy(q->field_names[i].first, PQfname(q->result, i));
+					q->field_names[i].second = len;
+				}
+				if (q->flags & QUERY_CACHED) {
+					q->cache.resize(q->num_rows);
+					for (int i = 0; i != q->num_rows; ++i) {
+						q->cache[i].resize(q->num_fields);
+						for (int j = 0; j != q->num_fields; ++j) {
+							char *cell = PQgetvalue(q->result, i, j);
+							int len = strlen(cell);
+							if (len) {
+								q->cache[i][j].first = (char*) malloc(sizeof(char) * (len + 1));
+								strcpy(q->cache[i][j].first, cell);
+								q->cache[i][j].second = len + 1;
+							} else {
+								q->cache[i][j].first = (char*) malloc(sizeof(char) * 5); // NULL + \0
+								strcpy(q->cache[i][j].first, "NULL");
+								q->cache[i][j].second = 5;
+							}
+						}
+					}
+				}
+			}
+		} else {
+			q->error = get_errno();
+			q->error_msg = get_error();
+		}
+	}
+}
+
+bool PgSQL_Handler::next_result() {
+	// TODO.
+	return false;
+}
+
+void PgSQL_Handler::handle_result(class SQL_Query *query) {
+	// TODO.
 }
 
 bool PgSQL_Handler::fetch_field(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
@@ -90,7 +151,21 @@ bool PgSQL_Handler::fetch_field(class SQL_Query *query, int fieldidx, char *&des
 }
 
 bool PgSQL_Handler::seek_row(class SQL_Query *query, int row) {
-	// TODO
+	MySQL_Query *q = dynamic_cast<MySQL_Query*>(query);
+	if (q == 0) {
+		log(LOG_ERROR, "MySQL_Handler::seek_row: Invalid dynamic cast.");
+		return true;
+	}
+	if (row == -1) {
+		row = q->last_row_idx + 1;
+	}
+	if (q->last_row_idx == row) {
+		return true;
+	}
+	if ((0 <= row) && (row < q->num_rows)) {
+		q->last_row_idx = row;
+		return true;
+	}
 	return false;
 }
 
