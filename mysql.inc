@@ -260,6 +260,13 @@ native sql_store_result(Result:result);
 native sql_free_result(Result:result);
 
 /**
+ * <summary>Gets the count of affected rows.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <returns>The count of affected rows.</returns>
+ */
+native sql_affected_rows(Result:result);
+
+/**
  * <summary>Gets the ID of the last insert query.</summary>
  * <param name="result">The ID of the result.</param>
  * <returns>The ID of the latest inserted row.</returns>
