@@ -46,8 +46,8 @@ void log(int level, char *format, ...) {
 	}
 	va_list args;
 	va_start(args, format);
-	int len = vsnprintf(0, 0, format, args);
-	char *msg = (char*) malloc(len + 1);
+	int len = vsnprintf(0, 0, format, args) + 1;
+	char *msg = (char*) malloc(len);
 	if (msg != 0) {
 		time_t rawtime;
 		struct tm *timeinfo;
@@ -55,7 +55,7 @@ void log(int level, char *format, ...) {
 		timeinfo = localtime(&rawtime);
 		char timestamp[16];
 		strftime(timestamp, sizeof(timestamp), "%X", timeinfo);
-		vsprintf(msg, format, args);
+		vsnprintf(msg, len, format, args);
 		if (level >= log_level_file) {
 			FILE *logFile = fopen(LOG_FILE, "a");
 			if (logFile != 0) {

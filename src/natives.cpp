@@ -483,9 +483,10 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 		Mutex::getInstance()->unlock();
 		return 0;
 	}
-	int dest_len = params[5], len;
+	int dest_len = params[4], len;
 	char *tmp = 0;
 	bool isCopy = handlers[query->handler]->fetch_field(query, params[2], tmp, len);
+	log(LOG_DEBUG, "Natives::sql_field_name: dest_len = %d, len = %d, tmp = %s", dest_len, len, tmp);
 	if (len != 0) {
 		if (dest_len < 2) {
 			amx_SetString_(amx, params[3], tmp, len);

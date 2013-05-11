@@ -35,8 +35,10 @@ PgSQL_Handler::~PgSQL_Handler() {
 }
 
 bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
-	int len = snprintf(0, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port);
-	char *conninfo = (char*) malloc(len + 1);
+	int len = snprintf(0, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port) + 1;
+	char *conninfo = (char*) malloc(len);
+	snprintf(conninfo, len, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port);
+	log(LOG_DEBUG, "PgSQL_Handler::connect: %s", conninfo);
 	conn = PQconnectdb(conninfo);
 	free(conninfo);
 	return PQstatus(conn) == CONNECTION_OK;
@@ -48,7 +50,7 @@ void PgSQL_Handler::disconnect() {
 
 int PgSQL_Handler::get_errno() {
 	// TODO
-	return 0;
+	return 1;
 }
 
 const char *PgSQL_Handler::get_error() {
@@ -89,11 +91,15 @@ void PgSQL_Handler::execute_query(class SQL_Query *query) {
 	if (PQstatus(conn) == CONNECTION_OK) {
 		PgSQL_Result *r = new PgSQL_Result();
 		r->result = PQexec(conn, query->query);
-		if (PQresultStatus(r->result) == PGRES_COMMAND_OK) {
-			q->error = 0;
-			r->insert_id = PQoidValue(r->result);
-			// TODO: Affected rows.
-			if (PQresultStatus(r->result) == PGRES_TUPLES_OK) {
+		switch (PQresultStatus(r->result)) {
+			case PGRES_EMPTY_QUERY: 
+				break;
+			case PGRES_NONFATAL_ERROR:
+			case PGRES_FATAL_ERROR:
+				q->error = atoi(PQresStatus(PQresultStatus(r->result)));
+				q->error_msg = PQresultErrorMessage(r->result);
+				break;
+			case PGRES_TUPLES_OK:
 				r->num_rows = PQntuples(r->result);
 				r->num_fields = PQnfields(r->result);
 				r->field_names.resize(r->num_fields);
@@ -122,13 +128,12 @@ void PgSQL_Handler::execute_query(class SQL_Query *query) {
 						}
 					}
 				}
-			}
-			// TODO: Multiple results.
-			query->results.push_back(r);
-		} else {
-			query->error = get_errno();
-			query->error_msg = get_error();
+			case PGRES_COMMAND_OK:
+				r->insert_id = PQoidValue(r->result);
+				r->affected_rows = atoi(PQcmdTuples(r->result));
+				break;
 		}
+		query->results.push_back(r);
 	} else {
 		query->error = get_errno();
 		query->error_msg = get_error();
@@ -181,7 +186,44 @@ bool PgSQL_Handler::seek_row(class SQL_Query *query, int row) {
 }
 
 bool PgSQL_Handler::fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	// TODO.
+	PgSQL_Result *r = dynamic_cast<PgSQL_Result*>(query->results[query->last_result]);
+	if (r == 0) {
+		log(LOG_ERROR, "MySQL_Handler::fetch_field: Invalid dynamic cast.");
+		return true;
+	}
+	if ((r->num_rows != 0) && (0 <= fieldidx) && (fieldidx < r->num_fields)) {
+		if (query->flags & QUERY_CACHED) {
+			if (dest == 0) {
+				len = r->cache[r->last_row_idx][fieldidx].second;
+				dest = r->cache[r->last_row_idx][fieldidx].first;
+				return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
+			} else {
+				memcpy(dest, r->cache[r->last_row_idx][fieldidx].first, len);
+				return true;
+			}
+		} else {
+			int _len = strlen(PQgetvalue(r->result, r->last_row_idx, fieldidx));
+			if (_len) {
+				if (dest == 0) {
+					len = _len + 1;
+					dest = (char*) malloc(sizeof(char) * len);
+					memcpy(dest, PQgetvalue(r->result, r->last_row_idx, fieldidx), len);
+				} else {
+					memcpy(dest, PQgetvalue(r->result, r->last_row_idx, fieldidx), len);
+				}
+			} else {
+				if (dest == 0) {
+					len = 5; // NULL + \0
+					dest = (char*) malloc(sizeof(char) * 5);
+					strcpy(dest, "NULL");
+				} else {
+					strncpy(dest, "NULL", len);
+				}
+			}
+			return true;
+		}
+	}
+	len = 0;
 	return true;
 }
 
