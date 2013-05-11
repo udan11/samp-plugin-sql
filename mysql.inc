@@ -151,6 +151,8 @@
 #define sql_fetch_assoc_int				sql_get_field_assoc_int
 #define sql_fetch_num_float				sql_get_field_int_float
 #define sql_fetch_assoc_float			sql_get_field_assoc_float
+#define mysql_connect(%0)				sql_connect(SQL_HANDLER_MYSQL,%0)
+#define pgsql_connect(%0)				sql_connect(SQL_HANDLER_POSTGRESQL,%0)
 
 /**
  * <summary>Called when a SQL error occurs during the execution of a query.</summary>
