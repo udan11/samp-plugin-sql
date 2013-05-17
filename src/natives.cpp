@@ -29,11 +29,11 @@ cell AMX_NATIVE_CALL Natives::sql_debug(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	log_level_file = params[1];
 	log_level_console = params[2];
 	log(LOG_WARNING, "Natives::sql_debug: Switching the log levels to (%d, %d)...", log_level_file, log_level_console);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return 1;
 }
 
@@ -41,18 +41,22 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	if (params[0] < 6 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	SQL_Handler *handler;
 	switch (params[1]) {
+#ifdef SQL_HANDLER_MYSQL
 		case SQL_HANDLER_MYSQL:
 			handler = new MySQL_Handler();
 			break;
+#endif
+#ifdef SQL_HANDLER_PGSQL
 		case SQL_HANDLER_PGSQL:
 			handler = new PgSQL_Handler();
 			break;
+#endif
 		default:
 			log(LOG_INFO, "Natives::sql_connect: Unknown SQL type (%d)!", params[1]);
-			Mutex::getInstance()->unlock();
+			amxMutex->unlock();
 			return 0;
 	}
 	int id = last_handler++;
@@ -67,12 +71,16 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	int port = params[6];
 	if (port == 0) {
 		switch (params[1]) {
+#ifdef SQL_HANDLER_MYSQL
 			case SQL_HANDLER_MYSQL:
-				port = 3306;
+				port = MYSQL_DEFAULT_PORT;
 				break;
+#endif
+#ifdef SQL_HANDLER_PGSQL
 			case SQL_HANDLER_PGSQL:
-				port = 5432;
+				port = PGSQL_DEFAULT_PORT;
 				break;
+#endif
 		}
 	}
 	log(LOG_INFO, "Natives::sql_connect: Connecting to %s:***@%s:%d/%s...", user, host, port, db);
@@ -84,12 +92,12 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	if (connected) {
 		log(LOG_INFO, "Natives::sql_connect: Connection was succesful!");
 		handlers[id] = handler;
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return id;
 	}
 	log(LOG_INFO, "Natives::sql_connect: Connection failed! (error = %d, %s)", handler->get_errno(), handler->get_error());
 	delete handler;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return 0;
 }
 
@@ -97,16 +105,16 @@ cell AMX_NATIVE_CALL Natives::sql_disconnect(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	delete handlers[handler_id];
 	handlers.erase(handler_id);
 	log(LOG_INFO, "Natives::sql_disconnect: Handler %d was destroyed!", handler_id);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return 1;
 }
 
@@ -114,10 +122,10 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *charset = 0;
@@ -125,7 +133,7 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	bool ret = handlers[handler_id]->set_charset(charset);
 	log(LOG_INFO, "Natives::sql_set_charset: Charset %s was set (%d)!", charset, ret);
 	free(charset);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return ret;
 }
 
@@ -133,10 +141,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *tmp = (char*) handlers[handler_id]->get_charset();
@@ -154,15 +162,15 @@ cell AMX_NATIVE_CALL Natives::sql_ping(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return -1;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return -1;
 	}
 	int ping = handlers[handler_id]->ping();
 	log(LOG_DEBUG, "Natives::sql_ping: Pinging handler %d, recieved result %d.", handler_id, ping);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return ping;
 }
 
@@ -170,10 +178,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *tmp = (char*) handlers[handler_id]->get_stat();
@@ -191,10 +199,10 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return -1;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return -1;
 	}
 	char *src = 0;
@@ -210,7 +218,7 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 		}
 		free(dest);
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return len;
 }
 
@@ -218,28 +226,32 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	if (params[0] < 5 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	SQL_Query *query;
 	switch (handlers[handler_id]->handler_type) {
+#ifdef SQL_HANDLER_MYSQL
 		case SQL_HANDLER_MYSQL:
 			query = new MySQL_Query();
 			break;
+#endif
+#ifdef SQL_HANDLER_PGSQL
 		case SQL_HANDLER_PGSQL:
 			query = new PgSQL_Query();
 			break;
+#endif SQL_HANDLER_PGSQL
 		default:
-			Mutex::getInstance()->unlock();
+			amxMutex->unlock();
 			return 0;
 	}
 	int id = last_query++;
 	query->amx = amx;
 	query->id = id;
-	query->handler = params[1];
+	query->handler = handler_id;
 	amx_GetString_(amx, params[2], query->query);
 	query->flags = params[3];
 	query->status = 0;
@@ -297,10 +309,10 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			log(LOG_DEBUG, "Natives::sql_query: Executing query callback (query->error = %d)...", query->error);
 			query->execute_callback();
 		}
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return id;
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return id;
 }
 
@@ -308,17 +320,17 @@ cell AMX_NATIVE_CALL Natives::sql_free_result(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	log(LOG_DEBUG, "Natives::sql_query: Freeing query %d...", query->id);
 	delete query;
 	queries.erase(query_id);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return 1;
 }
 
@@ -326,17 +338,17 @@ cell AMX_NATIVE_CALL Natives::sql_store_result(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	log(LOG_DEBUG, "Natives::sql_query: Storing query %d...", query->id);
 	query->flags &= ~QUERY_THREADED;
 	query->status = QUERY_STATUS_EXECUTED;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return 1;
 }
 
@@ -344,15 +356,15 @@ cell AMX_NATIVE_CALL Natives::sql_insert_id(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	SQL_Query *query = queries[query_id];
 	int insert_id = query->results[query->last_result]->insert_id;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return insert_id;
 }
 
@@ -360,15 +372,15 @@ cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	SQL_Query *query = queries[query_id];
 	int affected_rows = query->results[query->last_result]->affected_rows;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return affected_rows;
 }
 
@@ -376,14 +388,14 @@ cell AMX_NATIVE_CALL Natives::sql_error(AMX *amx, cell *params) {
 	if (params[0] < 1 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int error = queries[query_id]->error;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return error;
 }
 
@@ -391,15 +403,15 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 	if (params[0] < 3 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int dest_len = params[3], len = strlen(query->error_msg);
@@ -412,7 +424,7 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 			amx_SetString_(amx, params[2], error, dest_len);
 		}
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return len;
 }
 
@@ -420,15 +432,15 @@ cell AMX_NATIVE_CALL Natives::sql_num_rows(AMX *amx, cell *params) {
 	if (params[0] < 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	SQL_Query *query = queries[query_id];
 	int num_rows = query->results[query->last_result]->num_rows;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return num_rows;
 }
 
@@ -436,15 +448,15 @@ cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
 	if (params[0] < 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	SQL_Query *query = queries[query_id];
 	int num_fields = query->results[query->last_result]->num_fields;
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return num_fields;
 }
 
@@ -452,19 +464,19 @@ cell AMX_NATIVE_CALL Natives::sql_next_result(AMX *amx, cell* params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int ret = handlers[query->handler]->seek_result(query, params[2]);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return ret;
 }
 
@@ -472,15 +484,15 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	if (params[0] < 4 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int dest_len = params[4], len;
@@ -499,7 +511,7 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_field_name: Can't find field %d or result is empty.", params[2]);
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return len;
 }
 
@@ -507,19 +519,19 @@ cell AMX_NATIVE_CALL Natives::sql_next_row(AMX *amx, cell* params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int ret = handlers[query->handler]->seek_row(query, params[2]);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return ret;
 }
 
@@ -527,15 +539,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	if (params[0] < 4 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int fieldidx = params[2], dest_len = params[4], len;
@@ -553,7 +565,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field: Can't find field %d or result is empty.", fieldidx);
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return len;
 }
 
@@ -561,15 +573,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	if (params[0] < 4 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
@@ -589,7 +601,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return len;
 }
 
@@ -597,15 +609,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_int(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int fieldidx = params[2], len, val = 0;
@@ -619,7 +631,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_int(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", params[2]);
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return val;
 }
 
@@ -627,15 +639,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
@@ -651,7 +663,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return val;
 }
 
@@ -659,15 +671,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_float(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	int fieldidx = params[2], len;
@@ -682,7 +694,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_float(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", params[2]);
 	}
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return amx_ftoc(val);
 }
 
@@ -690,15 +702,15 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	Mutex::getInstance()->lock();
+	amxMutex->lock();
 	int query_id = params[1];
 	if (!is_valid_query(query_id)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
-	class SQL_Query *query = queries[query_id];
+	SQL_Query *query = queries[query_id];
 	if (!is_valid_handler(query->handler)) {
-		Mutex::getInstance()->unlock();
+		amxMutex->unlock();
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
@@ -715,6 +727,6 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	free(fieldname);
-	Mutex::getInstance()->unlock();
+	amxMutex->unlock();
 	return amx_ftoc(val);
 }

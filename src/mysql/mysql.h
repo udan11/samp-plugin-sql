@@ -22,35 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+ 
 #pragma once
 
-#include <vector>
+#include "../sql/sql_handler.h"
 
-#include "../sdk/amx/amx.h"
+#ifdef SQL_HANDLER_MYSQL	
 
-#include "sql_result.h"
+	#define MYSQL_DEFAULT_PORT			3306
 
-#define QUERY_ERROR_CALLBACK			"OnSQLError"
+	#include <Windows.h>
 
-#define QUERY_THREADED					1
-#define QUERY_CACHED					2
+	#include "../sql/sql_query.h"
+	#include "../sql/sql_result.h"
 
-#define QUERY_STATUS_NONE				0
-#define QUERY_STATUS_EXECUTED			1
-#define QUERY_STATUS_PROCESSED			2
+	#include "connector/mysql.h"
 
-class SQL_Query {
-	public:
-		AMX *amx;
-		int id, handler, flags, status, error, last_result;
-		char *query, *callback, *format;
-		const char *error_msg;
-		SQL_Query();
-		virtual ~SQL_Query();
-		std::vector<std::pair<cell*, int> > params_a;
-		std::vector<cell> params_c;
-		std::vector<char*> params_s;
-		std::vector<SQL_Result*> results;
-		int execute_callback();
-};
+	#include "mysql_handler.h"
+	#include "mysql_query.h"
+	#include "mysql_result.h"
+	
+#endif

@@ -4,11 +4,11 @@ GCC = gcc
 COMPILE_FLAGS = -c -m32 -O3 -fPIC -w -DLINUX -Wall -I src/SDK/amx/
 
 ifdef STATIC
-OUTFILE = "bin/mysql_static.so"
-COMPILE_FLAGS_2 = ./lib/mysql/libmysqlclient.a
+OUTFILE = "bin/sql_static.so"
+COMPILE_FLAGS_2 = ./lib/mysql/libmysqlclient.a ./lib/mysql/libpq.a
 else
-OUTFILE = "bin/mysql.so"
-COMPILE_FLAGS_2 = -L/usr/lib/mysql -lmysqlclient_r
+OUTFILE = "bin/sql.so"
+COMPILE_FLAGS_2 = -L/usr/lib/mysql -lmysqlclient_r -lpq
 endif
 
 all:

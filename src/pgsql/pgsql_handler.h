@@ -22,10 +22,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+ 
+#include "pgsql.h"
+ 
+#ifdef SQL_HANDLER_PGSQL
 
 #pragma once
-
-#include "../main.h"
 
 class PgSQL_Handler : public SQL_Handler {
 	public:
@@ -40,12 +42,14 @@ class PgSQL_Handler : public SQL_Handler {
 		const char *get_charset();
 		bool set_charset(char *charset);
 		int escape_string(const char *src, char *&dest);
-		void execute_query(class SQL_Query *query);
-		bool seek_result(class SQL_Query *query, int result);
-		bool fetch_field(class SQL_Query *query, int fieldix, char *&dest, int &len);
-		bool seek_row(class SQL_Query *query, int row);
-		bool fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len);
-		bool fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len);
+		void execute_query(SQL_Query *query);
+		bool seek_result(SQL_Query *query, int result);
+		bool fetch_field(SQL_Query *query, int fieldix, char *&dest, int &len);
+		bool seek_row(SQL_Query *query, int row);
+		bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len);
+		bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len);
 	private:
 		PGconn *conn;
 };
+
+#endif

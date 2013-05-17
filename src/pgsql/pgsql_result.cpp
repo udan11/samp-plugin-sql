@@ -23,7 +23,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pgsql_result.h"
+#include "pgsql.h"
+ 
+#ifdef SQL_HANDLER_PGSQL
 
 PgSQL_Result::PgSQL_Result() {
 	result = 0;
@@ -34,3 +36,5 @@ PgSQL_Result::~PgSQL_Result() {
 		PQclear(result);
 	}
 }
+
+#endif

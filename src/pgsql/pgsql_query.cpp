@@ -23,4 +23,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "pgsql_query.h"
+#include "pgsql.h"
+ 
+#ifdef SQL_HANDLER_PGSQL
+
+#endif

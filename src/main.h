@@ -25,16 +25,14 @@
 
 #pragma once
 
-#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <ctime>
 
 #include <map>
 #include <vector>
 
-#if ((defined(WIN32)) || (defined(_WIN32)) || (defined(_WIN64)))
-	#include "windows.h"
+#ifdef _WIN32
+	#include <Windows.h>
 	#define SLEEP(x) Sleep(x);
 #else
 	#include "pthread.h"
@@ -42,10 +40,6 @@
 	#define SLEEP(x) usleep(x * 1000);
 	typedef unsigned long DWORD;
 	typedef unsigned int UINT;
-#endif
-
-#if _MSC_VER
-	#define snprintf _snprintf
 #endif
 
 #include "sdk/amx/amx.h"
@@ -57,21 +51,21 @@
 #include "sql/sql_result.h"
 #include "sql/sql_utils.h"
 
-#include "mysql/connector/mysql.h"
-#include "mysql/mysql_handler.h"
-#include "mysql/mysql_query.h"
-#include "mysql/mysql_result.h"
+#ifdef SQL_HANDLER_MYSQL
+	#include "mysql/mysql.h"
+#endif
 
-#include "pgsql/connector/libpq-fe.h"
-#include "pgsql/pgsql_handler.h"
-#include "pgsql/pgsql_query.h"
-#include "pgsql/pgsql_result.h"
+#ifdef SQL_HANDLER_PGSQL
+	#include "pgsql/pgsql.h"
+#endif
 
 #include "log.h"
 #include "mutex.h"
 #include "natives.h"
 
 #define PLUGIN_VERSION					"v2.0"
+
+extern Mutex *amxMutex;
 
 extern int last_handler, last_query;
 extern std::map<int, class SQL_Handler*> handlers;

@@ -25,14 +25,10 @@
 
 #include "mutex.h"
 
-Mutex *Mutex::singleton = 0;
-bool Mutex::isEnabled = false;
-
 Mutex::Mutex() {
-#ifdef WIN32
-	handle = CreateMutex(0, FALSE, "samp_plugin_mysql");
+#ifdef _WIN32
+	InitializeCriticalSection(&handle);
 #else
-	//handle = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutexattr_t attr;
 	pthread_mutexattr_init(&attr);
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
@@ -43,25 +39,17 @@ Mutex::Mutex() {
 
 Mutex::~Mutex() {
 	isEnabled = false;
-#ifdef WIN32
-	CloseHandle(handle);
+#ifdef _WIN32
+	DeleteCriticalSection(&handle);
 #else
 	pthread_mutex_destroy(&handle);
 #endif
-	singleton = 0;
-}
-
-Mutex *Mutex::getInstance() {
-	if (singleton == 0) {
-		singleton = new Mutex();
-	}
-	return singleton;
 }
 
 void Mutex::lock() {
 	if (isEnabled) {
-#ifdef WIN32
-		WaitForSingleObject(handle, INFINITE);
+#ifdef _WIN32
+		EnterCriticalSection(&handle);
 #else
 		pthread_mutex_lock(&handle);
 #endif
@@ -69,11 +57,9 @@ void Mutex::lock() {
 }
 
 void Mutex::unlock() {
-	if (isEnabled) {
-#ifdef WIN32
-		ReleaseMutex(handle);
+#ifdef _WIN32
+	LeaveCriticalSection(&handle);
 #else
-		pthread_mutex_unlock(&handle);
+	pthread_mutex_unlock(&handle);
 #endif
-	}
 }

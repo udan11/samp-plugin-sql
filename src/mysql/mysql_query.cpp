@@ -23,4 +23,10 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mysql_query.h"
+#include "mysql.h"
+ 
+#ifdef SQL_HANDLER_MYSQL
+
+//
+
+#endif

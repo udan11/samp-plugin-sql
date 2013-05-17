@@ -23,7 +23,9 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mysql_result.h"
+#include "mysql.h"
+ 
+#ifdef SQL_HANDLER_MYSQL
 
 MySQL_Result::MySQL_Result() {
 	result = 0;
@@ -36,3 +38,5 @@ MySQL_Result::~MySQL_Result() {
 		mysql_free_result(result);
 	}
 }
+
+#endif

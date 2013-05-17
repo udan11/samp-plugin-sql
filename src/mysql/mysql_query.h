@@ -23,10 +23,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "mysql.h"
+ 
+#ifdef SQL_HANDLER_MYSQL
 
-#include "../main.h"
+#pragma once
 
 class MySQL_Query : public SQL_Query {
 	
 };
+
+#endif

@@ -25,7 +25,13 @@
 
 #pragma once
 
-#include "main.h"
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include "mutex.h"
 
 #define LOG_FILE						"sql_log.txt"
 
@@ -37,7 +43,9 @@
 #define LOG_NONE						5
 
 typedef void (*logprintf_t) (char *format, ...);
+
 extern logprintf_t logprintf;
+extern Mutex log_mutex;
 extern int log_level_file, log_level_console;
 
 extern void log(int level, char *format, ...);

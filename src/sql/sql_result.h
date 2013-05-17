@@ -27,8 +27,6 @@
 
 #include <vector>
 
-#include "../sdk/amx/amx.h"
-
 class SQL_Result {
 	public:
 		SQL_Result();

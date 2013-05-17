@@ -23,9 +23,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "mysql.h"
+ 
+#ifdef SQL_HANDLER_MYSQL
 
-#include "../main.h"
+#pragma once
 
 class MySQL_Result : public SQL_Result {
 	public:
@@ -35,3 +37,5 @@ class MySQL_Result : public SQL_Result {
 		MySQL_Result();
 		virtual ~MySQL_Result();
 };
+
+#endif

@@ -25,10 +25,12 @@
 
 #pragma once
 
-#include "../sdk/amx/amx.h"
-
 #define SQL_HANDLER_MYSQL				1
 #define SQL_HANDLER_PGSQL				2
+
+#include "../sdk/amx/amx.h"
+
+#include "sql_query.h"
 
 class SQL_Handler {
 	public:
@@ -57,15 +59,15 @@ class SQL_Handler {
 		// Escapes a string and returns the new length.
 		virtual int escape_string(const char *src, char *&dest) = 0;
 		// Executes a query.
-		virtual void execute_query(class SQL_Query *query) = 0;
+		virtual void execute_query(SQL_Query *query) = 0;
 		// Seeks a result.
-		virtual bool seek_result(class SQL_Query *query, int result) = 0;
+		virtual bool seek_result(SQL_Query *query, int result) = 0;
 		// Fetches the name of a field.
-		virtual bool fetch_field(class SQL_Query *query, int fieldix, char *&dest, int &len) = 0;
+		virtual bool fetch_field(SQL_Query *query, int fieldix, char *&dest, int &len) = 0;
 		// Seeks a row in the result.
-		virtual bool seek_row(class SQL_Query *query, int row) = 0;
+		virtual bool seek_row(SQL_Query *query, int row) = 0;
 		// Fetches a cell by it's index.
-		virtual bool fetch_num(class SQL_Query *query, int fieldidx, char *&dest, int &len) = 0;
+		virtual bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) = 0;
 		// Fetches a cell by it's name.
-		virtual bool fetch_assoc(class SQL_Query *query, char *fieldname, char *&dest, int &len) = 0;
+		virtual bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) = 0;
 };
