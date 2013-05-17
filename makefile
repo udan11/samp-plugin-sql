@@ -5,7 +5,7 @@ COMPILE_FLAGS = -c -m32 -O3 -fPIC -w -DLINUX -Wall -I src/SDK/amx/
 
 ifdef STATIC
 OUTFILE = "bin/sql_static.so"
-COMPILE_FLAGS_2 = ./lib/mysql/libmysqlclient.a ./lib/mysql/libpq.a
+COMPILE_FLAGS_2 = ./lib/mysql/libmysqlclient.a ./lib/pgsql/libpq.a
 else
 OUTFILE = "bin/sql.so"
 COMPILE_FLAGS_2 = -L/usr/lib/mysql -lmysqlclient_r -lpq

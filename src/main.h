@@ -44,7 +44,7 @@
 
 #include "sdk/amx/amx.h"
 #include "sdk/plugincommon.h"
-#include "sdk/string.h"
+#include "sdk/amxstring.h"
 
 #include "sql/sql_handler.h"
 #include "sql/sql_query.h"
