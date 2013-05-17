@@ -25,6 +25,8 @@
 
 #include "main.h"
 
+extern void *pAMXFunctions;
+
 Mutex *amxMutex;
 
 int last_handler = 1, last_query = 1;
@@ -73,6 +75,7 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 #ifdef SQL_HANDLER_MYSQL
 	if (mysql_library_init(0, 0, 0)) {
 		logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
