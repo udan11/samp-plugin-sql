@@ -252,10 +252,16 @@
     <ClInclude Include="src\sdk\amx\sclinux.h">
       <Filter>sdk\amx</Filter>
     </ClInclude>
-    <ClInclude Include="src\sdk\amxstring.h">
+    <ClInclude Include="src\sdk\amxtable.h">
       <Filter>sdk</Filter>
     </ClInclude>
     <ClInclude Include="src\sdk\plugincommon.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\amxredirect.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\amxstring.h">
       <Filter>sdk</Filter>
     </ClInclude>
   </ItemGroup>
@@ -294,10 +300,13 @@
     <ClCompile Include="src\pgsql\pgsql_result.cpp">
       <Filter>pgsql</Filter>
     </ClCompile>
-    <ClCompile Include="src\sdk\amxstring.cpp">
+    <ClCompile Include="src\sdk\amxplugin.cpp">
       <Filter>sdk</Filter>
     </ClCompile>
-    <ClCompile Include="src\sdk\amxplugin.cpp">
+    <ClCompile Include="src\sdk\amxredirect.cpp">
+      <Filter>sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sdk\amxstring.cpp">
       <Filter>sdk</Filter>
     </ClCompile>
   </ItemGroup>
