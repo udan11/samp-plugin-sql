@@ -342,4 +342,7 @@
       <UniqueIdentifier>{f5eb5886-8692-4f6a-889e-eda082d981aa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="src\plugin.def" />
+  </ItemGroup>
 </Project>
