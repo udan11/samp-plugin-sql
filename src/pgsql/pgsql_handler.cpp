@@ -50,8 +50,7 @@ void PgSQL_Handler::disconnect() {
 }
 
 int PgSQL_Handler::get_errno() {
-	// TODO
-	return 1;
+	return ping(); // TODO: Implement it properly.
 }
 
 const char *PgSQL_Handler::get_error() {
@@ -59,23 +58,19 @@ const char *PgSQL_Handler::get_error() {
 }
 
 int PgSQL_Handler::ping() {
-	// TODO: return PQping(conn);
-	return 0;
+	return PQstatus(conn);
 }
 
 const char *PgSQL_Handler::get_stat() {
-	// TODO
-	return 0;
+	return 0; // TODO: Find an equivalent.
 }
 
 const char *PgSQL_Handler::get_charset() {
-	// TODO
-	return 0;
+	return pg_encoding_to_char(PQclientEncoding(conn));
 }
 
 bool PgSQL_Handler::set_charset(char *charset) {
-	// TODO
-	return false;
+	return PQsetClientEncoding(conn, charset) == 0;
 }
 
 int PgSQL_Handler::escape_string(const char *src, char *&dest) {
@@ -88,7 +83,7 @@ void PgSQL_Handler::execute_query(SQL_Query *query) {
 		return;
 	}
 	q->status = QUERY_STATUS_EXECUTED;
-	if (PQstatus(conn) == CONNECTION_OK) {
+	if (!ping()) {
 		PgSQL_Result *r = new PgSQL_Result();
 		r->result = PQexec(conn, query->query);
 		switch (PQresultStatus(r->result)) {

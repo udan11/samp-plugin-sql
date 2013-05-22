@@ -1,7 +1,7 @@
 GPP = g++
 GCC = gcc
 
-COMPILE_FLAGS = -c -m32 -O3 -fPIC -w -DLINUX -Wall -I src/SDK/amx/
+COMPILE_FLAGS = -c -m32 -O3 -fPIC -w -DLINUX -Wall -I src/sdk/amx/
 
 ifdef STATIC
 OUTFILE = "bin/sql_static.so"
