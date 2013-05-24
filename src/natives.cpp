@@ -243,7 +243,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 		case SQL_HANDLER_PGSQL:
 			query = new PgSQL_Query();
 			break;
-#endif SQL_HANDLER_PGSQL
+#endif
 		default:
 			amxMutex->unlock();
 			return 0;
@@ -254,7 +254,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	query->handler = handler_id;
 	amx_GetString_(amx, params[2], query->query);
 	query->flags = params[3];
-	query->status = 0;
+	query->status = QUERY_STATUS_NONE;
 	amx_GetString_(amx, params[4], query->callback);
 	amx_GetString_(amx, params[5], query->format);
 	for (int i = 0, len = strlen(query->format), p = 6; i != len; ++i, ++p) {

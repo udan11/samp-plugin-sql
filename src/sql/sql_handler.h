@@ -25,8 +25,8 @@
 
 #pragma once
 
-#define SQL_HANDLER_MYSQL				1
-#define SQL_HANDLER_PGSQL				2
+//#define SQL_HANDLER_MYSQL				1
+//#define SQL_HANDLER_PGSQL				2
 
 #include "../sdk/amx/amx.h"
 

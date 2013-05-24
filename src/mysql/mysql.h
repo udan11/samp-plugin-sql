@@ -31,12 +31,14 @@
 
 	#define MYSQL_DEFAULT_PORT			3306
 
-	#include <Windows.h>
+	#ifdef _WIN32
+		#include <Windows.h>
+	#endif
 
 	#include "../sql/sql_query.h"
 	#include "../sql/sql_result.h"
 
-	#include "connector/mysql.h"
+	#include <mysql/mysql.h>
 
 	#include "mysql_handler.h"
 	#include "mysql_query.h"

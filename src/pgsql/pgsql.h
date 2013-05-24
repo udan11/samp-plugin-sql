@@ -38,7 +38,7 @@
 	#include "../sql/sql_query.h"
 	#include "../sql/sql_result.h"
 
-	#include "connector/libpq-fe.h"
+	#include <libpq/libpq-fe.h>
 
 	#include "pgsql_handler.h"
 	#include "pgsql_query.h"

@@ -25,6 +25,9 @@
 
 #pragma once
 
+#include <cstring>
+#include <cstdlib>
+
 #include <vector>
 
 class SQL_Result {

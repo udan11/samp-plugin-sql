@@ -96,7 +96,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	pthread_t thread;
 	pthread_create(&thread, &attr, &ProcessQueryThread, 0);
 #endif
-	logprintf("  >> MySQL plugin " PLUGIN_VERSION " successfully loaded.");
+	logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
 	return true;
 }
 
