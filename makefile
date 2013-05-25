@@ -31,21 +31,21 @@ LIBRARIES = -lpthread
 # Output filename.
 OUTFILE = bin/sql.so
 
-# 1: Linking MySQL library (if it's being used).
+# 1: Linking MySQL library (if it's necessary).
 ifdef MYSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_MYSQL=1
 	LIBRARIES += ./lib/mysql/libmysql.so
 	OUTFILE := bin/sql_mysql.so
 endif
 
-# 2: Linking PostgreSQL library (if it's used).
+# 2: Linking PostgreSQL library (if it's necessary).
 ifdef PGSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_PGSQL=2
 	LIBRARIES += ./lib/pgsql/libpq.so
 	OUTFILE := bin/sql_pgsql.so
 endif
 
-# It's has both MySQL & PgSQL support.
+# It has both MySQL & PgSQL support.
 ifdef MYSQL
 	ifdef PGSQL
 		OUTFILE := bin/sql.so
