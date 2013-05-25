@@ -64,10 +64,10 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	handler->handler_type = params[1];
 	handler->amx = amx;
 	char *host = 0, *user = 0, *pass = 0, *db = 0;
-	amx_GetString_(amx, params[2], host);
-	amx_GetString_(amx, params[3], user);
-	amx_GetString_(amx, params[4], pass);
-	amx_GetString_(amx, params[5], db);
+	amx_StrParam(amx, params[2], host);
+	amx_StrParam(amx, params[3], user);
+	amx_StrParam(amx, params[4], pass);
+	amx_StrParam(amx, params[5], db);
 	int port = params[6];
 	if (port == 0) {
 		switch (params[1]) {
@@ -85,10 +85,10 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	}
 	log(LOG_INFO, "Natives::sql_connect: Connecting to %s:***@%s:%d/%s...", user, host, port, db);
 	bool connected = handler->connect(host, user, pass, db, port);
-	free(host);
-	free(user);
-	free(pass);
-	free(db);
+	//free(host);
+	//free(user);
+	//free(pass);
+	//free(db);
 	if (connected) {
 		log(LOG_INFO, "Natives::sql_connect: Connection was succesful!");
 		handlers[id] = handler;
@@ -129,10 +129,10 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *charset = 0;
-	amx_GetString_(amx, params[2], charset);
+	amx_StrParam(amx, params[2], charset);
 	bool ret = handlers[handler_id]->set_charset(charset);
 	log(LOG_INFO, "Natives::sql_set_charset: Charset %s was set (%d)!", charset, ret);
-	free(charset);
+	//free(charset);
 	amxMutex->unlock();
 	return ret;
 }
@@ -206,10 +206,10 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 		return -1;
 	}
 	char *src = 0;
-	amx_GetString_(amx, params[2], src);
+	amx_StrParam(amx, params[2], src);
 	char *dest = (char*) malloc(sizeof(char) * strlen(src) * 2); // *2 in case every character is escaped
 	int dest_len = params[4], len = handlers[handler_id]->escape_string(src, dest);
-	free(src);
+	//free(src);
 	if (len != 0) {
 		if (dest_len < 2) {
 			amx_SetString_(amx, params[3], dest, len);
@@ -585,7 +585,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
-	amx_GetString_(amx, params[2], fieldname);
+	amx_StrParam(amx, params[2], fieldname);
 	int dest_len = params[4], len;
 	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
@@ -600,7 +600,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc: Can't find field %s or result is empty.", fieldname);
 	}
-	free(fieldname);
+	//free(fieldname);
 	amxMutex->unlock();
 	return len;
 }
@@ -651,7 +651,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
-	amx_GetString_(amx, params[2], fieldname);
+	amx_StrParam(amx, params[2], fieldname);
 	int len, val = 0;
 	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
@@ -662,7 +662,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
-	free(fieldname);
+	//free(fieldname);
 	amxMutex->unlock();
 	return val;
 }
@@ -714,7 +714,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 		return 0;
 	}
 	char *fieldname = 0, *tmp = 0;
-	amx_GetString_(amx, params[2], fieldname);
+	amx_StrParam(amx, params[2], fieldname);
 	int len;
 	bool isCopy = handlers[query->handler]->fetch_assoc(query, fieldname, tmp, len);
 	float val = 0.0;
@@ -726,7 +726,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 	} else {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
-	free(fieldname);
+	//free(fieldname);
 	amxMutex->unlock();
 	return amx_ftoc(val);
 }
