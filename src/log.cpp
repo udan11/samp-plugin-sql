@@ -64,7 +64,7 @@ void log(int level, char *format, ...) {
 			}
 		}
 		if (level >= log_level_console) {
-			logprintf("[plugin.mysql]%s %s", prefix, msg);
+			logprintf("[plugin.sql]%s %s", prefix, msg);
 		}
 		log_mutex.unlock();
 		free(msg);

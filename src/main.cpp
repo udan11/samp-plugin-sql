@@ -128,7 +128,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 	delete amxMutex;
-	logprintf("[plugin.mysql] Plugin succesfully unloaded!");
+	logprintf("[plugin.sql] Plugin succesfully unloaded!");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
@@ -139,7 +139,11 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
 			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->status = QUERY_STATUS_PROCESSED;
+			int id = query->id;
 			query->execute_callback();
+			if (!is_valid_query(id)) {
+				continue;
+			}
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
 			log(LOG_DEBUG, "ProccessTick(): Erasing query (query->id = %d)...", query->id);
@@ -162,7 +166,11 @@ void *ProcessQueryThread(void *lpParam) {
 			SQL_Query *query = it->second;
 			if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_NONE)) {
 				log(LOG_DEBUG, "ProcessQueryThread(): Executing query (query->id = %d, query->query = %s)...", query->id, query->query);
-				handlers[query->handler]->execute_query(query);
+				if (is_valid_handler(query->handler)) {
+					handlers[query->handler]->execute_query(query);
+				} else {
+					log(LOG_DEBUG, "ProcessQueryThread(): Query's handler is dead (query->id = %d, query->handler = %d query->query = %s", query->id, query->handler, query->query);
+				}
 			}
 		}
 		amxMutex->unlock();

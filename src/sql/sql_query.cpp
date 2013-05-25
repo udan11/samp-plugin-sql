@@ -57,7 +57,7 @@ SQL_Query::~SQL_Query() {
 	}
 	params_s.clear();
 	for (int i = 0, size = results.size(); i != size; ++i) {
-		free(results[i]);
+		delete results[i];
 	}
 	results.clear();
 }

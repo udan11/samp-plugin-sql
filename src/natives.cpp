@@ -229,6 +229,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	amxMutex->lock();
 	int handler_id = params[1];
 	if (!is_valid_handler(handler_id)) {
+		log(LOG_WARNING, "Natives::sql_query: Invalid handler: handler->id = %d.", handler_id);
 		amxMutex->unlock();
 		return 0;
 	}
@@ -245,6 +246,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			break;
 #endif
 		default:
+			log(LOG_WARNING, "Natives::sql_query: Invalid handler type: handler->id = %d, handler->type = %d.", handler_id, handlers[handler_id]->handler_type);
 			amxMutex->unlock();
 			return 0;
 	}
@@ -303,11 +305,14 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	log(LOG_DEBUG, "Natives::sql_query: Scheduling query %d: \"%s\", callback: %s(%s) for execution...", query->id, query->query, query->callback, query->format);
 	queries[query->id] = query;
 	if (!(query->flags & QUERY_THREADED)) {
-		log(LOG_DEBUG, "Natives::sql_query: Executing query->id = %d...", query->id);
+		log(LOG_DEBUG, "Natives::sql_query: Executing query: query->id = %d...", query->id);
 		handlers[query->handler]->execute_query(query);
 		if (strlen(query->callback)) {
-			log(LOG_DEBUG, "Natives::sql_query: Executing query callback (query->error = %d)...", query->error);
+			log(LOG_DEBUG, "Natives::sql_query: Executing query callback: query->error = %d...", query->error);
 			query->execute_callback();
+			if (!is_valid_query(id)) {
+				id = 0;
+			}
 		}
 		amxMutex->unlock();
 		return id;
