@@ -23,15 +23,15 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+
 #include "mysql.h"
  
 #ifdef SQL_HANDLER_MYSQL
 
-#pragma once
-
 class MySQL_Handler : public SQL_Handler {
 	public:
-		MySQL_Handler();
+		MySQL_Handler(int id, AMX *amx);
 		~MySQL_Handler();
 		bool connect(const char *host, const char *user, const char *pass, const char *db, int port);
 		void disconnect();
@@ -49,6 +49,7 @@ class MySQL_Handler : public SQL_Handler {
 		bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len);
 		bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len);
 	private:
+		Mutex *mutex;
 		MYSQL *conn;
 };
 

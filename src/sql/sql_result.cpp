@@ -31,20 +31,15 @@ SQL_Result::SQL_Result() {
 	num_rows = 0;
 	num_fields = 0;
 	last_row_idx = 0;
-	field_names.clear();
-	cache.clear();
 }
 
 SQL_Result::~SQL_Result() {
 	for (int i = 0, size = field_names.size(); i != size; ++i) {
 		free(field_names[i].first);
 	}
-	field_names.clear();
 	for (int i = 0, size = cache.size(); i != size; ++i) {
 		for (int j = 0, size = cache[i].size(); j != size; ++j) {
 			free(cache[i][j].first);
 		}
-		cache[i].clear();
 	}
-	cache.clear();
 }

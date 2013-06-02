@@ -23,12 +23,40 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "sql_utils.h"
+#pragma once
 
-bool is_valid_handler(int id) {
-	return handlers.find(id) != handlers.end();
-}
+//#define SQL_HANDLER_MYSQL				1
+//#define SQL_HANDLER_PGSQL				2
 
-bool is_valid_query(int id) {
-	return queries.find(id) != queries.end();
-}
+#include <boost/lockfree/queue.hpp>
+#include <boost/unordered/unordered_map.hpp>
+
+#ifdef _WIN32
+	#include <Windows.h>
+	#define SLEEP(x) Sleep(x);
+#else
+	#include "pthread.h"
+	#include <unistd.h>
+	#define SLEEP(x) usleep(x * 1000);
+	typedef unsigned long DWORD;
+	typedef unsigned int UINT;
+#endif
+
+typedef boost::unordered_map<int, class SQL_Handler*> handlers_t;
+typedef boost::unordered_map<int, class SQL_Query*> queries_t;
+typedef boost::lockfree::queue<class SQL_Query*> query_qt;
+
+extern int last_handler;
+extern handlers_t handlers;
+
+extern int last_query;
+extern queries_t queries;
+
+extern bool is_valid_handler(int id);
+extern bool is_valid_query(int id);
+
+#ifdef _WIN32
+	extern DWORD WINAPI worker(LPVOID param);
+#else
+	extern void *worker(void *param);
+#endif

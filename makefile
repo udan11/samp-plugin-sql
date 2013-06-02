@@ -45,7 +45,7 @@ ifdef PGSQL
 	OUTFILE := bin/sql_pgsql.so
 endif
 
-# It has both MySQL & PgSQL support.
+# It has both (or neither) MySQL and PgSQL support.
 ifdef MYSQL
 	ifdef PGSQL
 		OUTFILE := bin/sql.so
@@ -58,10 +58,10 @@ endif
 
 # Compiling!
 all:
-	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
-	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/mysql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/pgsql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/*.cpp
 	$(GPP) -fshort-wchar -shared -o $(OUTFILE) *.o $(LIBRARIES) 
 	rm -f *.o

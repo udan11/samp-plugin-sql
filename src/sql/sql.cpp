@@ -23,9 +23,53 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "../log.h"
 
-#include "../main.h"
+#include "sql_handler.h"
+#include "sql_query.h"
 
-extern bool is_valid_handler(int id);
-extern bool is_valid_query(int id);
+#include "../mysql/mysql.h"
+#include "../pgsql/pgsql.h"
+
+#include "sql.h"
+
+int last_handler = 1;
+handlers_t handlers;
+
+int last_query = 1;
+queries_t queries;
+
+bool is_valid_handler(int id) {
+	return handlers.find(id) != handlers.end();
+}
+
+bool is_valid_query(int id) {
+	return queries.find(id) != queries.end();
+}
+
+#ifdef _WIN32
+DWORD WINAPI worker(LPVOID param) {
+#else
+void *worker(void *param) {
+#endif
+	SQL_Handler* handler = (SQL_Handler*) param;
+#if defined SQL_HANDLER_MYSQL
+	if (handler->type == SQL_HANDLER_MYSQL) {
+		mysql_thread_init();
+	}
+#endif
+	while (handler->is_active) {
+		SQL_Query *query = NULL;
+		while (handler->pending.pop(query)) {
+			log(LOG_DEBUG, "worker(handlers[%d]): Executing query (query->id = %d, query->query = %s)...", handler->id, query->id, query->query);
+			handler->execute_query(query);
+		}
+		SLEEP(50);
+	}
+#if defined SQL_HANDLER_MYSQL
+	if (handler->type == SQL_HANDLER_MYSQL) {
+		mysql_thread_end();
+	}
+#endif
+	return 0;
+}

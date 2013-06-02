@@ -33,7 +33,7 @@
 
 class Mutex {
 	public:
-		bool isEnabled;
+		bool is_enabled;
 		void lock();
 		void unlock();
 		Mutex();

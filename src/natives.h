@@ -25,8 +25,6 @@
 
 #pragma once
 
-#include "main.h"
-
 class Natives {
 	public:
 		static cell AMX_NATIVE_CALL sql_debug(AMX *amx, cell *params);

@@ -23,11 +23,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#include "mutex.h"
+
 #include "log.h"
 
 logprintf_t logprintf;
+
+int log_level_file = LOG_ALL;
+int log_level_console = LOG_WARNING;
+
 Mutex log_mutex;
-int log_level_file = LOG_ALL, log_level_console = LOG_WARNING;
 
 void log(int level, char *format, ...) {
 	if ((level < log_level_file) && (level < log_level_console)) {
@@ -45,7 +56,7 @@ void log(int level, char *format, ...) {
 	}
 	va_list args;
 	va_start(args, format);
-	int len = vsnprintf(0, 0, format, args) + 1;
+	int len = vsnprintf(NULL, 0, format, args) + 1;
 	char *msg = (char*) malloc(sizeof(char) * len);
 	if (msg != NULL) {
 		time_t rawtime;
@@ -58,7 +69,7 @@ void log(int level, char *format, ...) {
 		log_mutex.lock();
 		if (level >= log_level_file) {
 			FILE *file = fopen(LOG_FILE, "a");
-			if (file != 0) {
+			if (file != NULL) {
 				fprintf(file, "[%s]%s %s\n", timestamp, prefix, msg);
 				fclose(file);
 			}

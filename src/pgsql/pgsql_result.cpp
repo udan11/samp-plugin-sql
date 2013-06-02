@@ -28,11 +28,11 @@
 #ifdef SQL_HANDLER_PGSQL
 
 PgSQL_Result::PgSQL_Result() {
-	result = 0;
+	result = NULL;
 }
 
 PgSQL_Result::~PgSQL_Result() {
-	if (result != 0) {
+	if (result != NULL) {
 		PQclear(result);
 	}
 }

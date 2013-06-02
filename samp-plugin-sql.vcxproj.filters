@@ -18,9 +18,6 @@
     <ClInclude Include="src\sql\sql_query.h">
       <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\sql\sql_utils.h">
-      <Filter>sql</Filter>
-    </ClInclude>
     <ClInclude Include="src\sql\sql_result.h">
       <Filter>sql</Filter>
     </ClInclude>
@@ -60,6 +57,9 @@
     <ClInclude Include="src\sdk\amxstring.h">
       <Filter>sdk</Filter>
     </ClInclude>
+    <ClInclude Include="src\sql\sql.h">
+      <Filter>sql</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\log.cpp" />
@@ -76,9 +76,6 @@
       <Filter>mysql</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\sql_query.cpp">
-      <Filter>sql</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sql\sql_utils.cpp">
       <Filter>sql</Filter>
     </ClCompile>
     <ClCompile Include="src\sql\sql_result.cpp">
@@ -104,6 +101,9 @@
     </ClCompile>
     <ClCompile Include="src\sdk\amxstring.cpp">
       <Filter>sdk</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sql\sql.cpp">
+      <Filter>sql</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

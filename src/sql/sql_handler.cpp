@@ -25,8 +25,29 @@
 
 #include "sql_handler.h"
 
-SQL_Handler::SQL_Handler() {
-	amx = 0;
-	id = 0;
-	handler_type = 0;
+SQL_Handler::SQL_Handler(int id, AMX *amx) : pending(32) {
+	this->id = id;
+	this->amx = amx;
+	is_active = true;
+#ifdef _WIN32
+	DWORD thread_id = 0;
+	thread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE) worker, (LPVOID) this, NULL, &thread_id);
+#else
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+	pthread_create(&thread, &attr, &worker, (void*) this);
+	pthread_attr_destroy(&attr);
+#endif
+}
+
+SQL_Handler::~SQL_Handler() {
+	is_active = false;
+#ifdef _WIN32
+	WaitForSingleObject(thread, INFINITE);
+	CloseHandle(thread);
+#else
+	void *status;
+	pthread_join(thread, &status);
+#endif
 }

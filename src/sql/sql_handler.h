@@ -25,49 +25,37 @@
 
 #pragma once
 
-//#define SQL_HANDLER_MYSQL				1
-//#define SQL_HANDLER_PGSQL				2
-
 #include "../sdk/amx/amx.h"
 
+#include "sql.h"
 #include "sql_query.h"
 
 class SQL_Handler {
 	public:
-		// The AMX machine hosting this handler.
+		int id, type;
 		AMX *amx;
-		// Handler's ID & type.
-		int id, handler_type;
-		// Constructor.
-		SQL_Handler();
-		// Connects to a MySQL server and returns handler's ID.
-		virtual bool connect(const char *host, const char *user, const char *pass, const char *db, int port) = 0;
-		// Disconnects from the MySQL server.
-		virtual void disconnect() = 0;
-		// Gets latest error ID.
-		virtual int get_errno() = 0;
-		// Gets latest error message.
-		virtual const char *get_error() = 0;
-		// Pings the servers.
-		virtual int ping() = 0;
-		// Gets server's information.
-		virtual const char *get_stat() = 0;
-		// Gets default character set.
-		virtual const char *get_charset() = 0;
-		// Sets default character set.
-		virtual bool set_charset(char *charset) = 0;
-		// Escapes a string and returns the new length.
-		virtual int escape_string(const char *src, char *&dest) = 0;
-		// Executes a query.
-		virtual void execute_query(SQL_Query *query) = 0;
-		// Seeks a result.
-		virtual bool seek_result(SQL_Query *query, int result) = 0;
-		// Fetches the name of a field.
-		virtual bool fetch_field(SQL_Query *query, int fieldix, char *&dest, int &len) = 0;
-		// Seeks a row in the result.
-		virtual bool seek_row(SQL_Query *query, int row) = 0;
-		// Fetches a cell by it's index.
-		virtual bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) = 0;
-		// Fetches a cell by it's name.
-		virtual bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) = 0;
+		query_qt pending;
+		bool is_active;
+	#ifdef _WIN32
+		HANDLE thread;
+	#else
+		pthread_t thread;
+	#endif
+		SQL_Handler(int id, AMX *amx);
+		~SQL_Handler();
+		virtual bool connect(const char *host, const char *user, const char *pass, const char *db, int port) = NULL;
+		virtual void disconnect() = NULL;
+		virtual int get_errno() = NULL;
+		virtual const char *get_error() = NULL;
+		virtual int ping() = NULL;
+		virtual const char *get_stat() = NULL;
+		virtual const char *get_charset() = NULL;
+		virtual bool set_charset(char *charset) = NULL;
+		virtual int escape_string(const char *src, char *&dest) = NULL;
+		virtual void execute_query(SQL_Query *query) = NULL;
+		virtual bool seek_result(SQL_Query *query, int result) = NULL;
+		virtual bool fetch_field(SQL_Query *query, int fieldix, char *&dest, int &len) = NULL;
+		virtual bool seek_row(SQL_Query *query, int row) = NULL;
+		virtual bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) = NULL;
+		virtual bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) = NULL;
 };

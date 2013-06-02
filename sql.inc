@@ -145,12 +145,6 @@
  */
 #define sql_open						sql_connect
 #define sql_close						sql_disconnect
-#define sql_fetch_num					sql_get_field
-#define sql_fetch_assoc					sql_get_field_assoc
-#define sql_fetch_num_int				sql_get_field_int
-#define sql_fetch_assoc_int				sql_get_field_assoc_int
-#define sql_fetch_num_float				sql_get_field_int_float
-#define sql_fetch_assoc_float			sql_get_field_assoc_float
 #define mysql_connect(%0)				sql_connect(SQL_HANDLER_MYSQL,%0)
 #define pgsql_connect(%0)				sql_connect(SQL_HANDLER_POSTGRESQL,%0)
 
@@ -331,6 +325,8 @@ native sql_field_name(Result:result, field, dest[], dest_len = sizeof(dest));
  */
 native sql_next_row(Result:result, row = -1);
 
+// ----------------------------------------------------------------------------
+
 /**
  * <summary>Fetches a cell containing a string by field index.</summary>
  * <param name="result">The ID of the result.</param>
@@ -382,3 +378,63 @@ native Float:sql_get_field_float(Result:result, field);
  * <returns>The value of the cell.</returns>
  */
 native Float:sql_get_field_assoc_float(Result:result, field[]);
+
+// ----------------------------------------------------------------------------
+
+/**
+ * <summary>Fetches a cell containing a string by field index.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The index of the field.</param>
+ * <param name="dest">The destination where the string will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+ * <returns>The length of the string.</returns>
+ */
+native sql_get_field_ex(Result:result, row, field, dest[], dest_len = sizeof(dest));
+
+/**
+ * <summary>Fetches a cell containing a string by field name.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The name of the field.</param>
+ * <param name="dest">The destination where the string will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+ * <returns>The length of the string.</returns>
+ */
+native sql_get_field_assoc_ex(Result:result, row, field[], dest[], dest_len = sizeof(dest));
+
+/**
+ * <summary>Fetches a cell containing an integer value by field index.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The index of the field.</param>
+ * <returns>The value of the cell.</returns>
+ */
+native sql_get_field_int_ex(Result:result, row, field);
+
+/**
+ * <summary>Fetches a cell containing an integer value by field name.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The name of the field.</param>
+ * <returns>The value of the cell.</returns>
+ */
+native sql_get_field_assoc_int_ex(Result:result, row, field[]);
+
+/**
+ * <summary>Fetches a cell containing a float value by field index.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The index of the field.</param>
+ * <returns>The value of the cell.</returns>
+ */
+native Float:sql_get_field_float_ex(Result:result, row, field);
+
+/**
+ * <summary>Fetches a cell containing a float value by field name.</summary>
+ * <param name="result">The ID of the result.</param>
+ * <param name="row">The index of the row.</param>
+ * <param name="field">The name of the field.</param>
+ * <returns>The value of the cell.</returns>
+ */
+native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);

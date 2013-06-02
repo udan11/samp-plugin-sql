@@ -62,17 +62,17 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>bin\</OutDir>
-    <IntDir>bin\</IntDir>
+    <IntDir>bin\obj\</IntDir>
     <TargetName>sql</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - PostgreSQL only|Win32'">
     <OutDir>bin\</OutDir>
-    <IntDir>bin\</IntDir>
+    <IntDir>bin\obj\</IntDir>
     <TargetName>sql_pgsql</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - MySQL only|Win32'">
     <OutDir>bin\</OutDir>
-    <IntDir>bin\</IntDir>
+    <IntDir>bin\obj\</IntDir>
     <TargetName>sql_mysql</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -98,7 +98,7 @@
       <AdditionalIncludeDirectories>include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
-      <PreprocessorDefinitions>SQL_HANDLER_MYSQL=1;SQL_HANDLER_PGSQL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDINT_H;SQL_HANDLER_MYSQL=1;SQL_HANDLER_PGSQL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release - PostgreSQL only|Win32'">
@@ -114,7 +114,7 @@
       <AdditionalIncludeDirectories>include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
-      <PreprocessorDefinitions>SQL_HANDLER_PGSQL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDINT_H;SQL_HANDLER_PGSQL=2;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release - MySQL only|Win32'">
@@ -130,7 +130,7 @@
       <AdditionalIncludeDirectories>include/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefinePreprocessorDefinitions>
       </UndefinePreprocessorDefinitions>
-      <PreprocessorDefinitions>SQL_HANDLER_MYSQL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>HAVE_STDINT_H;SQL_HANDLER_MYSQL=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -153,10 +153,10 @@
     <ClInclude Include="src\sdk\amx\amx.h" />
     <ClInclude Include="src\sdk\amx\sclinux.h" />
     <ClInclude Include="src\sdk\plugincommon.h" />
+    <ClInclude Include="src\sql\sql.h" />
     <ClInclude Include="src\sql\sql_handler.h" />
     <ClInclude Include="src\sql\sql_query.h" />
     <ClInclude Include="src\sql\sql_result.h" />
-    <ClInclude Include="src\sql\sql_utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\log.cpp" />
@@ -172,10 +172,10 @@
     <ClCompile Include="src\sdk\amxplugin.cpp" />
     <ClCompile Include="src\sdk\amxredirect.cpp" />
     <ClCompile Include="src\sdk\amxstring.cpp" />
+    <ClCompile Include="src\sql\sql.cpp" />
     <ClCompile Include="src\sql\sql_handler.cpp" />
     <ClCompile Include="src\sql\sql_query.cpp" />
     <ClCompile Include="src\sql\sql_result.cpp" />
-    <ClCompile Include="src\sql\sql_utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="src\plugin.rc" />

@@ -23,21 +23,29 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "../log.h"
+
 #include "pgsql.h"
  
 #ifdef SQL_HANDLER_PGSQL
 
-PgSQL_Handler::PgSQL_Handler() {
-	handler_type = SQL_HANDLER_PGSQL;
+PgSQL_Handler::PgSQL_Handler(int id, AMX *amx) : SQL_Handler(id, amx) {
+	type = SQL_HANDLER_PGSQL;
 	conn = NULL;
+	if (!PQisthreadsafe()) {
+		log(LOG_WARNING, "libpq is not thread-safe! Crashes may occur!");
+	}
 }
 
 PgSQL_Handler::~PgSQL_Handler() {
 	disconnect();
 }
 
-bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
-	int len = snprintf(0, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port) + 1;
+bool PgSQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port) {
+	if (port == 0) {
+		port = PGSQL_DEFAULT_PORT;
+	}
+	int len = snprintf(NULL, 0, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port) + 1;
 	char *conninfo = (char*) malloc(len);
 	snprintf(conninfo, len, "user=%s password=%s dbname=%s hostaddr=%s port=%d", user, pass, db, host, port);
 	conn = PQconnectdb(conninfo);
@@ -79,10 +87,9 @@ int PgSQL_Handler::escape_string(const char *src, char *&dest) {
 
 void PgSQL_Handler::execute_query(SQL_Query *query) {
 	PgSQL_Query *q = dynamic_cast<PgSQL_Query*>(query);
-	if (q == 0) {
+	if (q == NULL) {
 		return;
 	}
-	q->status = QUERY_STATUS_EXECUTED;
 	if (!ping()) {
 		PgSQL_Result *r = new PgSQL_Result();
 		r->result = PQexec(conn, query->query);
@@ -133,6 +140,7 @@ void PgSQL_Handler::execute_query(SQL_Query *query) {
 		query->error = get_errno();
 		query->error_msg = get_error();
 	}
+	q->status = QUERY_STATUS_EXECUTED;
 }
 
 bool PgSQL_Handler::seek_result(SQL_Query *query, int result) {
@@ -152,7 +160,7 @@ bool PgSQL_Handler::seek_result(SQL_Query *query, int result) {
 bool PgSQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int &len) {
 	SQL_Result *r = query->results[query->last_result];
 	if ((0 <= fieldidx) && (fieldidx < r->num_fields)) {
-		if (dest == 0) {
+		if (dest == NULL) {
 			dest = r->field_names[fieldidx].first;
 			len = r->field_names[fieldidx].second;
 			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
@@ -167,8 +175,8 @@ bool PgSQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int
 
 bool PgSQL_Handler::seek_row(SQL_Query *query, int row) {
 	SQL_Result *r = query->results[query->last_result];
-	if (row == -1) {
-		row = r->last_row_idx + 1;
+	if (row < 0) {
+		row = r->last_row_idx - row;
 	}
 	if (r->last_row_idx == row) {
 		return true;
@@ -182,13 +190,13 @@ bool PgSQL_Handler::seek_row(SQL_Query *query, int row) {
 
 bool PgSQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) {
 	PgSQL_Result *r = dynamic_cast<PgSQL_Result*>(query->results[query->last_result]);
-	if (r == 0) {
+	if (r == NULL) {
 		len = 0;
 		return true;
 	}
 	if ((r->num_rows != 0) && (0 <= fieldidx) && (fieldidx < r->num_fields)) {
 		if (query->flags & QUERY_CACHED) {
-			if (dest == 0) {
+			if (dest == NULL) {
 				len = r->cache[r->last_row_idx][fieldidx].second;
 				dest = r->cache[r->last_row_idx][fieldidx].first;
 				return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
@@ -199,7 +207,7 @@ bool PgSQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &
 		} else {
 			int _len = strlen(PQgetvalue(r->result, r->last_row_idx, fieldidx));
 			if (_len) {
-				if (dest == 0) {
+				if (dest == NULL) {
 					len = _len + 1;
 					dest = (char*) malloc(sizeof(char) * len);
 					memcpy(dest, PQgetvalue(r->result, r->last_row_idx, fieldidx), len);
@@ -207,7 +215,7 @@ bool PgSQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &
 					memcpy(dest, PQgetvalue(r->result, r->last_row_idx, fieldidx), len);
 				}
 			} else {
-				if (dest == 0) {
+				if (dest == NULL) {
 					len = 5; // NULL + \0
 					dest = (char*) malloc(sizeof(char) * 5);
 					strcpy(dest, "NULL");

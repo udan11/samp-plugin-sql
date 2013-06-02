@@ -22,16 +22,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+#pragma once
  
 #include "pgsql.h"
  
 #ifdef SQL_HANDLER_PGSQL
 
-#pragma once
-
 class PgSQL_Handler : public SQL_Handler {
 	public:
-		PgSQL_Handler();
+		PgSQL_Handler(int id, AMX *amx);
 		~PgSQL_Handler();
 		bool connect(const char *host, const char *user, const char *pass, const char *db, int port);
 		void disconnect();

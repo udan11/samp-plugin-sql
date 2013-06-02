@@ -26,21 +26,17 @@
 #include "sql_query.h"
 
 SQL_Query::SQL_Query() {
-	amx = 0;
+	amx = NULL;
 	id = 0;
 	handler = 0;
 	flags = 0;
-	status = 0;
+	status = QUERY_STATUS_NONE;
 	error = 0;
 	last_result = 0;
-	query = 0;
-	callback = 0;
-	format = 0;
-	error_msg = 0;
-	params_a.clear();
-	params_c.clear();
-	params_s.clear();
-	results.clear();
+	query = NULL;
+	callback = NULL;
+	format = NULL;
+	error_msg = NULL;
 }
 
 SQL_Query::~SQL_Query() {
@@ -50,16 +46,12 @@ SQL_Query::~SQL_Query() {
 	for (int i = 0, size = params_a.size(); i != size; ++i) {
 		free(params_a[i].first);
 	}
-	params_a.clear();
-	params_c.clear();
 	for (int i = 0, size = params_s.size(); i != size; ++i) {
 		free(params_s[i]);
 	}
-	params_s.clear();
 	for (int i = 0, size = results.size(); i != size; ++i) {
 		delete results[i];
 	}
-	results.clear();
 }
 
 int SQL_Query::execute_callback() {
@@ -72,10 +64,10 @@ int SQL_Query::execute_callback() {
 				switch (format[i]) {
 					case 'a':
 					case 'A':
-						if (amx_addr < 0) {
-							amx_addr = 0;
+						if (amx_addr < NULL) {
+							amx_addr = NULL;
 						}
-						amx_PushArray(amx, &amx_addr, 0, params_a[--a_idx].first, params_a[a_idx].second);
+						amx_PushArray(amx, &amx_addr, NULL, params_a[--a_idx].first, params_a[a_idx].second);
 						break;
 					case 'b':
 					case 'B':
@@ -95,10 +87,10 @@ int SQL_Query::execute_callback() {
 						break;
 					case 's':
 					case 'S':
-						if (amx_addr < 0) {
-							amx_addr = 0;
+						if (amx_addr < NULL) {
+							amx_addr = NULL;
 						}
-						amx_PushString(amx, &amx_addr, 0, params_s[--s_idx], 0, 0);
+						amx_PushString(amx, &amx_addr, NULL, params_s[--s_idx], 0, 0);
 						break;
 				}
 			}
@@ -106,16 +98,16 @@ int SQL_Query::execute_callback() {
 		}
 	} else {
 		if (!amx_FindPublic(amx, QUERY_ERROR_CALLBACK, &funcidx)) {
-			amx_addr = 0;
-			amx_PushString(amx, &amx_addr, 0, callback, 0, 0);
-			amx_PushString(amx, &amx_addr, 0, query, 0, 0);
-			amx_PushString(amx, &amx_addr, 0, error_msg, 0, 0);
+			amx_addr = NULL;
+			amx_PushString(amx, &amx_addr, NULL, callback, 0, 0);
+			amx_PushString(amx, &amx_addr, NULL, query, 0, 0);
+			amx_PushString(amx, &amx_addr, NULL, error_msg, 0, 0);
 			amx_Push(amx, (cell) error);
 			amx_Push(amx, (cell) handler);
 			amx_Exec(amx, &ret, funcidx);
 		}
 	}
-	if (amx_addr >= 0) {
+	if (amx_addr >= NULL) {
 		amx_Release(amx, amx_addr);
 	}
 	return (int) ret;

@@ -27,18 +27,6 @@
 
 extern void *pAMXFunctions;
 
-Mutex *amxMutex;
-
-int last_handler = 1, last_query = 1;
-std::map<int, class SQL_Handler*> handlers;
-std::map<int, class SQL_Query*> queries;
-
-#ifdef _WIN32
-DWORD __stdcall ProcessQueryThread(LPVOID lpParam);
-#else
-void *ProcessQueryThread(void *lpParam);
-#endif
-
 const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_debug", Natives::sql_debug},
 	{"sql_connect", Natives::sql_connect},
@@ -59,6 +47,7 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_num_fields", Natives::sql_num_fields},
 	{"sql_next_result", Natives::sql_next_result},
 	{"sql_field_name", Natives::sql_field_name},
+	// Polymorphic natives.
 	{"sql_next_row", Natives::sql_next_row},
 	{"sql_get_field", Natives::sql_get_field},
 	{"sql_get_field_assoc", Natives::sql_get_field_assoc},
@@ -66,7 +55,14 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_get_field_assoc_int", Natives::sql_get_field_assoc_int},
 	{"sql_get_field_float", Natives::sql_get_field_float},
 	{"sql_get_field_assoc_float", Natives::sql_get_field_assoc_float},
-	{0, 0}
+	// The extended version (includes a `row` parameter).
+	{"sql_get_field_ex", Natives::sql_get_field},
+	{"sql_get_field_assoc_ex", Natives::sql_get_field_assoc},
+	{"sql_get_field_int_ex", Natives::sql_get_field_int},
+	{"sql_get_field_assoc_int_ex", Natives::sql_get_field_assoc_int},
+	{"sql_get_field_float_ex", Natives::sql_get_field_float},
+	{"sql_get_field_assoc_float_ex", Natives::sql_get_field_assoc_float},
+	{NULL, NULL}
 };
 
 PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
@@ -77,24 +73,11 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 #ifdef SQL_HANDLER_MYSQL
-	if (mysql_library_init(0, 0, 0)) {
+	if (mysql_library_init(0, NULL, NULL)) {
 		logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
 		exit(0);
-		return 0;
+		return false;
 	}
-#endif
-	amxMutex = new Mutex();
-#ifdef _WIN32
-	HANDLE thread;
-	DWORD threadId = 0;
-	thread = CreateThread(0, 0, (LPTHREAD_START_ROUTINE) ProcessQueryThread, 0, 0, &threadId);
-	CloseHandle(thread);
-#else
-	pthread_attr_t attr;
-	pthread_attr_init(&attr);
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	pthread_t thread;
-	pthread_create(&thread, &attr, &ProcessQueryThread, 0);
 #endif
 	logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
 	return true;
@@ -105,36 +88,32 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
-	amxMutex->lock();
-	for (std::map<int, class SQL_Handler*>::iterator it = handlers.begin(), next = it; it != handlers.end(); it = next) {
-		++next;
+	for (handlers_t::iterator it = handlers.begin(), next = it, end = handlers.end(); it != end; it = next++) {
 		SQL_Handler *handler = it->second;
 		if (handler->amx == amx) {
-			delete handler;
 			handlers.erase(it);
+			delete handler;
 		}
 	}
-	for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
-		++next;
+	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next++) {
 		SQL_Query *query = it->second;
 		if (query->amx == amx) {
-			delete query;
 			queries.erase(it);
+			delete query;
 		}
 	}
-	amxMutex->unlock();
 	return AMX_ERR_NONE;
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
-	delete amxMutex;
+#ifdef SQL_HANDLER_MYSQL
+	mysql_library_end();
+#endif
 	logprintf("[plugin.sql] Plugin succesfully unloaded!");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
-	amxMutex->lock();
-	for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
-		++next;
+	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next++) {
 		SQL_Query *query = it->second;
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
 			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
@@ -147,34 +126,8 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
 			log(LOG_DEBUG, "ProccessTick(): Erasing query (query->id = %d)...", query->id);
-			delete query;
 			queries.erase(it);
+			delete query;
 		}
 	}
-	amxMutex->unlock();
-}
-
-#ifdef _WIN32
-DWORD __stdcall ProcessQueryThread(LPVOID lpParam) {
-#else
-void *ProcessQueryThread(void *lpParam) {
-#endif
-	while (true) {
-		amxMutex->lock();
-		for (std::map<int, class SQL_Query*>::iterator it = queries.begin(), next = it; it != queries.end(); it = next) {
-			++next;
-			SQL_Query *query = it->second;
-			if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_NONE)) {
-				log(LOG_DEBUG, "ProcessQueryThread(): Executing query (query->id = %d, query->query = %s)...", query->id, query->query);
-				if (is_valid_handler(query->handler)) {
-					handlers[query->handler]->execute_query(query);
-				} else {
-					log(LOG_DEBUG, "ProcessQueryThread(): Query's handler is dead (query->id = %d, query->handler = %d query->query = %s", query->id, query->handler, query->query);
-				}
-			}
-		}
-		amxMutex->unlock();
-		SLEEP(50);
-	}
-	return 0;
 }

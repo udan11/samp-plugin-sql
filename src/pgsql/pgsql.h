@@ -25,7 +25,7 @@
  
 #pragma once
 
-#include "../sql/sql_handler.h"
+#include "../sql/sql.h"
 
 #ifdef SQL_HANDLER_PGSQL	
 
@@ -35,10 +35,11 @@
 		#define snprintf _snprintf
 	#endif
 
+	#include <libpq/libpq-fe.h>
+
+	#include "../sql/sql_handler.h"
 	#include "../sql/sql_query.h"
 	#include "../sql/sql_result.h"
-
-	#include <libpq/libpq-fe.h>
 
 	#include "pgsql_handler.h"
 	#include "pgsql_query.h"

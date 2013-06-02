@@ -27,19 +27,24 @@
  
 #ifdef SQL_HANDLER_MYSQL
 
-MySQL_Handler::MySQL_Handler() {
-	handler_type = SQL_HANDLER_MYSQL;
-	conn = mysql_init(0);
+MySQL_Handler::MySQL_Handler(int id, AMX *amx) : SQL_Handler(id, amx) {
+	type = SQL_HANDLER_MYSQL;
+	mutex = new Mutex();
+	conn = mysql_init(NULL);
 	bool reconnect = true;
 	mysql_options(conn, MYSQL_OPT_RECONNECT, &reconnect);
 }
 
 MySQL_Handler::~MySQL_Handler() {
 	disconnect();
+	delete mutex;
 }
 
-bool MySQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port = 3306) {
-	return mysql_real_connect(conn, host, user, pass, db, port, 0, CLIENT_MULTI_STATEMENTS) ? true : false;
+bool MySQL_Handler::connect(const char *host, const char *user, const char *pass, const char *db, int port) {
+	if (port == 0) {
+		port = MYSQL_DEFAULT_PORT;
+	}
+	return mysql_real_connect(conn, host, user, pass, db, port, NULL, CLIENT_MULTI_STATEMENTS) ? true : false;
 }
 
 void MySQL_Handler::disconnect() {
@@ -76,10 +81,10 @@ int MySQL_Handler::escape_string(const char *src, char *&dest) {
 
 void MySQL_Handler::execute_query(SQL_Query *query) {
 	MySQL_Query *q = dynamic_cast<MySQL_Query*>(query);
-	if (q == 0) {
+	if (q == NULL) {
 		return;
 	}
-	q->status = QUERY_STATUS_EXECUTED;
+	mutex->lock();
 	if ((!ping()) && (!mysql_query(conn, q->query))) {
 		q->error = 0;
 		do {
@@ -87,7 +92,7 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 			r->result = mysql_store_result(conn);
 			r->insert_id = mysql_insert_id(conn);
 			r->affected_rows = mysql_affected_rows(conn);
-			if (r->result != 0) {
+			if (r->result != NULL) {
 				r->num_rows = mysql_num_rows(r->result);
 				r->num_fields = mysql_num_fields(r->result);
 				r->field_names.resize(r->num_fields);
@@ -127,6 +132,8 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 		query->error = get_errno();
 		query->error_msg = get_error();
 	}
+	mutex->unlock();
+	q->status = QUERY_STATUS_EXECUTED;
 }
 
 bool MySQL_Handler::seek_result(SQL_Query *query, int result) {
@@ -146,7 +153,7 @@ bool MySQL_Handler::seek_result(SQL_Query *query, int result) {
 bool MySQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int &len) {
 	SQL_Result *r = query->results[query->last_result];
 	if ((0 <= fieldidx) && (fieldidx < r->num_fields)) {
-		if (dest == 0) {
+		if (dest == NULL) {
 			dest = r->field_names[fieldidx].first;
 			len = r->field_names[fieldidx].second;
 			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
@@ -161,11 +168,8 @@ bool MySQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int
 
 bool MySQL_Handler::seek_row(SQL_Query *query, int row) {
 	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->last_result]);
-	if (r == 0) {
-		return true;
-	}
-	if (row == -1) {
-		row = r->last_row_idx + 1;
+	if (row < 0) {
+		row = r->last_row_idx - row;
 	}
 	if (r->last_row_idx == row) {
 		return true;
@@ -184,13 +188,13 @@ bool MySQL_Handler::seek_row(SQL_Query *query, int row) {
 
 bool MySQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) {
 	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->last_result]);
-	if (r == 0) {
+	if (r == NULL) {
 		len = 0;
 		return true;
 	}
 	if ((r->num_rows != 0) && (0 <= fieldidx) && (fieldidx < r->num_fields)) {
 		if (query->flags & QUERY_CACHED) {
-			if (dest == 0) {
+			if (dest == NULL) {
 				len = r->cache[r->last_row_idx][fieldidx].second;
 				dest = r->cache[r->last_row_idx][fieldidx].first;
 				return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
@@ -199,7 +203,7 @@ bool MySQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &
 				return true;
 			}
 		} else {
-			if (r->last_row != 0) {
+			if (r->last_row != NULL) {
 				if (r->last_row_lengths[fieldidx]) {
 					if (dest == 0) {
 						len = r->last_row_lengths[fieldidx] + 1;

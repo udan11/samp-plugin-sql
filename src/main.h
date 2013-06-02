@@ -28,28 +28,10 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include <map>
-#include <vector>
-
-#ifdef _WIN32
-	#include <Windows.h>
-	#define SLEEP(x) Sleep(x);
-#else
-	#include "pthread.h"
-	#include <unistd.h>
-	#define SLEEP(x) usleep(x * 1000);
-	typedef unsigned long DWORD;
-	typedef unsigned int UINT;
-#endif
-
 #include "sdk/amx/amx.h"
 #include "sdk/plugincommon.h"
-#include "sdk/amxstring.h"
 
-#include "sql/sql_handler.h"
-#include "sql/sql_query.h"
-#include "sql/sql_result.h"
-#include "sql/sql_utils.h"
+#include "sql/sql.h"
 
 #ifdef SQL_HANDLER_MYSQL
 	#include "mysql/mysql.h"
@@ -60,13 +42,6 @@
 #endif
 
 #include "log.h"
-#include "mutex.h"
 #include "natives.h"
 
 #define PLUGIN_VERSION					"v2.0"
-
-extern Mutex *amxMutex;
-
-extern int last_handler, last_query;
-extern std::map<int, class SQL_Handler*> handlers;
-extern std::map<int, class SQL_Query*> queries;

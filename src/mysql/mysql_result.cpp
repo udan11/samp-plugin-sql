@@ -28,13 +28,13 @@
 #ifdef SQL_HANDLER_MYSQL
 
 MySQL_Result::MySQL_Result() {
-	result = 0;
-	last_row = 0;
+	result = NULL;
+	last_row = NULL;
 	last_row_lengths = 0;
 }
 
 MySQL_Result::~MySQL_Result() {
-	if (result != 0) {
+	if (result != NULL) {
 		mysql_free_result(result);
 	}
 }
