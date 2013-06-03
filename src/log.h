@@ -38,7 +38,7 @@ typedef void (*logprintf_t) (char *format, ...);
 
 extern logprintf_t logprintf;
 
-extern int log_level_file;
-extern int log_level_console;
+extern int logFile;
+extern int logConsole;
 
 extern void log(int level, char *format, ...);

@@ -29,8 +29,8 @@
 
 MySQL_Result::MySQL_Result() {
 	result = NULL;
-	last_row = NULL;
-	last_row_lengths = 0;
+	lastRow = NULL;
+	lastRowLens = NULL;
 }
 
 MySQL_Result::~MySQL_Result() {

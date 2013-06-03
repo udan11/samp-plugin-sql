@@ -35,13 +35,13 @@
 
 logprintf_t logprintf;
 
-int log_level_file = LOG_ALL;
-int log_level_console = LOG_WARNING;
+int logFile = LOG_ALL;
+int logConsole = LOG_WARNING;
 
 Mutex log_mutex;
 
 void log(int level, char *format, ...) {
-	if ((level < log_level_file) && (level < log_level_console)) {
+	if ((level < logFile) && (level < logConsole)) {
 		return;
 	}
 	char prefix[16] = "";
@@ -67,14 +67,14 @@ void log(int level, char *format, ...) {
 		strftime(timestamp, sizeof(timestamp), "%X", timeinfo);
 		vsnprintf(msg, len, format, args);
 		log_mutex.lock();
-		if (level >= log_level_file) {
+		if (level >= logFile) {
 			FILE *file = fopen(LOG_FILE, "a");
 			if (file != NULL) {
 				fprintf(file, "[%s]%s %s\n", timestamp, prefix, msg);
 				fclose(file);
 			}
 		}
-		if (level >= log_level_console) {
+		if (level >= logConsole) {
 			logprintf("[plugin.sql]%s %s", prefix, msg);
 		}
 		log_mutex.unlock();

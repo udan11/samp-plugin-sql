@@ -43,14 +43,14 @@
 class SQL_Query {
 	public:
 		AMX *amx;
-		int id, handler, flags, status, error, last_result;
+		int id, handler, flags, status, error, lastResultIdx;
 		char *query, *callback, *format;
-		const char *error_msg;
+		const char *errorMsg;
 		SQL_Query();
 		virtual ~SQL_Query();
-		std::vector<std::pair<cell*, int> > params_a;
-		std::vector<cell> params_c;
-		std::vector<char*> params_s;
+		std::vector<std::pair<cell*, int> > paramsArr;
+		std::vector<cell> paramsC;
+		std::vector<char*> paramsStr;
 		std::vector<SQL_Result*> results;
 		int execute_callback();
 };

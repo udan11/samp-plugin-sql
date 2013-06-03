@@ -38,9 +38,9 @@ cell AMX_NATIVE_CALL Natives::sql_debug(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	log_level_file = params[1];
-	log_level_console = params[2];
-	log(LOG_WARNING, "Natives::sql_debug: Switching the log levels to (%d, %d)...", log_level_file, log_level_console);
+	logFile = params[1];
+	logConsole = params[2];
+	log(LOG_WARNING, "Natives::sql_debug: Switching the log levels to (%d, %d)...", logFile, logConsole);
 	return 1;
 }
 
@@ -48,7 +48,7 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	if (params[0] < 6 * 4) {
 		return 0;
 	}
-	int id = last_handler++;
+	int id = lastHandler++;
 	SQL_Handler *handler = NULL;
 	switch (params[1]) {
 #ifdef SQL_HANDLER_MYSQL
@@ -203,7 +203,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			log(LOG_WARNING, "Natives::sql_query: Invalid handler! (handler->id = %d, handler->type = %d)", params[1], handlers[params[1]]->type);
 			return 0;
 	}
-	int id = last_query++;
+	int id = lastQuery++;
 	query->amx = amx;
 	query->id = id;
 	query->handler = params[1];
@@ -222,7 +222,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 				arr = (cell*) malloc(len);
 				if (arr != NULL) {
 					memcpy(arr, ptr_arr, len);
-					query->params_a.push_back(std::make_pair(arr, *ptr_len));
+					query->paramsArr.push_back(std::make_pair(arr, *ptr_len));
 				}
 				break;
 			case 'b':
@@ -237,7 +237,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			case 'F':
 				cell *ptr;
 				amx_GetAddr(amx, params[p], &ptr);
-				query->params_c.push_back(*ptr);
+				query->paramsC.push_back(*ptr);
 				break;
 			case 'r':
 			case 'R':
@@ -247,7 +247,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			case 'S':
 				char *str;
 				amx_GetString_(amx, params[p], str);
-				query->params_s.push_back(str);
+				query->paramsStr.push_back(str);
 				break;
 			default: 
 				log(LOG_WARNING, "Natives::sql_query: Format '%c' is not recognized.", query->format[i]);
@@ -320,7 +320,7 @@ cell AMX_NATIVE_CALL Natives::sql_insert_id(AMX *amx, cell *params) {
 		return 0;
 	}
 	log(LOG_DEBUG, "Natives::sql_query: Retrieving insert ID (query->id = %d)...", params[1]);
-	return query->results[query->last_result]->insert_id;
+	return query->results[query->lastResultIdx]->insertId;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
@@ -335,7 +335,7 @@ cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
 		return 0;
 	}
 	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of affected rows (query->id = %d)...", params[1]);
-	return query->results[query->last_result]->affected_rows;
+	return query->results[query->lastResultIdx]->affectedRows;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_error(AMX *amx, cell *params) {
@@ -367,10 +367,10 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 	if (!is_valid_handler(query->handler)) {
 		return 0;
 	}
-	int len = strlen(query->error_msg);
+	int len = strlen(query->errorMsg);
 	if (len != 0) {
 		char *error = (char*) malloc(sizeof(char) * len);
-		strcpy(error, query->error_msg);
+		strcpy(error, query->errorMsg);
 		if (params[3] < 2) {
 			amx_SetString_(amx, params[2], error, len);
 		} else {
@@ -393,7 +393,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_rows(AMX *amx, cell *params) {
 		return 0;
 	}
 	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of rows (query->id = %d)...", params[1]);
-	return query->results[query->last_result]->num_rows;
+	return query->results[query->lastResultIdx]->numRows;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
@@ -408,7 +408,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
 		return 0;
 	}
 	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of fields (query->id = %d)...", params[1]);
-	return query->results[query->last_result]->num_fields;
+	return query->results[query->lastResultIdx]->numFields;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_next_result(AMX *amx, cell* params) {

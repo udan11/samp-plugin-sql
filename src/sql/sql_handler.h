@@ -35,7 +35,7 @@ class SQL_Handler {
 		int id, type;
 		AMX *amx;
 		query_qt pending;
-		bool is_active;
+		bool isActive;
 	#ifdef _WIN32
 		HANDLE thread;
 	#else

@@ -34,7 +34,7 @@ class SQL_Result {
 	public:
 		SQL_Result();
 		virtual ~SQL_Result();
-		int insert_id, affected_rows, num_rows, num_fields, last_row_idx;
-		std::vector<std::pair<char*, int > > field_names;
+		int insertId, affectedRows, numRows, numFields, lastRowIdx;
+		std::vector<std::pair<char*, int > > fieldNames;
 		std::vector<std::vector<std::pair<char*, int> > > cache;
 };

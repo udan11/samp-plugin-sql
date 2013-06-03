@@ -32,8 +32,8 @@
 class MySQL_Result : public SQL_Result {
 	public:
 		MYSQL_RES *result;
-		MYSQL_ROW last_row;
-		unsigned long *last_row_lengths;
+		MYSQL_ROW lastRow;
+		unsigned long *lastRowLens;
 		MySQL_Result();
 		virtual ~MySQL_Result();
 };

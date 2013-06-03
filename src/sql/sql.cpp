@@ -33,10 +33,10 @@
 
 #include "sql.h"
 
-int last_handler = 1;
+int lastHandler = 1;
 handlers_t handlers;
 
-int last_query = 1;
+int lastQuery = 1;
 queries_t queries;
 
 bool is_valid_handler(int id) {
@@ -58,7 +58,7 @@ void *worker(void *param) {
 		mysql_thread_init();
 	}
 #endif
-	while (handler->is_active) {
+	while (handler->isActive) {
 		SQL_Query *query = NULL;
 		while (handler->pending.pop(query)) {
 			log(LOG_DEBUG, "worker(handlers[%d]): Executing query (query->id = %d, query->query = %s)...", handler->id, query->id, query->query);

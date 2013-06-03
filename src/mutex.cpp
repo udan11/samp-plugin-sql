@@ -34,11 +34,11 @@ Mutex::Mutex() {
 	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	pthread_mutex_init(&handle, &attr);
 #endif
-	is_enabled = true;
+	isEnabled = true;
 }
 
 Mutex::~Mutex() {
-	is_enabled = false;
+	isEnabled = false;
 #ifdef _WIN32
 	DeleteCriticalSection(&handle);
 #else
@@ -47,7 +47,7 @@ Mutex::~Mutex() {
 }
 
 void Mutex::lock() {
-	if (is_enabled) {
+	if (isEnabled) {
 #ifdef _WIN32
 		EnterCriticalSection(&handle);
 #else

@@ -90,26 +90,26 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 		do {
 			MySQL_Result *r = new MySQL_Result();
 			r->result = mysql_store_result(conn);
-			r->insert_id = mysql_insert_id(conn);
-			r->affected_rows = mysql_affected_rows(conn);
+			r->insertId = mysql_insert_id(conn);
+			r->affectedRows = mysql_affected_rows(conn);
 			if (r->result != NULL) {
-				r->num_rows = mysql_num_rows(r->result);
-				r->num_fields = mysql_num_fields(r->result);
-				r->field_names.resize(r->num_fields);
+				r->numRows = mysql_num_rows(r->result);
+				r->numFields = mysql_num_fields(r->result);
+				r->fieldNames.resize(r->numFields);
 				MYSQL_FIELD *field;
 				for (int i = 0; field = mysql_fetch_field(r->result); ++i) {
 					int len = strlen(field->name) + 1;
-					r->field_names[i].first = (char*) malloc(sizeof(char) * len);
-					strcpy(r->field_names[i].first, field->name);
-					r->field_names[i].second = len;
+					r->fieldNames[i].first = (char*) malloc(sizeof(char) * len);
+					strcpy(r->fieldNames[i].first, field->name);
+					r->fieldNames[i].second = len;
 				}
 				if (query->flags & QUERY_CACHED) {
-					r->cache.resize(r->num_rows);
-					for (int i = 0; i != r->num_rows; ++i) {
-						r->cache[i].resize(r->num_fields);
+					r->cache.resize(r->numRows);
+					for (int i = 0; i != r->numRows; ++i) {
+						r->cache[i].resize(r->numFields);
 						MYSQL_ROW row = mysql_fetch_row(r->result);
 						unsigned long *lengths = mysql_fetch_lengths(r->result);
-						for (int j = 0; j != r->num_fields; ++j) {
+						for (int j = 0; j != r->numFields; ++j) {
 							if (lengths[j]) {
 								r->cache[i][j].first = (char*) malloc(sizeof(char) * (lengths[j] + 1));
 								strcpy(r->cache[i][j].first, row[j]);
@@ -122,15 +122,15 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 						}
 					}
 				} else {
-					r->last_row = mysql_fetch_row(r->result);
-					r->last_row_lengths = mysql_fetch_lengths(r->result);
+					r->lastRow = mysql_fetch_row(r->result);
+					r->lastRowLens = mysql_fetch_lengths(r->result);
 				}
 			}
 			query->results.push_back(r);
 		} while (mysql_next_result(conn) == 0);
 	} else {
 		query->error = get_errno();
-		query->error_msg = get_error();
+		query->errorMsg = get_error();
 	}
 	mutex->unlock();
 	q->status = QUERY_STATUS_EXECUTED;
@@ -138,27 +138,27 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 
 bool MySQL_Handler::seek_result(SQL_Query *query, int result) {
 	if (result == -1) {
-		result = query->last_result + 1;
+		result = query->lastResultIdx + 1;
 	}
-	if (query->last_result == result) {
+	if (query->lastResultIdx == result) {
 		return true;
 	}
 	if ((0 <= result) && (result < query->results.size())) {
-		query->last_result = result;
+		query->lastResultIdx = result;
 		return true;
 	}
 	return false;
 }
 
 bool MySQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	SQL_Result *r = query->results[query->last_result];
-	if ((0 <= fieldidx) && (fieldidx < r->num_fields)) {
+	SQL_Result *r = query->results[query->lastResultIdx];
+	if ((0 <= fieldidx) && (fieldidx < r->numFields)) {
 		if (dest == NULL) {
-			dest = r->field_names[fieldidx].first;
-			len = r->field_names[fieldidx].second;
+			dest = r->fieldNames[fieldidx].first;
+			len = r->fieldNames[fieldidx].second;
 			return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
 		} else {
-			strncpy(dest, r->field_names[fieldidx].first, len);
+			strncpy(dest, r->fieldNames[fieldidx].first, len);
 			return true;
 		}
 	}
@@ -167,50 +167,50 @@ bool MySQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int
 }
 
 bool MySQL_Handler::seek_row(SQL_Query *query, int row) {
-	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->last_result]);
+	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
 	if (row < 0) {
-		row = r->last_row_idx - row;
+		row = r->lastRowIdx - row;
 	}
-	if (r->last_row_idx == row) {
+	if (r->lastRowIdx == row) {
 		return true;
 	}
-	if ((0 <= row) && (row < r->num_rows)) {
+	if ((0 <= row) && (row < r->numRows)) {
 		if (!(query->flags & QUERY_CACHED)) {
 			mysql_data_seek(r->result, row);
-			r->last_row = mysql_fetch_row(r->result);
-			r->last_row_lengths = mysql_fetch_lengths(r->result);
+			r->lastRow = mysql_fetch_row(r->result);
+			r->lastRowLens = mysql_fetch_lengths(r->result);
 		}
-		r->last_row_idx = row;
+		r->lastRowIdx = row;
 		return true;
 	}
 	return false;
 }
 
 bool MySQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->last_result]);
+	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
 	if (r == NULL) {
 		len = 0;
 		return true;
 	}
-	if ((r->num_rows != 0) && (0 <= fieldidx) && (fieldidx < r->num_fields)) {
+	if ((r->numRows != 0) && (0 <= fieldidx) && (fieldidx < r->numFields)) {
 		if (query->flags & QUERY_CACHED) {
 			if (dest == NULL) {
-				len = r->cache[r->last_row_idx][fieldidx].second;
-				dest = r->cache[r->last_row_idx][fieldidx].first;
+				len = r->cache[r->lastRowIdx][fieldidx].second;
+				dest = r->cache[r->lastRowIdx][fieldidx].first;
 				return false; // It is not a copy; we warn the user that he SHOULD NOT free dest.
 			} else {
-				memcpy(dest, r->cache[r->last_row_idx][fieldidx].first, len);
+				memcpy(dest, r->cache[r->lastRowIdx][fieldidx].first, len);
 				return true;
 			}
 		} else {
-			if (r->last_row != NULL) {
-				if (r->last_row_lengths[fieldidx]) {
+			if (r->lastRow != NULL) {
+				if (r->lastRowLens[fieldidx]) {
 					if (dest == 0) {
-						len = r->last_row_lengths[fieldidx] + 1;
+						len = r->lastRowLens[fieldidx] + 1;
 						dest = (char*) malloc(sizeof(char) * len);
-						memcpy(dest, r->last_row[fieldidx], len);
+						memcpy(dest, r->lastRow[fieldidx], len);
 					} else {
-						memcpy(dest, r->last_row[fieldidx], len);
+						memcpy(dest, r->lastRow[fieldidx], len);
 					}
 				} else {
 					if (dest == 0) {
@@ -230,9 +230,9 @@ bool MySQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &
 }
 
 bool MySQL_Handler::fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) {
-	SQL_Result *r = query->results[query->last_result];
-	for (int i = 0, size = r->field_names.size(); i != size; ++i) {
-		if (strcmp(r->field_names[i].first, fieldname) == 0) {
+	SQL_Result *r = query->results[query->lastResultIdx];
+	for (int i = 0, size = r->fieldNames.size(); i != size; ++i) {
+		if (strcmp(r->fieldNames[i].first, fieldname) == 0) {
 			return fetch_num(query, i, dest, len);
 		}
 	}

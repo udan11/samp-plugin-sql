@@ -46,10 +46,10 @@ typedef boost::unordered_map<int, class SQL_Handler*> handlers_t;
 typedef boost::unordered_map<int, class SQL_Query*> queries_t;
 typedef boost::lockfree::queue<class SQL_Query*> query_qt;
 
-extern int last_handler;
+extern int lastHandler;
 extern handlers_t handlers;
 
-extern int last_query;
+extern int lastQuery;
 extern queries_t queries;
 
 extern bool is_valid_handler(int id);

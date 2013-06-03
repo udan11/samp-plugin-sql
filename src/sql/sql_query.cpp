@@ -32,22 +32,22 @@ SQL_Query::SQL_Query() {
 	flags = 0;
 	status = QUERY_STATUS_NONE;
 	error = 0;
-	last_result = 0;
+	lastResultIdx = 0;
 	query = NULL;
 	callback = NULL;
 	format = NULL;
-	error_msg = NULL;
+	errorMsg = NULL;
 }
 
 SQL_Query::~SQL_Query() {
 	free(query);
 	free(callback);
 	free(format);
-	for (int i = 0, size = params_a.size(); i != size; ++i) {
-		free(params_a[i].first);
+	for (int i = 0, size = paramsArr.size(); i != size; ++i) {
+		free(paramsArr[i].first);
 	}
-	for (int i = 0, size = params_s.size(); i != size; ++i) {
-		free(params_s[i]);
+	for (int i = 0, size = paramsStr.size(); i != size; ++i) {
+		free(paramsStr[i]);
 	}
 	for (int i = 0, size = results.size(); i != size; ++i) {
 		delete results[i];
@@ -59,7 +59,7 @@ int SQL_Query::execute_callback() {
 	int funcidx;
 	if (error == 0) {
 		if (!amx_FindPublic(amx, callback, &funcidx)) {
-			int a_idx = params_a.size(), c_idx = params_c.size(), s_idx = params_s.size();
+			int a_idx = paramsArr.size(), c_idx = paramsC.size(), s_idx = paramsStr.size();
 			for (int i = strlen(format) - 1; i != -1; --i) {
 				switch (format[i]) {
 					case 'a':
@@ -67,7 +67,7 @@ int SQL_Query::execute_callback() {
 						if (amx_addr < NULL) {
 							amx_addr = NULL;
 						}
-						amx_PushArray(amx, &amx_addr, NULL, params_a[--a_idx].first, params_a[a_idx].second);
+						amx_PushArray(amx, &amx_addr, NULL, paramsArr[--a_idx].first, paramsArr[a_idx].second);
 						break;
 					case 'b':
 					case 'B':
@@ -79,7 +79,7 @@ int SQL_Query::execute_callback() {
 					case 'I':
 					case 'f':
 					case 'F':
-						amx_Push(amx, params_c[--c_idx]);
+						amx_Push(amx, paramsC[--c_idx]);
 						break;
 					case 'r':
 					case 'R':
@@ -90,7 +90,7 @@ int SQL_Query::execute_callback() {
 						if (amx_addr < NULL) {
 							amx_addr = NULL;
 						}
-						amx_PushString(amx, &amx_addr, NULL, params_s[--s_idx], 0, 0);
+						amx_PushString(amx, &amx_addr, NULL, paramsStr[--s_idx], 0, 0);
 						break;
 				}
 			}
@@ -101,7 +101,7 @@ int SQL_Query::execute_callback() {
 			amx_addr = NULL;
 			amx_PushString(amx, &amx_addr, NULL, callback, 0, 0);
 			amx_PushString(amx, &amx_addr, NULL, query, 0, 0);
-			amx_PushString(amx, &amx_addr, NULL, error_msg, 0, 0);
+			amx_PushString(amx, &amx_addr, NULL, errorMsg, 0, 0);
 			amx_Push(amx, (cell) error);
 			amx_Push(amx, (cell) handler);
 			amx_Exec(amx, &ret, funcidx);

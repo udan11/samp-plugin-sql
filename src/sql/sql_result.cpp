@@ -26,16 +26,16 @@
 #include "sql_result.h"
 
 SQL_Result::SQL_Result() {
-	insert_id = 0;
-	affected_rows = 0;
-	num_rows = 0;
-	num_fields = 0;
-	last_row_idx = 0;
+	insertId = 0;
+	affectedRows = 0;
+	numRows = 0;
+	numFields = 0;
+	lastRowIdx = 0;
 }
 
 SQL_Result::~SQL_Result() {
-	for (int i = 0, size = field_names.size(); i != size; ++i) {
-		free(field_names[i].first);
+	for (int i = 0, size = fieldNames.size(); i != size; ++i) {
+		free(fieldNames[i].first);
 	}
 	for (int i = 0, size = cache.size(); i != size; ++i) {
 		for (int j = 0, size = cache[i].size(); j != size; ++j) {
