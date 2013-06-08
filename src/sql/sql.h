@@ -28,9 +28,6 @@
 //#define SQL_HANDLER_MYSQL				1
 //#define SQL_HANDLER_PGSQL				2
 
-#include <boost/lockfree/queue.hpp>
-#include <boost/unordered/unordered_map.hpp>
-
 #ifdef _WIN32
 	#include <Windows.h>
 	#define SLEEP(x) Sleep(x);
@@ -42,9 +39,9 @@
 	typedef unsigned int UINT;
 #endif
 
-typedef boost::unordered_map<int, class SQL_Handler*> handlers_t;
-typedef boost::unordered_map<int, class SQL_Query*> queries_t;
-typedef boost::lockfree::queue<class SQL_Query*> query_qt;
+#include "sql_handler.h"
+#include "sql_query.h"
+#include "sql_result.h"
 
 extern int lastHandler;
 extern handlers_t handlers;

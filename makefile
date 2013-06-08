@@ -50,10 +50,6 @@ ifdef MYSQL
 	ifdef PGSQL
 		OUTFILE := bin/sql.so
 	endif
-else
-	ifndef PGSQL
-		ECHO "Error! MYSQL & PGSQL weren't defined."
-	endif
 endif
 
 # Compiling!

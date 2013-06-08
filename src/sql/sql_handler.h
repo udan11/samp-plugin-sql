@@ -25,9 +25,17 @@
 
 #pragma once
 
+#include <boost/unordered/unordered_map.hpp>
+
+#ifdef _WIN32
+	#include <Windows.h>
+#else
+	#include "pthread.h"
+	#include <unistd.h>
+#endif
+
 #include "../sdk/amx/amx.h"
 
-#include "sql.h"
 #include "sql_query.h"
 
 class SQL_Handler {
@@ -59,3 +67,5 @@ class SQL_Handler {
 		virtual bool fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) = 0;
 		virtual bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) = 0;
 };
+
+typedef boost::unordered_map<int, class SQL_Handler*> handlers_t;

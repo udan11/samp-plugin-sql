@@ -23,6 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sql.h"
 #include "sql_handler.h"
 
 SQL_Handler::SQL_Handler(int id, AMX *amx) : pending(32) {
