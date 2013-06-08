@@ -88,14 +88,16 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
-	for (handlers_t::iterator it = handlers.begin(), next = it, end = handlers.end(); it != end; it = next++) {
+	for (handlers_t::iterator it = handlers.begin(), next = it, end = handlers.end(); it != end; it = next) {
+		++next;
 		SQL_Handler *handler = it->second;
 		if (handler->amx == amx) {
 			handlers.erase(it);
 			delete handler;
 		}
 	}
-	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next++) {
+	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next) {
+		++next;
 		SQL_Query *query = it->second;
 		if (query->amx == amx) {
 			queries.erase(it);
@@ -113,7 +115,8 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
-	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next++) {
+	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next) {
+		++next;
 		SQL_Query *query = it->second;
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
 			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
