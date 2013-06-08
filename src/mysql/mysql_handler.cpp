@@ -31,7 +31,7 @@ MySQL_Handler::MySQL_Handler(int id, AMX *amx) : SQL_Handler(id, amx) {
 	type = SQL_HANDLER_MYSQL;
 	mutex = new Mutex();
 	conn = mysql_init(NULL);
-	bool reconnect = true;
+	my_bool reconnect = true;
 	mysql_options(conn, MYSQL_OPT_RECONNECT, &reconnect);
 }
 
