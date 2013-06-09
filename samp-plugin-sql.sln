@@ -5,15 +5,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "samp-plugin-sql", "samp-plu
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Release - MySQL only|Win32 = Release - MySQL only|Win32
-		Release - PostgreSQL only|Win32 = Release - PostgreSQL only|Win32
+		Release - MySQL|Win32 = Release - MySQL|Win32
+		Release - PostgreSQL|Win32 = Release - PostgreSQL|Win32
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - MySQL only|Win32.ActiveCfg = Release - MySQL only|Win32
-		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - MySQL only|Win32.Build.0 = Release - MySQL only|Win32
-		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - PostgreSQL only|Win32.ActiveCfg = Release - PostgreSQL only|Win32
-		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - PostgreSQL only|Win32.Build.0 = Release - PostgreSQL only|Win32
+		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - MySQL|Win32.ActiveCfg = Release - MySQL only|Win32
+		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - MySQL|Win32.Build.0 = Release - MySQL only|Win32
+		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - PostgreSQL|Win32.ActiveCfg = Release - PostgreSQL only|Win32
+		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release - PostgreSQL|Win32.Build.0 = Release - PostgreSQL only|Win32
 		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release|Win32.ActiveCfg = Release|Win32
 		{465A3531-9C93-4B23-B904-82F23F189AF1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
