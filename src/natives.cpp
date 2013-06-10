@@ -70,6 +70,18 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	amx_StrParam(amx, params[3], user);
 	amx_StrParam(amx, params[4], pass);
 	amx_StrParam(amx, params[5], db);
+	if (host == NULL) {
+		log(LOG_WARNING, "Natives::sql_connect: The `host` field is empty.");
+	}
+	if (user == NULL) {
+		log(LOG_WARNING, "Natives::sql_connect: The `user` field is empty.");
+	}
+	if (pass == NULL) {
+		log(LOG_WARNING, "Natives::sql_connect: The `pass` field is empty.");
+	}
+	if (db == NULL) {
+		log(LOG_WARNING, "Natives::sql_connect: The `db` field is empty.");
+	}
 	log(LOG_INFO, "Natives::sql_connect: Connecting to database (type = %d) %s:***@%s:%d/%s...", params[1], user, host, params[6], db);
 	if (handler->connect(host, user, pass, db, params[6])) {
 		log(LOG_INFO, "Natives::sql_connect: Connection (handler->id = %d) was succesful!", id);
@@ -105,6 +117,10 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	}
 	char *charset = NULL;
 	amx_StrParam(amx, params[2], charset);
+	if (charset == NULL) {
+		log(LOG_WARNING, "Natives::sql_set_charset: New charset is null.");
+		return false;
+	}
 	log(LOG_INFO, "Natives::sql_set_charset: Setting handler's charset (handler->id = %d) to %s.", params[1], charset);
 	return handlers[params[1]]->set_charset(charset);
 }
@@ -157,26 +173,34 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 }
 
 cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
-	if (params[0] < 1 * 4) {
-		return -1;
-	}
-	if (!is_valid_handler(params[1])) {
+	if (params[0] < 3 * 4) {
 		return -1;
 	}
 	char *src = NULL;
 	amx_StrParam(amx, params[2], src);
-	log(LOG_DEBUG, "Natives::sql_escape_string: Escaping (handler->id = %s) string '%s'...", params[1], src);
-	char *dest = (char*) malloc(sizeof(char) * strlen(src) * 2); // *2 in case every character is escaped
-	int len = handlers[params[1]]->escape_string(src, dest);
-	if (len != 0) {
-		if (params[4] < 2) {
-			amx_SetString_(amx, params[3], dest, len);
-		} else {
-			amx_SetString_(amx, params[3], dest, params[4]);
-		}
-		free(dest);
+	if (src == NULL) {
+		log(LOG_DEBUG, "Natives::sql_escape_string: Escaping null string...");
+		amx_SetString_(amx, params[3], "", params[4]);
+		return 0;
 	}
-	return len;
+	if (!is_valid_handler(params[1])) {
+		return -1;
+	}
+	log(LOG_DEBUG, "Natives::sql_escape_string: Escaping (handler->id = %d) string '%s'...", params[1], src);
+	char *dest = (char*) malloc(sizeof(char) * strlen(src) * 2); // *2 in case every character is escaped
+	if (dest != NULL) {
+		int len = handlers[params[1]]->escape_string(src, dest);
+		if (len != 0) {
+			if (params[4] < 2) {
+				amx_SetString_(amx, params[3], dest, len);
+			} else {
+				amx_SetString_(amx, params[3], dest, params[4]);
+			}
+			free(dest);
+		}
+		return len;
+	}
+	return 0;
 }
 
 cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
@@ -557,6 +581,11 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	}
 	char *fieldname = NULL, *tmp = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
+	if (fieldname == NULL) {
+		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		amx_SetString_(amx, dest_str, "", dest_len);
+		return 0;
+	}
 	int len;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
@@ -640,6 +669,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 	}
 	char *fieldname = NULL, *tmp = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
+	if (fieldname == NULL) {
+		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		return 0;
+	}
 	int len, val = 0;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
@@ -720,6 +753,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 	}
 	char *fieldname = NULL, *tmp = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
+	if (fieldname == NULL) {
+		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		return 0;
+	}
 	int len;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	float val = 0.0;
