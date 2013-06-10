@@ -21,6 +21,15 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#
+# make <parameters>
+#
+# Parameters list:
+#	MYSQL=true  - adds support for MySQL 
+#	PGSQL=true  - adds support for PostgreSQL
+#	STATIC=true - links statically MySQL library (only!)
+#
+
 GCC = gcc
 GPP = g++
 
@@ -34,13 +43,19 @@ OUTFILE = bin/sql.so
 # 1: Linking MySQL library (if it's necessary).
 ifdef MYSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_MYSQL=1
-	LIBRARIES += ./lib/mysql/libmysql.so
-	OUTFILE := bin/sql_mysql.so
+	ifdef STATIC
+		LIBRARIES += ./lib/mysql/libmysql.a
+		OUTFILE := bin/sql_mysql_static.so
+	else
+		LIBRARIES += ./lib/mysql/libmysql.so
+		OUTFILE := bin/sql_mysql.so
+	endif
 endif
 
 # 2: Linking PostgreSQL library (if it's necessary).
 ifdef PGSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_PGSQL=2
+	# There is no way to link statically `libpq`.
 	LIBRARIES += ./lib/pgsql/libpq.so
 	OUTFILE := bin/sql_pgsql.so
 endif
@@ -48,7 +63,11 @@ endif
 # It has both (or neither) MySQL and PgSQL support.
 ifdef MYSQL
 	ifdef PGSQL
-		OUTFILE := bin/sql.so
+		ifdef STATIC
+			OUTFILE := bin/sql_static.so
+		else
+			OUTFILE := bin/sql.so
+		endif
 	endif
 endif
 
@@ -60,4 +79,6 @@ all:
 	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/*.cpp
 	$(GPP) -fshort-wchar -shared -o $(OUTFILE) *.o $(LIBRARIES) 
+	
+clean:
 	rm -f *.o
