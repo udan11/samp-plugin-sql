@@ -61,7 +61,7 @@ void *worker(void *param) {
 	while (handler->isActive) {
 		SQL_Query *query = NULL;
 		while (handler->pending.pop(query)) {
-			log(LOG_DEBUG, "worker(handlers[%d]): Executing query (query->id = %d, query->query = %s)...", handler->id, query->id, query->query);
+			log(LOG_DEBUG, "worker[%d]: Executing query (query->id = %d, query->query = %s)...", handler->id, query->id, query->query);
 			handler->execute_query(query);
 		}
 		SLEEP(50);

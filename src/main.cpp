@@ -119,7 +119,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		++next;
 		SQL_Query *query = it->second;
 		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
-			log(LOG_DEBUG, "ProccessTick(): Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
+			log(LOG_DEBUG, "ProccessTick: Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->status = QUERY_STATUS_PROCESSED;
 			int id = query->id;
 			query->execute_callback();
@@ -128,7 +128,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 			}
 		}
 		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
-			log(LOG_DEBUG, "ProccessTick(): Erasing query (query->id = %d)...", query->id);
+			log(LOG_DEBUG, "ProccessTick: Erasing query (query->id = %d)...", query->id);
 			queries.erase(it);
 			delete query;
 		}

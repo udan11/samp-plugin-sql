@@ -284,14 +284,16 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 		log(LOG_DEBUG, "Natives::sql_query: Scheduling query (query->id = %d, query->query = %s, query->callback = %s) for execution...", query->id, query->query, query->callback);
 		handler->pending.push(query);
 	} else {
-		log(LOG_DEBUG, "Natives::sql_query: Executing query (query->id = %d)...", query->id);
+		log(LOG_DEBUG, "Natives::sql_query: Executing query (query->id = %d, query->query = %s)...", query->id, query->query);
 		handler->execute_query(query);
 		if (strlen(query->callback)) {
-			log(LOG_DEBUG, "Natives::sql_query: Executing query callback (query->error = %d)...", query->error);
+			log(LOG_DEBUG, "Natives::sql_query: Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->execute_callback();
 			if (!is_valid_query(id)) {
 				id = 0;
 			}
+		} else {
+			log(LOG_DEBUG, "Natives::sql_query: Query executed (query->id = %d, query->error = %d). No callback found!", query->id, query->error);
 		}
 	}
 	return id;
