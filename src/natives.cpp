@@ -286,7 +286,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	} else {
 		log(LOG_DEBUG, "Natives::sql_query: Executing query (query->id = %d, query->query = %s)...", query->id, query->query);
 		handler->execute_query(query);
-		if (strlen(query->callback)) {
+		if ((strlen(query->callback)) || (query->error != 0)) {
 			log(LOG_DEBUG, "Natives::sql_query: Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
 			query->execute_callback();
 			if (!is_valid_query(id)) {
