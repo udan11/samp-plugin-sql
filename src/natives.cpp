@@ -310,7 +310,7 @@ cell AMX_NATIVE_CALL Natives::sql_free_result(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Freeing query (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_free_result: Freeing query (query->id = %d)...", params[1]);
 	queries.erase(params[1]);
 	delete query;
 	return 1;
@@ -327,7 +327,7 @@ cell AMX_NATIVE_CALL Natives::sql_store_result(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Storing query (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_store_result: Storing query (query->id = %d)...", params[1]);
 	// Switching the state of this query to non-threaded (it has to be freed manually).
 	query->flags &= ~QUERY_THREADED;
 	query->status = QUERY_STATUS_EXECUTED;
@@ -345,7 +345,7 @@ cell AMX_NATIVE_CALL Natives::sql_insert_id(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving insert ID (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_insert_id: Retrieving insert ID (query->id = %d)...", params[1]);
 	return query->results[query->lastResultIdx]->insertId;
 }
 
@@ -360,7 +360,7 @@ cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of affected rows (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_affected_rows: Retrieving the count of affected rows (query->id = %d)...", params[1]);
 	return query->results[query->lastResultIdx]->affectedRows;
 }
 
@@ -375,7 +375,7 @@ cell AMX_NATIVE_CALL Natives::sql_error(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving error code (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_error: Retrieving error code (query->id = %d)...", params[1]);
 	return query->error;
 }
 
@@ -403,7 +403,7 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 			amx_SetString_(amx, params[2], error, params[3]);
 		}
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving error string (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_error_string: Retrieving error string (query->id = %d)...", params[1]);
 	return len;
 }
 
@@ -418,7 +418,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_rows(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of rows (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_num_rows: Retrieving the count of rows (query->id = %d)...", params[1]);
 	return query->results[query->lastResultIdx]->numRows;
 }
 
@@ -433,7 +433,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
 	if (query->status == QUERY_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving the count of fields (query->id = %d)...", params[1]);
+	log(LOG_DEBUG, "Natives::sql_num_fields: Retrieving the count of fields (query->id = %d)...", params[1]);
 	return query->results[query->lastResultIdx]->numFields;
 }
 
@@ -451,7 +451,7 @@ cell AMX_NATIVE_CALL Natives::sql_next_result(AMX *amx, cell* params) {
 	if (!is_valid_handler(query->handler)) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving next result (query->id = %d, next_result = %d)...", params[1], params[2]);
+	log(LOG_DEBUG, "Natives::sql_next_result: Retrieving next result (query->id = %d, next_result = %d)...", params[1], params[2]);
 	return handlers[query->handler]->seek_result(query, params[2]);
 }
 
@@ -501,7 +501,7 @@ cell AMX_NATIVE_CALL Natives::sql_next_row(AMX *amx, cell* params) {
 	if (!is_valid_handler(query->handler)) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_query: Retrieving next row (query->id = %d, next_row = %d)...", params[1], params[2]);
+	log(LOG_DEBUG, "Natives::sql_next_row: Retrieving next row (query->id = %d, next_row = %d)...", params[1], params[2]);
 	return handlers[query->handler]->seek_row(query, params[2]);
 }
 
