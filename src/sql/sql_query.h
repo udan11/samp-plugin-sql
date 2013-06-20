@@ -25,10 +25,10 @@
 
 #pragma once
 
-#include <boost/lockfree/queue.hpp>
-#include <boost/unordered/unordered_map.hpp>
-
+#include <map>
 #include <vector>
+
+#include <boost/lockfree/queue.hpp>
 
 #include "../sdk/amx/amx.h"
 
@@ -58,5 +58,5 @@ class SQL_Query {
 		int execute_callback();
 };
 
-typedef boost::unordered_map<int, class SQL_Query*> queries_t;
+typedef std::map<int, class SQL_Query*> queries_t;
 typedef boost::lockfree::queue<class SQL_Query*> query_qt;
