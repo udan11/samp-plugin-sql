@@ -31,6 +31,7 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_debug", Natives::sql_debug},
 	{"sql_connect", Natives::sql_connect},
 	{"sql_disconnect", Natives::sql_disconnect},
+	{"sql_wait", Natives::sql_wait},
 	{"sql_set_charset", Natives::sql_set_charset},
 	{"sql_get_charset", Natives::sql_get_charset},
 	{"sql_ping", Natives::sql_ping},
@@ -80,6 +81,12 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	}
 #endif
 	logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
+#ifdef SQL_HANDLER_MYSQL
+	logprintf("      + MySQL support is enabled.");
+#endif
+#ifdef SQL_HANDLER_PGSQL
+	logprintf("      + PostgreSQL support is enabled.");
+#endif
 	return true;
 }
 

@@ -108,6 +108,20 @@ cell AMX_NATIVE_CALL Natives::sql_disconnect(AMX *amx, cell *params) {
 	return 1;
 }
 
+cell AMX_NATIVE_CALL Natives::sql_wait(AMX *amx, cell *params) {
+	if (params[0] < 1 * 4) {
+		return 0;
+	}
+	if (!is_valid_handler(params[1])) {
+		return 0;
+	}
+	SQL_Handler *handler = handlers[params[1]];
+	while (!handler->pending.empty()) {
+		SLEEP(TICK_RATE);
+	}
+	return 1;
+}
+
 cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;

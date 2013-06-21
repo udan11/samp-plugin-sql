@@ -30,6 +30,7 @@ class Natives {
 		static cell AMX_NATIVE_CALL sql_debug(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_connect(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_disconnect(AMX *amx, cell *params);
+		static cell AMX_NATIVE_CALL sql_wait(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_set_charset(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_get_charset(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_ping(AMX *amx, cell *params);

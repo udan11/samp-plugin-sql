@@ -86,10 +86,7 @@ int PgSQL_Handler::escape_string(const char *src, char *&dest) {
 }
 
 void PgSQL_Handler::execute_query(SQL_Query *query) {
-	PgSQL_Query *q = dynamic_cast<PgSQL_Query*>(query);
-	if (q == NULL) {
-		return;
-	}
+	PgSQL_Query *q = static_cast<PgSQL_Query*>(query);
 	if (!ping()) {
 		PgSQL_Result *r = new PgSQL_Result();
 		r->result = PQexec(conn, query->query);
@@ -189,11 +186,7 @@ bool PgSQL_Handler::seek_row(SQL_Query *query, int row) {
 }
 
 bool PgSQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	PgSQL_Result *r = dynamic_cast<PgSQL_Result*>(query->results[query->lastResultIdx]);
-	if (r == NULL) {
-		len = 0;
-		return true;
-	}
+	PgSQL_Result *r = static_cast<PgSQL_Result*>(query->results[query->lastResultIdx]);
 	if ((r->numRows != 0) && (0 <= fieldidx) && (fieldidx < r->numFields)) {
 		if (query->flags & QUERY_CACHED) {
 			if (dest == NULL) {

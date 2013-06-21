@@ -64,7 +64,7 @@ void *worker(void *param) {
 			log(LOG_DEBUG, "worker[%d]: Executing query (query->id = %d, query->query = %s)...", handler->id, query->id, query->query);
 			handler->execute_query(query);
 		}
-		SLEEP(50);
+		SLEEP(TICK_RATE);
 	}
 #if defined SQL_HANDLER_MYSQL
 	if (handler->type == SQL_HANDLER_MYSQL) {

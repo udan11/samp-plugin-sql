@@ -43,6 +43,8 @@
 #include "sql_query.h"
 #include "sql_result.h"
 
+#define TICK_RATE						50
+
 extern int lastHandler;
 extern handlers_t handlers;
 

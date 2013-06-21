@@ -80,10 +80,7 @@ int MySQL_Handler::escape_string(const char *src, char *&dest) {
 }
 
 void MySQL_Handler::execute_query(SQL_Query *query) {
-	MySQL_Query *q = dynamic_cast<MySQL_Query*>(query);
-	if (q == NULL) {
-		return;
-	}
+	MySQL_Query *q = static_cast<MySQL_Query*>(query);
 	mutex->lock();
 	if ((!ping()) && (!mysql_query(conn, q->query))) {
 		q->error = 0;
@@ -167,7 +164,7 @@ bool MySQL_Handler::fetch_field(SQL_Query *query, int fieldidx, char *&dest, int
 }
 
 bool MySQL_Handler::seek_row(SQL_Query *query, int row) {
-	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
+	MySQL_Result *r = static_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
 	if (row < 0) {
 		row = r->lastRowIdx - row;
 	}
@@ -187,11 +184,7 @@ bool MySQL_Handler::seek_row(SQL_Query *query, int row) {
 }
 
 bool MySQL_Handler::fetch_num(SQL_Query *query, int fieldidx, char *&dest, int &len) {
-	MySQL_Result *r = dynamic_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
-	if (r == NULL) {
-		len = 0;
-		return true;
-	}
+	MySQL_Result *r = static_cast<MySQL_Result*>(query->results[query->lastResultIdx]);
 	if ((r->numRows != 0) && (0 <= fieldidx) && (fieldidx < r->numFields)) {
 		if (query->flags & QUERY_CACHED) {
 			if (dest == NULL) {

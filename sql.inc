@@ -24,7 +24,7 @@
  */
  
 /**
- * <version>2.1</version>
+ * <version>2.2</version>
  * <remarks>
  * Data types:
  * 		SQL	- a SQL database handle
@@ -184,6 +184,13 @@ native SQL:sql_connect(sql_type, host[], user[], pass[], db[], port = 0);
  * <returns>No return value.</returns>
  */
 native sql_disconnect(SQL:handle);
+
+/**
+ * <summary>Waits for a handle to finish its activity (all queries to be executed).</summary>
+ * <param name="handle">The SQL handle which has to be disconnected.</param>
+ * <returns>No return value.</returns>
+ */
+native sql_wait(SQL:handle);
 
 /**
  * <summary>Sets default character set.</summary>

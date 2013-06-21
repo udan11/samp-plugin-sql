@@ -68,4 +68,4 @@ class SQL_Handler {
 		virtual bool fetch_assoc(SQL_Query *query, char *fieldname, char *&dest, int &len) = 0;
 };
 
-typedef boost::unordered_map<int, class SQL_Handler*> handlers_t;
+typedef std::map<int, class SQL_Handler*> handlers_t;
