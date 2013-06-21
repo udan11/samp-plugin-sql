@@ -129,8 +129,8 @@ void MySQL_Handler::execute_query(SQL_Query *query) {
 		query->error = get_errno();
 		query->errorMsg = get_error();
 	}
-	mutex->unlock();
 	q->status = QUERY_STATUS_EXECUTED;
+	mutex->unlock();
 }
 
 bool MySQL_Handler::seek_result(SQL_Query *query, int result) {
