@@ -187,7 +187,7 @@ native sql_disconnect(SQL:handle);
 
 /**
  * <summary>Waits for a handle to finish its activity (all queries to be executed).</summary>
- * <param name="handle">The SQL handle which has to be disconnected.</param>
+ * <param name="handle">The SQL handle.</param>
  * <returns>No return value.</returns>
  */
 native sql_wait(SQL:handle);
