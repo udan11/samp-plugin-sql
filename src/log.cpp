@@ -29,7 +29,7 @@
 #include <cstring>
 #include <ctime>
 
-#include "mutex.h"
+//#include "mutex.h"
 
 #include "log.h"
 
@@ -38,7 +38,7 @@ logprintf_t logprintf;
 int logFile = LOG_ALL;
 int logConsole = LOG_WARNING;
 
-Mutex log_mutex;
+//Mutex logMutex;
 
 void log(int level, char *format, ...) {
 	if ((level < logFile) && (level < logConsole)) {
@@ -66,7 +66,7 @@ void log(int level, char *format, ...) {
 		timeinfo = localtime(&rawtime);
 		strftime(timestamp, sizeof(timestamp), "%X", timeinfo);
 		vsnprintf(msg, len, format, args);
-		log_mutex.lock();
+		//logMutex.lock();
 		if (level >= logFile) {
 			FILE *file = fopen(LOG_FILE, "a");
 			if (file != NULL) {
@@ -77,7 +77,7 @@ void log(int level, char *format, ...) {
 		if (level >= logConsole) {
 			logprintf("[plugin.sql]%s %s", prefix, msg);
 		}
-		log_mutex.unlock();
+		//logMutex.unlock();
 		free(msg);
 	}
 	va_end(args);
