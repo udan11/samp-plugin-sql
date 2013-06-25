@@ -23,6 +23,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdio>
+
 #include "sdk/amx/amx.h"
 #include "sdk/amxstring.h"
 
@@ -483,8 +485,8 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	if (!is_valid_handler(query->handler)) {
 		return 0;
 	}
-	int len;
 	char *tmp = NULL;
+	int len;
 	bool isCopy = handlers[query->handler]->fetch_field(query, params[2], tmp, len);
 	if (len != 0) {
 		if (params[4] < 2) {
@@ -501,7 +503,50 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	return len;
 }
 
-cell AMX_NATIVE_CALL Natives::sql_next_row(AMX *amx, cell* params) {
+cell AMX_NATIVE_CALL Natives::sql_fetch_row(AMX *amx, cell *params) {
+	if (params[0] < 4 * 4) {
+		return 0;
+	}
+	if (!is_valid_query(params[1])) {
+		return 0;
+	}
+	SQL_Query *query = queries[params[1]];
+	if (query->status == QUERY_STATUS_NONE) {
+		return 0;
+	}
+	if (!is_valid_handler(query->handler)) {
+		return 0;
+	}
+	SQL_Handler *handler = handlers[query->handler];
+	log(LOG_DEBUG, "Natives::sql_fetch_row: Fetching a row (query->id = %d)...", params[1]);
+	char *sep;
+	amx_StrParam(amx, params[2], sep);
+	char *ret = (char*) malloc(4096 * sizeof(char));
+	memset(ret, 0, 4096 * sizeof(char));
+	for (int i = 0, fields = query->results[query->lastResultIdx]->numFields; i != fields; ++i) {
+		char *tmp = NULL;
+		int len;
+		bool isCopy = handler->fetch_num(query, i, tmp, len);
+		sprintf(ret, "%s%s%s", ret, tmp, sep);
+		if (isCopy) {
+			free(tmp);
+		}
+	}
+	int len = strlen(ret);
+	if (len != 0) {
+		if (params[4] < 2) { // Probably a multi-dimensional array.
+			amx_SetString_(amx, params[3], ret, len);
+		} else {
+			amx_SetString_(amx, params[3], ret, params[4]);
+		}
+		free(ret);
+	} else {
+		log(LOG_WARNING, "Natives::sql_fetch_row: This row is empty.");
+	}
+	return 0;
+}
+
+cell AMX_NATIVE_CALL Natives::sql_next_row(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
@@ -548,8 +593,8 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	if (row != -1) {
 		handler->seek_row(query, row);
 	}
+	char *tmp = NULL;
 	int len;
-	char *tmp = 0;
 	bool isCopy = handler->fetch_num(query, fieldidx, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) { // Probably a multi-dimensional array.
@@ -595,13 +640,14 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	if (row != -1) {
 		handler->seek_row(query, row);
 	}
-	char *fieldname = NULL, *tmp = NULL;
+	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		amx_SetString_(amx, dest_str, "", dest_len);
 		return 0;
 	}
+	char *tmp = NULL;
 	int len;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
@@ -644,8 +690,8 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_int(AMX *amx, cell *params) {
 	if (row != -1) {
 		handler->seek_row(query, row);
 	}
-	int len, val = 0;
 	char *tmp = NULL;
+	int len, val = 0;
 	bool isCopy = handler->fetch_num(query, fieldidx, tmp, len);
 	if (len != 0) {
 		val = atoi(tmp);
@@ -683,12 +729,13 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 	if (row != -1) {
 		handler->seek_row(query, row);
 	}
-	char *fieldname = NULL, *tmp = NULL;
+	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		return 0;
 	}
+	char *tmp = NULL;
 	int len, val = 0;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {

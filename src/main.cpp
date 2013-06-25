@@ -48,6 +48,7 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_num_fields", Natives::sql_num_fields},
 	{"sql_next_result", Natives::sql_next_result},
 	{"sql_field_name", Natives::sql_field_name},
+	{"sql_fetch_row", Natives::sql_fetch_row},
 	// Polymorphic natives.
 	{"sql_next_row", Natives::sql_next_row},
 	{"sql_get_field", Natives::sql_get_field},

@@ -24,7 +24,7 @@
  */
  
 /**
- * <version>2.2</version>
+ * <version>2.3</version>
  * <remarks>
  * Data types:
  * 		SQL	- a SQL database handle
@@ -320,9 +320,19 @@ native sql_next_result(Result:result, idx = -1);
  * <param name="field">The index of the field.</param>
  * <param name="dest">The destination where the field will be stored.</param>
  * <param name="dest_len">The capacity of the destination.</param>
- * <returns>The count of fields contained in the result.</returns>
+ * <returns>The length of field's name.</returns>
  */
 native sql_field_name(Result:result, field, dest[], dest_len = sizeof(dest));
+
+/**
+ * <summary>Fetches an entire row inserting the separator between each cell.</summary>
+ * <param name="result"></param>
+ * <param name="separator"></param>
+ * <param name="dest">The destination where the field will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+  * <returns>The length of the row.</returns>
+ */
+native sql_fetch_row(Result:result, sep[], dest[], dest_len = sizeof(dest));
 
 /**
  * <summary>Jumps to a specific row.</summary>

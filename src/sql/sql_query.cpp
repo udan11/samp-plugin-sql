@@ -61,13 +61,14 @@ int SQL_Query::execute_callback() {
 		if (!amx_FindPublic(amx, callback, &funcidx)) {
 			int a_idx = paramsArr.size(), c_idx = paramsC.size(), s_idx = paramsStr.size();
 			for (int i = strlen(format) - 1; i != -1; --i) {
+				cell tmp;
 				switch (format[i]) {
 					case 'a':
 					case 'A':
-						if (amx_addr < NULL) {
-							amx_addr = NULL;
+						amx_PushArray(amx, &tmp, NULL, paramsArr[--a_idx].first, paramsArr[a_idx].second);
+						if (amx_addr == -1) {
+							amx_addr = tmp;
 						}
-						amx_PushArray(amx, &amx_addr, NULL, paramsArr[--a_idx].first, paramsArr[a_idx].second);
 						break;
 					case 'b':
 					case 'B':
@@ -87,10 +88,10 @@ int SQL_Query::execute_callback() {
 						break;
 					case 's':
 					case 'S':
-						if (amx_addr < NULL) {
-							amx_addr = NULL;
+						amx_PushString(amx, &tmp, NULL, paramsStr[--s_idx], 0, 0);
+						if (amx_addr == -1) {
+							amx_addr = tmp;
 						}
-						amx_PushString(amx, &amx_addr, NULL, paramsStr[--s_idx], 0, 0);
 						break;
 				}
 			}
@@ -98,16 +99,16 @@ int SQL_Query::execute_callback() {
 		}
 	} else {
 		if (!amx_FindPublic(amx, QUERY_ERROR_CALLBACK, &funcidx)) {
-			amx_addr = NULL;
+			cell tmp;
 			amx_PushString(amx, &amx_addr, NULL, callback, 0, 0);
-			amx_PushString(amx, &amx_addr, NULL, query, 0, 0);
-			amx_PushString(amx, &amx_addr, NULL, errorMsg, 0, 0);
-			amx_Push(amx, (cell) error);
-			amx_Push(amx, (cell) handler);
+			amx_PushString(amx, &tmp, NULL, query, 0, 0);
+			amx_PushString(amx, &tmp, NULL, errorMsg, 0, 0);
+			amx_Push(amx, error);
+			amx_Push(amx, handler);
 			amx_Exec(amx, &ret, funcidx);
 		}
 	}
-	if (amx_addr >= NULL) {
+	if (amx_addr != -1) {
 		amx_Release(amx, amx_addr);
 	}
 	return (int) ret;
