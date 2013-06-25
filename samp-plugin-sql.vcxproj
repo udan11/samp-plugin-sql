@@ -68,12 +68,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - PostgreSQL only|Win32'">
     <OutDir>bin\</OutDir>
     <IntDir>bin\obj\</IntDir>
-    <TargetName>sql_pgsql</TargetName>
+    <TargetName>pgsql</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - MySQL only|Win32'">
     <OutDir>bin\</OutDir>
     <IntDir>bin\obj\</IntDir>
-    <TargetName>sql_mysql</TargetName>
+    <TargetName>mysql</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

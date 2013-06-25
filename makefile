@@ -45,10 +45,10 @@ ifdef MYSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_MYSQL=1
 	ifdef STATIC
 		LIBRARIES += ./lib/mysql/libmysql.a
-		OUTFILE := bin/sql_mysql_static.so
+		OUTFILE := bin/mysql_static.so
 	else
 		LIBRARIES += ./lib/mysql/libmysql.so
-		OUTFILE := bin/sql_mysql.so
+		OUTFILE := bin/mysql.so
 	endif
 endif
 
@@ -57,7 +57,7 @@ ifdef PGSQL
 	COMPILE_FLAGS += -DSQL_HANDLER_PGSQL=2
 	# There is no way to link statically `libpq`.
 	LIBRARIES += ./lib/pgsql/libpq.so
-	OUTFILE := bin/sql_pgsql.so
+	OUTFILE := bin/pgsql.so
 endif
 
 # It has both (or neither) MySQL and PgSQL support.
