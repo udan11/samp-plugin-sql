@@ -37,7 +37,7 @@ GPP = g++
 COMPILE_FLAGS = -c -fPIC -m32 -O3 -w -Wall -Iinclude/ -DLINUX
 LIBRARIES = -lpthread
 
-# Output filename.
+# Output file name.
 OUTFILE = bin/sql.so
 
 # 1: Linking MySQL library (if it's necessary).
@@ -78,7 +78,7 @@ all:
 	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/*.cpp
-	$(GPP) -fshort-wchar -shared -o $(OUTFILE) *.o $(LIBRARIES) 
+	$(GPP) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES) 
 	
 clean:
 	rm -f *.o
