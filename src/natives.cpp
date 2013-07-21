@@ -152,6 +152,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 	log(LOG_DEBUG, "Natives::sql_get_charset: Getting handler's charset (handler->id = %s, handler->get_charset() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
+		log(LOG_DEBUG, "Natives::sql_get_charset: Specified destination size is smaller than 2, setting it to %s.", len);
 		amx_SetString_(amx, params[2], tmp, len);
 	} else {
 		amx_SetString_(amx, params[2], tmp, params[3]);
@@ -181,6 +182,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 	log(LOG_DEBUG, "Natives::sql_get_stat: Getting handler's statistics (handler->id = %s, handler->get_stat() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
+		log(LOG_DEBUG, "Natives::sql_get_stat: Specified destination size is smaller than 2, setting it to %s.", len);
 		amx_SetString_(amx, params[2], tmp, len);
 	} else {
 		amx_SetString_(amx, params[2], tmp, params[3]);
@@ -208,6 +210,7 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 		int len = handlers[params[1]]->escape_string(src, dest);
 		if (len != 0) {
 			if (params[4] < 2) {
+				log(LOG_DEBUG, "Natives::sql_escape_string: Specified destination size is smaller than 2, setting it to %s.", len);
 				amx_SetString_(amx, params[3], dest, len);
 			} else {
 				amx_SetString_(amx, params[3], dest, params[4]);
@@ -414,6 +417,7 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 		char *error = (char*) malloc(sizeof(char) * len);
 		strcpy(error, query->errorMsg);
 		if (params[3] < 2) {
+			log(LOG_DEBUG, "Natives::sql_error_string: Specified destination size is smaller than 2, setting it to %s.", len);
 			amx_SetString_(amx, params[2], error, len);
 		} else {
 			amx_SetString_(amx, params[2], error, params[3]);
@@ -490,6 +494,7 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	bool isCopy = handlers[query->handler]->fetch_field(query, params[2], tmp, len);
 	if (len != 0) {
 		if (params[4] < 2) {
+			log(LOG_DEBUG, "Natives::sql_field_name: Specified destination size is smaller than 2, setting it to %s.", len);
 			amx_SetString_(amx, params[3], tmp, len);
 		} else {
 			amx_SetString_(amx, params[3], tmp, params[4]);
@@ -535,6 +540,7 @@ cell AMX_NATIVE_CALL Natives::sql_fetch_row(AMX *amx, cell *params) {
 	int len = strlen(ret);
 	if (len != 0) {
 		if (params[4] < 2) { // Probably a multi-dimensional array.
+			log(LOG_DEBUG, "Natives::sql_fetch_row: Specified destination size is smaller than 2, setting it to %s.", len);
 			amx_SetString_(amx, params[3], ret, len);
 		} else {
 			amx_SetString_(amx, params[3], ret, params[4]);
@@ -598,6 +604,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	bool isCopy = handler->fetch_num(query, fieldidx, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) { // Probably a multi-dimensional array.
+			log(LOG_DEBUG, "Natives::sql_get_field: Specified destination size is smaller than 2, setting it to %s.", len);
 			amx_SetString_(amx, dest_str, tmp, len);
 		} else {
 			amx_SetString_(amx, dest_str, tmp, dest_len);
@@ -652,6 +659,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) {
+			log(LOG_DEBUG, "Natives::sql_get_field_assoc: Specified destination size is smaller than 2, setting it to %s.", len);
 			amx_SetString_(amx, dest_str, tmp, len);
 		} else {
 			amx_SetString_(amx, dest_str, tmp, dest_len);
@@ -814,12 +822,13 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 	if (row != -1) {
 		handler->seek_row(query, row);
 	}
-	char *fieldname = NULL, *tmp = NULL;
+	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
 		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		return 0;
 	}
+	char *tmp = NULL;
 	int len;
 	bool isCopy = handler->fetch_assoc(query, fieldname, tmp, len);
 	float val = 0.0;

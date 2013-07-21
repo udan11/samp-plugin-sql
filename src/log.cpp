@@ -38,6 +38,9 @@ logprintf_t logprintf;
 int logFile = LOG_ALL;
 int logConsole = LOG_WARNING;
 
+// NOTE: This logging system is not thread-safe. Using it in multiple threads
+// requires a mutex, which decreases the performance significantly.
+
 //Mutex logMutex;
 
 void log(int level, char *format, ...) {
