@@ -149,7 +149,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) handlers[params[1]]->get_charset();
-	log(LOG_DEBUG, "Natives::sql_get_charset: Getting handler's charset (handler->id = %s, handler->get_charset() = %s)...", params[1], tmp);
+	log(LOG_DEBUG, "Natives::sql_get_charset: Getting handler's charset (handler->id = %d, handler->get_charset() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
 		log(LOG_DEBUG, "Natives::sql_get_charset: Specified destination size is smaller than 2, setting it to %s.", len);
@@ -179,7 +179,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) handlers[params[1]]->get_stat();
-	log(LOG_DEBUG, "Natives::sql_get_stat: Getting handler's statistics (handler->id = %s, handler->get_stat() = %s)...", params[1], tmp);
+	log(LOG_DEBUG, "Natives::sql_get_stat: Getting handler's statistics (handler->id = %d, handler->get_stat() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
 		log(LOG_DEBUG, "Natives::sql_get_stat: Specified destination size is smaller than 2, setting it to %s.", len);
