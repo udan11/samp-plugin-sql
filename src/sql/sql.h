@@ -55,7 +55,7 @@ extern bool is_valid_handler(int id);
 extern bool is_valid_query(int id);
 
 #ifdef _WIN32
-	extern DWORD WINAPI worker(LPVOID param);
+	extern DWORD WINAPI sql_worker(LPVOID param);
 #else
-	extern void *worker(void *param);
+	extern void *sql_worker(void *param);
 #endif

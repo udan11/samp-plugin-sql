@@ -88,6 +88,7 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	if (handler->connect(host, user, pass, db, params[6])) {
 		log(LOG_INFO, "Natives::sql_connect: Connection (handler->id = %d) was succesful!", id);
 		handlers[id] = handler;
+		handler->start_worker();
 	} else {
 		log(LOG_WARNING, "Natives::sql_connect: Connection (handler->id = %d) failed! (error = %d, %s)", id, handler->get_errno(), handler->get_error());
 		delete handler;
@@ -105,6 +106,7 @@ cell AMX_NATIVE_CALL Natives::sql_disconnect(AMX *amx, cell *params) {
 	}
 	SQL_Handler *handler = handlers[params[1]];
 	handlers.erase(params[1]);
+	handler->stop_worker();
 	delete handler;
 	log(LOG_INFO, "Natives::sql_disconnect: Handler (handler->id = %d) was destroyed!", params[1]);
 	return 1;

@@ -50,7 +50,8 @@ class SQL_Handler {
 		pthread_t thread;
 	#endif
 		SQL_Handler(int id, AMX *amx);
-		~SQL_Handler();
+		void start_worker();
+		void stop_worker();
 		virtual bool connect(const char *host, const char *user, const char *pass, const char *db, int port) = 0;
 		virtual void disconnect() = 0;
 		virtual int get_errno() = 0;

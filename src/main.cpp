@@ -101,6 +101,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
 		SQL_Handler *handler = it->second;
 		if (handler->amx == amx) {
 			handlers.erase(it);
+			handler->stop_worker();
 			delete handler;
 		}
 	}

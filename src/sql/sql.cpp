@@ -48,9 +48,9 @@ bool is_valid_query(int id) {
 }
 
 #ifdef _WIN32
-DWORD WINAPI worker(LPVOID param) {
+DWORD WINAPI sql_worker(LPVOID param) {
 #else
-void *worker(void *param) {
+void *sql_worker(void *param) {
 #endif
 	SQL_Handler* handler = (SQL_Handler*) param;
 #if defined SQL_HANDLER_MYSQL

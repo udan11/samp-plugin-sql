@@ -44,4 +44,4 @@
 #include "log.h"
 #include "natives.h"
 
-#define PLUGIN_VERSION					"v2.3"
+#define PLUGIN_VERSION					"v2.4"

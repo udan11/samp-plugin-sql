@@ -29,20 +29,23 @@
 SQL_Handler::SQL_Handler(int id, AMX *amx) : pending(32) {
 	this->id = id;
 	this->amx = amx;
+}
+
+void SQL_Handler::start_worker() {
 	isActive = true;
 #ifdef _WIN32
 	DWORD threadId = 0;
-	thread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE) worker, (LPVOID) this, NULL, &threadId);
+	thread = CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE) sql_worker, (LPVOID) this, NULL, &threadId);
 #else
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-	pthread_create(&thread, &attr, &worker, (void*) this);
+	pthread_create(&thread, &attr, &sql_worker, (void*) this);
 	pthread_attr_destroy(&attr);
 #endif
 }
 
-SQL_Handler::~SQL_Handler() {
+void SQL_Handler::stop_worker() {
 	isActive = false;
 #ifdef _WIN32
 	WaitForSingleObject(thread, INFINITE);
