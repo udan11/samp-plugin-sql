@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <boost/unordered/unordered_map.hpp>
+#include <map>
 
 #ifdef _WIN32
 	#include <Windows.h>
