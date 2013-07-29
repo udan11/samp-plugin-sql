@@ -33,9 +33,19 @@
 
 #include "log.h"
 
+/**
+ * logprintf
+ */
 logprintf_t logprintf;
 
+/** 
+ * The minimum level of logs tha are saved into LOG_FILE.
+ */
 int logFile = LOG_ALL;
+
+/**
+ * The minimum level of logs that are printed to the console.
+ */
 int logConsole = LOG_WARNING;
 
 // NOTE: This logging system is not thread-safe. Using it in multiple threads
@@ -43,6 +53,11 @@ int logConsole = LOG_WARNING;
 
 //Mutex logMutex;
 
+/**
+ * Formats and logs a message (in file or console).
+ * @param level
+ * @param format
+ */
 void log(int level, char *format, ...) {
 	if ((level < logFile) && (level < logConsole)) {
 		return;

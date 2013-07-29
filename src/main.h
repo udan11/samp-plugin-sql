@@ -29,19 +29,7 @@
 #include <cstdlib>
 
 #include "sdk/amx/amx.h"
+#include "sdk/amx/amx_ex.h"
 #include "sdk/plugincommon.h"
-
-#include "sql/sql.h"
-
-#ifdef SQL_HANDLER_MYSQL
-	#include "mysql/mysql.h"
-#endif
-
-#ifdef SQL_HANDLER_PGSQL
-	#include "pgsql/pgsql.h"
-#endif
-
-#include "log.h"
-#include "natives.h"
 
 #define PLUGIN_VERSION					"v2.4"

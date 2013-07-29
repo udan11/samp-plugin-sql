@@ -25,52 +25,20 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+#include "pgsql.h"
+ 
+#ifdef PLUGIN_SUPPORTS_PGSQL
+
+	#include "../SQL_Statement.h"
+
+	class PgSQL_Statement : public SQL_Statement {
+
+		public:
+			
+			/**
+			 * Constructor.
+			 */
+			PgSQL_Statement(int id, AMX *amx, int connectionId);
+	};
+
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

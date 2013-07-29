@@ -25,52 +25,76 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
-#endif
+#include "sql.h"
 
-class Mutex {
+/**
+ * An abstract SQL result set.
+ */
+class SQL_Pools {
 
 	public:
-
+	
 		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
+		 * The ID of the last connection.
 		 */
-		bool isEnabled;
-
+		static int lastConnectionId;
+	
+		/** 
+		 * A map of active connections.
+		 */
+		static connectionsMap_t connections;
+	
 		/**
-		 * Locks the mutex.
+		 * The ID of the last connection.
 		 */
-		void lock();
-
+		static int lastStatementId;
+		
 		/**
-		 * Unlocks the mutex.
+		 * A map of active statements.
 		 */
-		void unlock();
+		static statementsMap_t statements;
+	
+		/**
+		 * Checks if a connection is valid.
+		 * @param id
+		 * @return
+		 */
+		static bool isValidConnection(int id);
+	
+		/**
+		 * Checks if a statement is valid.
+		 * @param id
+		 * @return
+		 */
+		static bool isValidStatement(int id);
+		
+		/**
+		 * Creates a new SQL connection instsance.
+		 * @param type
+		 * @return
+		 */ 
+		static SQL_Connection *newConnection(AMX *amx, int type);
+		
+		/**
+		 * Creates a new SQL statement instsance.
+		 * @param amx
+		 * @param connectionId
+		 * @return
+		 */ 
+		static SQL_Statement *newStatement(AMX *amx, int connectionId);
+
+	/**
+	 * Static class.
+	 */
+	private:
 
 		/**
 		 * Constructor.
 		 */
-		Mutex();
+		SQL_Pools();
 
 		/**
 		 * Destructor.
 		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
+		~SQL_Pools();
 };

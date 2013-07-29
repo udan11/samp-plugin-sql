@@ -25,52 +25,57 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
-#endif
+#include "sql.h"
 
-class Mutex {
+/**
+ * An abstract SQL result set.
+ */
+class SQL_ResultSet {
 
 	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
+	
 		/**
 		 * Constructor.
 		 */
-		Mutex();
-
+		SQL_ResultSet();
+		
 		/**
 		 * Destructor.
 		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
+		virtual ~SQL_ResultSet();
+		
+		/**
+		 * Insert ID.
+		 */
+		int insertId;
+		
+		/**
+		 * The number of affected rows.
+		 */
+		int affectedRows;
+		
+		/**
+		 * The number of rows.
+		 */
+		int numRows;
+		
+		/**
+		 * The number of fields.
+		 */
+		int numFields;
+		
+		/** 
+		 * Last row fetched.
+		 */
+		int lastRowIdx;
+		
+		/**
+		 * The names of the fields of this result set.
+		 */
+		std::vector<std::pair<char*, int > > fieldNames;
+		
+		/**
+		 * A cached copy of the result set.
+		 */
+		std::vector<std::vector<std::pair<char*, int> > > cache;
 };

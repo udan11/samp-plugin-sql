@@ -25,7 +25,12 @@
 
 #pragma once
 
+#include "sdk/amx/amx.h"
+
 class Natives {
+	/**
+	 * Exported AMX natives.
+	 */
 	public:
 		static cell AMX_NATIVE_CALL sql_debug(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_connect(AMX *amx, cell *params);
@@ -55,7 +60,19 @@ class Natives {
 		static cell AMX_NATIVE_CALL sql_get_field_assoc_int(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_get_field_float(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_get_field_assoc_float(AMX* amx, cell* params);
+
+	/**
+	 * Static class.
+	 */
 	private:
+		
+		/**
+		 * Constructor.
+		 */
 		Natives();
+
+		/**
+		 * Destructor.
+		 */
 		~Natives();
 };

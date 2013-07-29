@@ -23,54 +23,20 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "MySQL_ResultSet.h"
+ 
+#ifdef PLUGIN_SUPPORTS_MYSQL
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+	MySQL_ResultSet::MySQL_ResultSet() {
+		result = NULL;
+		lastRow = NULL;
+		lastRowLens = NULL;
+	}
+
+	MySQL_ResultSet::~MySQL_ResultSet() {
+		if (result != NULL) {
+			mysql_free_result(result);
+		}
+	}
+
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

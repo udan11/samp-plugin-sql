@@ -22,55 +22,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
+ 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+#include "../sql.h"
+
+#ifdef PLUGIN_SUPPORTS_PGSQL
+
+	#include <pgsql/libpq-fe.h>
+
+	#define PGSQL_DEFAULT_PORT			5432
+
+	#if _MSC_VER
+		#define snprintf _snprintf
+	#endif
+	
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

@@ -25,37 +25,31 @@
 
 #pragma once
 
-//#define SQL_HANDLER_MYSQL				1
-//#define SQL_HANDLER_PGSQL				2
+#include <vector>
 
-#ifdef _WIN32
-	#include <Windows.h>
-	#define SLEEP(x) Sleep(x);
-#else
-	#include "pthread.h"
-	#include <unistd.h>
-	#define SLEEP(x) usleep(x * 1000);
-	typedef unsigned long DWORD;
-	typedef unsigned int UINT;
-#endif
+#include <boost/unordered_map.hpp>
+#include <boost/lockfree/queue.hpp>
 
-#include "sql_handler.h"
-#include "sql_query.h"
-#include "sql_result.h"
+#include "../sdk/amx/amx.h"
+#include "../sdk/amx/amx_ex.h"
 
-#define TICK_RATE						50
+#define ERROR_CALLBACK					"OnSQLError"
 
-extern int lastHandler;
-extern handlers_t handlers;
+#define STATEMENT_FLAGS_NONE			0
+#define STATEMENT_FLAGS_THREADED		1
+#define STATEMENT_FLAGS_CACHED			2
 
-extern int lastQuery;
-extern queries_t queries;
+#define STATEMENT_STATUS_NONE			0
+#define STATEMENT_STATUS_EXECUTED		1
+#define STATEMENT_STATUS_PROCESSED		2
 
-extern bool is_valid_handler(int id);
-extern bool is_valid_query(int id);
+#define WORKER_TICK_RATE				50
 
-#ifdef _WIN32
-	extern DWORD WINAPI sql_worker(LPVOID param);
-#else
-	extern void *sql_worker(void *param);
-#endif
+// SQL_Connection
+class SQL_Connection;
+typedef boost::unordered_map<int, class SQL_Connection*> connectionsMap_t;
+
+// SQL_Statement
+class SQL_Statement;
+typedef boost::unordered_map<int, class SQL_Statement*> statementsMap_t;
+typedef boost::lockfree::queue<class SQL_Statement*> statementsQueue_t;

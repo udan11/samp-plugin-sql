@@ -6,59 +6,56 @@
     <ClInclude Include="src\natives.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\main.h" />
-    <ClInclude Include="src\sql\sql_handler.h">
+    <ClInclude Include="src\sql\SQL_Pools.h">
       <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\mysql\mysql_handler.h">
-      <Filter>mysql</Filter>
-    </ClInclude>
-    <ClInclude Include="src\mysql\mysql_query.h">
-      <Filter>mysql</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sql\sql_query.h">
+    <ClInclude Include="src\sql\SQL_ResultSet.h">
       <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\sql\sql_result.h">
+    <ClInclude Include="src\sql\SQL_Statement.h">
       <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\mysql\mysql_result.h">
-      <Filter>mysql</Filter>
+    <ClInclude Include="src\sql\SQL_Connection.h">
+      <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\pgsql\pgsql_handler.h">
-      <Filter>pgsql</Filter>
+    <ClInclude Include="src\sql\mysql\MySQL_ResultSet.h">
+      <Filter>sql\mysql</Filter>
     </ClInclude>
-    <ClInclude Include="src\pgsql\pgsql_query.h">
-      <Filter>pgsql</Filter>
+    <ClInclude Include="src\sql\mysql\MySQL_Statement.h">
+      <Filter>sql\mysql</Filter>
     </ClInclude>
-    <ClInclude Include="src\pgsql\pgsql_result.h">
-      <Filter>pgsql</Filter>
+    <ClInclude Include="src\sql\mysql\mysql.h">
+      <Filter>sql\mysql</Filter>
     </ClInclude>
-    <ClInclude Include="src\mysql\mysql.h">
-      <Filter>mysql</Filter>
+    <ClInclude Include="src\sql\mysql\MySQL_Connection.h">
+      <Filter>sql\mysql</Filter>
     </ClInclude>
-    <ClInclude Include="src\pgsql\pgsql.h">
-      <Filter>pgsql</Filter>
+    <ClInclude Include="src\sql\sql.h">
+      <Filter>sql</Filter>
     </ClInclude>
-    <ClInclude Include="src\sdk\amx\amx.h">
+    <ClInclude Include="src\sql\pgsql\PgSQL_Connection.h">
+      <Filter>sql\pgsql</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sql\pgsql\PgSQL_ResultSet.h">
+      <Filter>sql\pgsql</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sql\pgsql\PgSQL_Statement.h">
+      <Filter>sql\pgsql</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sql\pgsql\pgsql.h">
+      <Filter>sql\pgsql</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\plugincommon.h">
+      <Filter>sdk</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\amx\amx_ex.h">
       <Filter>sdk\amx</Filter>
     </ClInclude>
     <ClInclude Include="src\sdk\amx\sclinux.h">
       <Filter>sdk\amx</Filter>
     </ClInclude>
-    <ClInclude Include="src\sdk\amxtable.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sdk\plugincommon.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sdk\amxredirect.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sdk\amxstring.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sql\sql.h">
-      <Filter>sql</Filter>
+    <ClInclude Include="src\sdk\amx\amx.h">
+      <Filter>sdk\amx</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -66,44 +63,41 @@
     <ClCompile Include="src\mutex.cpp" />
     <ClCompile Include="src\natives.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\sql\sql_handler.cpp">
+    <ClCompile Include="src\sql\SQL_ResultSet.cpp">
       <Filter>sql</Filter>
     </ClCompile>
-    <ClCompile Include="src\mysql\mysql_query.cpp">
-      <Filter>mysql</Filter>
-    </ClCompile>
-    <ClCompile Include="src\mysql\mysql_handler.cpp">
-      <Filter>mysql</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sql\sql_query.cpp">
+    <ClCompile Include="src\sql\SQL_Statement.cpp">
       <Filter>sql</Filter>
     </ClCompile>
-    <ClCompile Include="src\sql\sql_result.cpp">
+    <ClCompile Include="src\sql\SQL_Connection.cpp">
       <Filter>sql</Filter>
     </ClCompile>
-    <ClCompile Include="src\mysql\mysql_result.cpp">
-      <Filter>mysql</Filter>
+    <ClCompile Include="src\sql\SQL_Pools.cpp">
+      <Filter>sql</Filter>
     </ClCompile>
-    <ClCompile Include="src\pgsql\pgsql_handler.cpp">
-      <Filter>pgsql</Filter>
+    <ClCompile Include="src\sql\mysql\MySQL_ResultSet.cpp">
+      <Filter>sql\mysql</Filter>
     </ClCompile>
-    <ClCompile Include="src\pgsql\pgsql_query.cpp">
-      <Filter>pgsql</Filter>
+    <ClCompile Include="src\sql\mysql\MySQL_Statement.cpp">
+      <Filter>sql\mysql</Filter>
     </ClCompile>
-    <ClCompile Include="src\pgsql\pgsql_result.cpp">
-      <Filter>pgsql</Filter>
+    <ClCompile Include="src\sql\mysql\MySQL_Connection.cpp">
+      <Filter>sql\mysql</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sql\pgsql\PgSQL_ResultSet.cpp">
+      <Filter>sql\pgsql</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sql\pgsql\PgSQL_Statement.cpp">
+      <Filter>sql\pgsql</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sql\pgsql\PgSQL_Connection.cpp">
+      <Filter>sql\pgsql</Filter>
     </ClCompile>
     <ClCompile Include="src\sdk\amxplugin.cpp">
       <Filter>sdk</Filter>
     </ClCompile>
-    <ClCompile Include="src\sdk\amxredirect.cpp">
-      <Filter>sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sdk\amxstring.cpp">
-      <Filter>sdk</Filter>
-    </ClCompile>
-    <ClCompile Include="src\sql\sql.cpp">
-      <Filter>sql</Filter>
+    <ClCompile Include="src\sdk\amx\amx_ex.cpp">
+      <Filter>sdk\amx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -113,17 +107,17 @@
     <Filter Include="sdk">
       <UniqueIdentifier>{2d1ea69c-9e9d-41b3-9cd0-750a9bd25d39}</UniqueIdentifier>
     </Filter>
-    <Filter Include="sql">
-      <UniqueIdentifier>{54335f95-a0e5-412e-956f-f90b3c4bcf2e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="mysql">
-      <UniqueIdentifier>{f39040f5-0bb4-4987-a16e-2589ea07a0ac}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="pgsql">
-      <UniqueIdentifier>{4c9d3761-1701-4248-a7cc-6789bcabc48b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="sdk\amx">
       <UniqueIdentifier>{f5eb5886-8692-4f6a-889e-eda082d981aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sql">
+      <UniqueIdentifier>{1ff00801-f127-4c0a-abae-9d86c54c562c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sql\mysql">
+      <UniqueIdentifier>{c91bda83-5f7a-4155-ac1a-093107a1e8c1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sql\pgsql">
+      <UniqueIdentifier>{22b685a6-2c2e-425a-b60a-45c23f0075fd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

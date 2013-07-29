@@ -25,52 +25,46 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+#include "mysql.h"
+ 
+#ifdef PLUGIN_SUPPORTS_MYSQL
+
+	#include "../SQL_Connection.h"
+
+	class MySQL_Connection : public SQL_Connection {
+
+		public:
+			MySQL_Connection(int id, AMX *amx);
+			~MySQL_Connection();
+			void startWorker();
+			void stopWorker();
+			bool connect(const char *host, const char *user, const char *pass, const char *db, int port);
+			void disconnect();
+			int getErrorId();
+			const char *getError();
+			int ping();
+			const char *getStat();
+			const char *getCharset();
+			bool setCharset(char *charset);
+			int escapeString(const char *src, char *&dest);
+			void executeStatement(SQL_Statement *stmt);
+			bool seekResult(SQL_Statement *stmt, int resultIdx);
+			bool fetchField(SQL_Statement *stmt, int fieldIdx, char *&dest, int &len);
+			bool seekRow(SQL_Statement *stmt, int rowIdx);
+			bool fetchNum(SQL_Statement *stmt, int fieldIdx, char *&dest, int &len);
+			bool fetchAssoc(SQL_Statement *stmt, char *fieldName, char *&dest, int &len);
+			
+		private:
+
+			/**
+			 * MySQL C connector is not (entirely) thread-safe.
+			 */
+			Mutex *mutex;
+
+			/**
+			 * The MySQL connection resource.
+			 */
+			MYSQL *conn;
+	};
+
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

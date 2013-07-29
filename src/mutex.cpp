@@ -26,40 +26,40 @@
 #include "mutex.h"
 
 Mutex::Mutex() {
-#ifdef _WIN32
-	InitializeCriticalSection(&handle);
-#else
-	pthread_mutexattr_t attr;
-	pthread_mutexattr_init(&attr);
-	pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-	pthread_mutex_init(&handle, &attr);
-#endif
+	#ifdef _WIN32
+		InitializeCriticalSection(&handle);
+	#else
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init(&attr);
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&handle, &attr);
+	#endif
 	isEnabled = true;
 }
 
 Mutex::~Mutex() {
 	isEnabled = false;
-#ifdef _WIN32
-	DeleteCriticalSection(&handle);
-#else
-	pthread_mutex_destroy(&handle);
-#endif
+	#ifdef _WIN32
+		DeleteCriticalSection(&handle);
+	#else
+		pthread_mutex_destroy(&handle);
+	#endif
 }
 
 void Mutex::lock() {
 	if (isEnabled) {
-#ifdef _WIN32
-		EnterCriticalSection(&handle);
-#else
-		pthread_mutex_lock(&handle);
-#endif
+		#ifdef _WIN32
+			EnterCriticalSection(&handle);
+		#else
+			pthread_mutex_lock(&handle);
+		#endif
 	}
 }
 
 void Mutex::unlock() {
-#ifdef _WIN32
-	LeaveCriticalSection(&handle);
-#else
-	pthread_mutex_unlock(&handle);
-#endif
+	#ifdef _WIN32
+		LeaveCriticalSection(&handle);
+	#else
+		pthread_mutex_unlock(&handle);
+	#endif
 }

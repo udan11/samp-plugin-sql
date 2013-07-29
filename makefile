@@ -35,16 +35,16 @@ GPP = g++
 
 # Compilation flags.
 COMPILE_FLAGS = -c -fPIC -m32 -O3 -w -Wall -Iinclude/ -DLINUX
-LIBRARIES = -lpthread
+LIBRARIES = -lpthread -lrt
 
 # Output file name.
 OUTFILE = bin/sql.so
 
 # 1: Linking MySQL library (if it's necessary).
 ifdef MYSQL
-	COMPILE_FLAGS += -DSQL_HANDLER_MYSQL=1
+	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_MYSQL=1
 	ifdef STATIC
-		LIBRARIES += ./lib/mysql/libmysql.a
+		LIBRARIES += -ldl ./lib/mysql/libmysql.a
 		OUTFILE := bin/mysql_static.so
 	else
 		LIBRARIES += ./lib/mysql/libmysql.so
@@ -54,7 +54,7 @@ endif
 
 # 2: Linking PostgreSQL library (if it's necessary).
 ifdef PGSQL
-	COMPILE_FLAGS += -DSQL_HANDLER_PGSQL=2
+	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_PGSQL=2
 	# There is no way to link statically `libpq`.
 	LIBRARIES += ./lib/pgsql/libpq.so
 	OUTFILE := bin/pgsql.so
@@ -73,10 +73,11 @@ endif
 
 # Compiling!
 all:
-	$(GPP) $(COMPILE_FLAGS) src/mysql/*.cpp
-	$(GPP) $(COMPILE_FLAGS) src/pgsql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sdk/amx/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
+	$(GPP) $(COMPILE_FLAGS) src/sql/pgsql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/*.cpp
 	$(GPP) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES) 
 	

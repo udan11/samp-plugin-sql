@@ -25,52 +25,40 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+#include "mysql.h"
+ 
+#ifdef PLUGIN_SUPPORTS_MYSQL
+
+	#include "../SQL_ResultSet.h"
+
+	class MySQL_ResultSet : public SQL_ResultSet {
+
+		public:
+
+			/**
+			 * MySQL result set.
+			 */
+			MYSQL_RES *result;
+
+			/**
+			 * MySQL last fetched row.
+			 */
+			MYSQL_ROW lastRow;
+
+			/**
+			 * The lengths of each field from the last row.
+			 */
+			unsigned long *lastRowLens;
+
+			/**
+			 * Constructor.
+			 */
+			MySQL_ResultSet();
+
+			/**
+			 * Destructor.
+			 */
+			~MySQL_ResultSet();
+	};
+
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

@@ -23,54 +23,18 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "PgSQL_ResultSet.h"
+ 
+#ifdef PLUGIN_SUPPORTS_PGSQL
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
+	PgSQL_ResultSet::PgSQL_ResultSet() {
+		result = NULL;
+	}
+
+	PgSQL_ResultSet::~PgSQL_ResultSet() {
+		if (result != NULL) {
+			PQclear(result);
+		}
+	}
+
 #endif
-
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};

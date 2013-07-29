@@ -23,54 +23,23 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "SQL_ResultSet.h"
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
-#endif
+SQL_ResultSet::SQL_ResultSet() {
+	insertId = 0;
+	affectedRows = 0;
+	numRows = 0;
+	numFields = 0;
+	lastRowIdx = 0;
+}
 
-class Mutex {
-
-	public:
-
-		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
-		 */
-		bool isEnabled;
-
-		/**
-		 * Locks the mutex.
-		 */
-		void lock();
-
-		/**
-		 * Unlocks the mutex.
-		 */
-		void unlock();
-
-		/**
-		 * Constructor.
-		 */
-		Mutex();
-
-		/**
-		 * Destructor.
-		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
-};
+SQL_ResultSet::~SQL_ResultSet() {
+	for (int i = 0, size = fieldNames.size(); i != size; ++i) {
+		free(fieldNames[i].first);
+	}
+	for (int i = 0, size = cache.size(); i != size; ++i) {
+		for (int j = 0, size = cache[i].size(); j != size; ++j) {
+			free(cache[i][j].first);
+		}
+	}
+}

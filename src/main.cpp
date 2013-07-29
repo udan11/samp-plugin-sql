@@ -23,6 +23,22 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "sql/sql.h"
+#include "sql/SQL_Connection.h"
+#include "sql/SQL_Statement.h"
+#include "sql/SQL_Pools.h"
+
+#if defined PLUGIN_SUPPORTS_MYSQL
+	#include "sql/mysql/mysql.h"
+#endif
+
+#if defined PLUGIN_SUPPORTS_PGSQL
+	#include "sql/pgsql/pgsql.h"
+#endif
+
+#include "log.h"
+#include "natives.h"
+
 #include "main.h"
 
 extern void *pAMXFunctions;
@@ -74,20 +90,20 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
-#ifdef SQL_HANDLER_MYSQL
-	if (mysql_library_init(0, NULL, NULL)) {
-		logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
-		exit(0);
-		return false;
-	}
-#endif
+	#ifdef PLUGIN_SUPPORTS_MYSQL
+		if (mysql_library_init(0, NULL, NULL)) {
+			logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
+			exit(0);
+			return false;
+		}
+	#endif
 	logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
-#ifdef SQL_HANDLER_MYSQL
-	logprintf("      + MySQL support is enabled.");
-#endif
-#ifdef SQL_HANDLER_PGSQL
-	logprintf("      + PostgreSQL support is enabled.");
-#endif
+	#ifdef PLUGIN_SUPPORTS_MYSQL
+		logprintf("      + MySQL support is enabled.");
+	#endif
+	#ifdef PLUGIN_SUPPORTS_PGSQL
+		logprintf("      + PostgreSQL support is enabled.");
+	#endif
 	return true;
 }
 
@@ -96,50 +112,50 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx) {
 }
 
 PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx) {
-	for (handlers_t::iterator it = handlers.begin(), next = it, end = handlers.end(); it != end; it = next) {
+	for (connectionsMap_t::iterator it = SQL_Pools::connections.begin(), next = it, end = SQL_Pools::connections.end(); it != end; it = next) {
 		++next;
-		SQL_Handler *handler = it->second;
-		if (handler->amx == amx) {
-			handlers.erase(it);
-			handler->stop_worker();
-			delete handler;
+		SQL_Connection *conn = it->second;
+		if (conn->amx == amx) {
+			SQL_Pools::connections.erase(it);
+			conn->stopWorker();
+			delete conn;
 		}
 	}
-	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next) {
+	for (statementsMap_t::iterator it = SQL_Pools::statements.begin(), next = it, end = SQL_Pools::statements.end(); it != end; it = next) {
 		++next;
-		SQL_Query *query = it->second;
-		if (query->amx == amx) {
-			queries.erase(it);
-			delete query;
+		SQL_Statement *stmt = it->second;
+		if (stmt->amx == amx) {
+			SQL_Pools::statements.erase(it);
+			delete stmt;
 		}
 	}
 	return AMX_ERR_NONE;
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL Unload() {
-#ifdef SQL_HANDLER_MYSQL
-	mysql_library_end();
-#endif
+	#ifdef PLUGIN_SUPPORTS_MYSQL
+		mysql_library_end();
+	#endif
 	logprintf("[plugin.sql] Plugin succesfully unloaded!");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
-	for (queries_t::iterator it = queries.begin(), next = it, end = queries.end(); it != end; it = next) {
+	for (statementsMap_t::iterator it = SQL_Pools::statements.begin(), next = it, end = SQL_Pools::statements.end(); it != end; it = next) {
 		++next;
-		SQL_Query *query = it->second;
-		if ((query->flags & QUERY_THREADED) && (query->status == QUERY_STATUS_EXECUTED)) {
-			log(LOG_DEBUG, "ProccessTick: Executing query callback (query->id = %d, query->error = %d, query->callback = %s)...", query->id, query->error, query->callback);
-			query->status = QUERY_STATUS_PROCESSED;
-			int id = query->id;
-			query->execute_callback();
-			if (!is_valid_query(id)) {
+		SQL_Statement *stmt = it->second;
+		if ((stmt->flags & STATEMENT_FLAGS_THREADED) && (stmt->status == STATEMENT_STATUS_EXECUTED)) {
+			log(LOG_DEBUG, "ProccessTick: Executing query callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
+			stmt->status = STATEMENT_STATUS_PROCESSED;
+			int id = stmt->id;
+			stmt->executeCallback();
+			if (!SQL_Pools::isValidStatement(id)) {
 				continue;
 			}
 		}
-		if ((!is_valid_handler(query->handler)) || (query->status == QUERY_STATUS_PROCESSED)) {
-			log(LOG_DEBUG, "ProccessTick: Erasing query (query->id = %d)...", query->id);
-			queries.erase(it);
-			delete query;
+		if ((!SQL_Pools::isValidConnection(stmt->connectionId)) || (stmt->status == STATEMENT_STATUS_PROCESSED)) {
+			log(LOG_DEBUG, "ProccessTick: Erasing query (stmt->id = %d)...", stmt->id);
+			SQL_Pools::statements.erase(it);
+			delete stmt;
 		}
 	}
 }

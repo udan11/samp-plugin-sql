@@ -25,52 +25,105 @@
 
 #pragma once
 
-#ifdef _WIN32
-	#include <Windows.h>
-#else
-	#include "pthread.h"
-#endif
+#include <vector>
 
-class Mutex {
+#include "sql.h"
+#include "SQL_ResultSet.h"
+
+/**
+ * An abstract SQL statement.
+ */
+class SQL_Statement {
 
 	public:
+	
+		/**
+		 * SQL's statement unique ID.
+		 */
+		int id;
+	
+		/**
+		 * The AMX machine owning this statement.
+		 */
+		AMX *amx;
+		
+		/**
+		 * The ID of the SQL connection owning this statement.
+		 */
+		int connectionId;
+		
+		/**
+		 * SQL's statement flags.
+		 */
+		int flags;
+		
+		/**
+		 * SQL's statement status.
+		 */
+		int status;
+		
+		/** 
+		 * Last result fetched.
+		 */
+		int lastResultIdx;
+		
+		/**
+		 * SQL query.
+		 */
+		char *query;
 
 		/**
-		 * `true` if Mutex has been initialized and is enabled, `false` otherwise.
+		 * The PAWN callback.
 		 */
-		bool isEnabled;
-
+		char *callback;
+		
 		/**
-		 * Locks the mutex.
+		 * The format of the PAWN callback.
 		 */
-		void lock();
-
+		char *format;
+		
 		/**
-		 * Unlocks the mutex.
+		 * SQL's statement error ID.
 		 */
-		void unlock();
-
+		int error;
+		
+		/**
+		 * SQL's error message.
+		 */
+		const char *errorMsg;
+		
+		/**
+		 * The list of array parameters.
+		 */
+		std::vector<std::pair<cell*, int> > paramsArr;
+		
+		/**
+		 * The list of cell (bool, float, int, etc.) parameters.
+		 */ 
+		std::vector<cell> paramsC;
+		
+		/**
+		 * The list of string parameters.
+		 */
+		std::vector<char*> paramsStr;
+		
+		/**
+		 * The list of SQL result sets.
+		 */
+		std::vector<SQL_ResultSet*> resultSets;
+		
 		/**
 		 * Constructor.
 		 */
-		Mutex();
-
+		SQL_Statement(int id, AMX *amx, int connectionId);
+		
 		/**
 		 * Destructor.
 		 */
-		~Mutex();
-
-		#ifdef _WIN32
-
-			/**
-			 * Win32 critical section.
-			 */
-			CRITICAL_SECTION handle;
-		#else
-
-			/**
-			 * UNIX pthread mutex.
-			 */
-			pthread_mutex_t handle;
-		#endif
+		virtual ~SQL_Statement();
+		
+		/**
+		 * Executes the PAWN callback.
+		 */
+		int executeCallback();
 };
