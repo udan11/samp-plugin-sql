@@ -24,7 +24,7 @@
  */
  
 /**
- * <version>2.4</version>
+ * <version>2.5</version>
  * <remarks>
  * Data types:
  * 		SQL	- a SQL database handle
