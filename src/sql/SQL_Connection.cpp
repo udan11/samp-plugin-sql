@@ -51,7 +51,7 @@ void *SQL_Worker(void *param) {
 	while (conn->isActive) {
 		SQL_Statement *stmt = NULL;
 		while (conn->pending.pop(stmt)) {
-			log(LOG_DEBUG, "sqlWorkerThread[%d]: Executing query (stmt->id = %d, stmt->query = %s)...", conn->id, stmt->id, stmt->query);
+			log(LOG_DEBUG, "SQL_Worker[%d]: Executing query (stmt->id = %d, stmt->query = %s)...", conn->id, stmt->id, stmt->query);
 			conn->executeStatement(stmt);
 		}
 		SLEEP(WORKER_TICK_RATE);
