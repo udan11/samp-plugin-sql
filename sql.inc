@@ -532,6 +532,7 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 			#emit LCTRL				5
 			#emit ADD
 			#emit STOR.S.pri		addresses
+			--numArgs;
 			for (new i = 1; i != numArgs; ++i) {
 				addresses[i] = addresses[0] + (i * 4); // BYTES_PER_CELL = 4
 			}
