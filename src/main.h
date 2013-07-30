@@ -32,4 +32,4 @@
 #include "sdk/amx/amx_ex.h"
 #include "sdk/plugincommon.h"
 
-#define PLUGIN_VERSION					"v2.4"
+#define PLUGIN_VERSION					"v2.6"
