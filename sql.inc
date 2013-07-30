@@ -463,20 +463,20 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
  */
 #if defined SQL_USE_Y_INLINE
 
-	#if !defined MAX_SQL_CALLBACKS
+	#if !defined SQL_MAX_INLINE_CALLBACKS
 	
 		/**
 		 * <summary>The maximum number of inline callbacks scheduled simultaneously.</summary>
 		 */
-		#define MAX_SQL_CALLBACKS			512
+		#define SQL_MAX_INLINE_CALLBACKS	512
 	#endif
 	
-	#if !defined MAX_SQL_INLINE_PARAMETERS
+	#if !defined SQL_MAX_INLINE_PARAMETERS
 		
 		/**
 		 * <summary>The maximum number of parameters an inline function can have.</summary>
 		 */
-		#define MAX_SQL_INLINE_PARAMETERS	16
+		#define SQL_MAX_INLINE_PARAMETERS	16
 	#endif
 
 	/**
@@ -494,7 +494,7 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 	 * TODO: If the query fails, the `SQL_OnInlineCallback` won't  be called
 	 * and the data won't be recycled. Fix it.
 	 */
-	stock SQL_callbacks[MAX_SQL_CALLBACKS][E_CALLBACK_DATA];
+	stock SQL_callbacks[SQL_MAX_INLINE_CALLBACKS][E_CALLBACK_DATA];
 
 	/**
 	 * <summary>Saves the callback data of a scheduled statement.</summary>
@@ -526,7 +526,7 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 		if (idx == -1) {
 			return;
 		}
-		new numArgs = numargs(), addresses[MAX_SQL_INLINE_PARAMETERS];
+		new numArgs = numargs(), addresses[SQL_MAX_INLINE_PARAMETERS];
 		if (numArgs > 1) {
 			#emit CONST.alt			16
 			#emit LCTRL				5
