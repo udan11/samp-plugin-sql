@@ -480,7 +480,7 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 	#endif
 
 	/**
-	 * <summary>Executes a SQL query and calls a inline callback on return.</summary>
+	 * <summary>Executes a SQL query and calls an inline callback on return.</summary>
 	 * <remarks>The "format" parameter must be static.</remarks>
 	 */
 	//native Result:sql_query_inline(SQL:handle, query[], flag, callback:callback, format[] = "", {Float,_}:...);
