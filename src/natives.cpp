@@ -292,9 +292,6 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 		if ((strlen(stmt->callback)) || (stmt->error != 0)) {
 			log(LOG_DEBUG, "Natives::sql_query: Executing statement callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
 			stmt->executeCallback();
-			if (!SQL_Pools::isValidStatement(id)) {
-				id = 0;
-			}
 		} else {
 			log(LOG_DEBUG, "Natives::sql_query: Statement executed (stmt->id = %d, stmt->error = %d). No callback found!", stmt->id, stmt->error);
 		}

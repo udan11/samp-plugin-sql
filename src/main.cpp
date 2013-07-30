@@ -145,7 +145,6 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		SQL_Statement *stmt = it->second;
 		if ((stmt->flags & STATEMENT_FLAGS_THREADED) && (stmt->status == STATEMENT_STATUS_EXECUTED)) {
 			log(LOG_DEBUG, "ProccessTick: Executing query callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
-			stmt->status = STATEMENT_STATUS_PROCESSED;
 			int id = stmt->id;
 			stmt->executeCallback();
 			if (!SQL_Pools::isValidStatement(id)) {

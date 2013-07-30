@@ -55,6 +55,7 @@ SQL_Statement::~SQL_Statement() {
 }
 
 int SQL_Statement::executeCallback() {
+	status = STATEMENT_STATUS_PROCESSED;
 	cell ret, amx_addr = -1;
 	int funcidx;
 	if (error == 0) {
