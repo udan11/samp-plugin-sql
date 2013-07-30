@@ -83,10 +83,9 @@
 	}
 
 	void MySQL_Connection::executeStatement(SQL_Statement *stmt) {
-		MySQL_Statement *s = static_cast<MySQL_Statement*>(stmt);
 		mutex->lock();
-		if ((!ping()) && (!mysql_query(conn, s->query))) {
-			s->error = 0;
+		if ((!ping()) && (!mysql_query(conn, stmt->query))) {
+			stmt->error = 0;
 			do {
 				MySQL_ResultSet *r = new MySQL_ResultSet();
 				r->result = mysql_store_result(conn);
@@ -132,7 +131,7 @@
 			stmt->error = getErrorId();
 			stmt->errorMsg = getError();
 		}
-		s->status = STATEMENT_STATUS_EXECUTED;
+		stmt->status = STATEMENT_STATUS_EXECUTED;
 		mutex->unlock();
 	}
 

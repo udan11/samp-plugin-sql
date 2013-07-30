@@ -89,7 +89,6 @@
 	}
 
 	void PgSQL_Connection::executeStatement(SQL_Statement *stmt) {
-		PgSQL_Statement *q = static_cast<PgSQL_Statement*>(stmt);
 		if (!ping()) {
 			PgSQL_ResultSet *r = new PgSQL_ResultSet();
 			r->result = PQexec(conn, stmt->query);
@@ -98,8 +97,8 @@
 					break;
 				case PGRES_NONFATAL_ERROR:
 				case PGRES_FATAL_ERROR:
-					q->error = atoi(PQresStatus(PQresultStatus(r->result)));
-					q->errorMsg = PQresultErrorMessage(r->result);
+					stmt->error = atoi(PQresStatus(PQresultStatus(r->result)));
+					stmt->errorMsg = PQresultErrorMessage(r->result);
 					break;
 				case PGRES_TUPLES_OK:
 					r->numRows = PQntuples(r->result);
@@ -140,7 +139,7 @@
 			stmt->error = getErrorId();
 			stmt->errorMsg = getError();
 		}
-		q->status = STATEMENT_STATUS_EXECUTED;
+		stmt->status = STATEMENT_STATUS_EXECUTED;
 	}
 
 	bool PgSQL_Connection::seekResult(SQL_Statement *stmt, int resultIdx) {
