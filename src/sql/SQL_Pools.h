@@ -28,7 +28,7 @@
 #include "sql.h"
 
 /**
- * An abstract SQL result set.
+ * Keeps track of all SQL connections and statements.
  */
 class SQL_Pools {
 
