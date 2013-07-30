@@ -455,3 +455,89 @@ native Float:sql_get_field_float_ex(Result:result, row, field);
  * <returns>The value of the cell.</returns>
  */
 native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
+
+// ----------------------------------------------------------------------------
+
+/**
+ * y_inline interface
+ */
+#if defined SQL_USE_Y_INLINE
+
+	#if !defined MAX_SQL_CALLBACKS
+	
+		/**
+		 * <summary>The maximum number of inline callbacks scheduled simultaneously.</summary>
+		 */
+		#define MAX_SQL_CALLBACKS			512
+	#endif
+	
+	#if !defined MAX_SQL_INLINE_PARAMETERS
+		
+		/**
+		 * <summary>The maximum number of parameters an inline function can have.</summary>
+		 */
+		#define MAX_SQL_INLINE_PARAMETERS	16
+	#endif
+
+	/**
+	 * <summary>Executes a SQL query and calls a inline callback on return.</summary>
+	 * <remarks>The "format" parameter must be static.</remarks>
+	 */
+	//native Result:sql_query_inline(SQL:handle, query[], flag, callback:callback, format[] = "", {Float,_}:...);
+	#define sql_query_inline(%0,%1,%2,%3,"%4"%5) \
+		sql_query(%0,%1,%2,"SQL_OnInlineCallback","i"#%4,SQL_SaveCallback(%3)%5)
+
+	/**
+	 * <summary>Stores information about callbacks that are scheduled to be executed.</summary>
+	 * <remarks>This data is recycled. Once `SQL_LoadCallback` was called, that index is marked as free.</remarks>
+	 *
+	 * TODO: If the query fails, the `SQL_OnInlineCallback` won't  be called
+	 * and the data won't be recycled. Fix it.
+	 */
+	stock SQL_callbacks[MAX_SQL_CALLBACKS][E_CALLBACK_DATA];
+
+	/**
+	 * <summary>Saves the callback data of a scheduled statement.</summary>
+	 * <param name="callback">Callback's ID.</param>
+	 * <returns>The index from `SQL_callbacks` where the callback was saved.</returns>
+	 */
+	stock SQL_SaveCallback(callback:callback) {
+		for (new i = 0; i != sizeof(SQL_callbacks); ++i) {
+			if (SQL_callbacks[i][E_CALLBACK_DATA_POINTER] != 0) {
+				continue;
+			}
+			if (!Callback_Get(callback, SQL_callbacks[i])) {
+				SQL_callbacks[i][E_CALLBACK_DATA_POINTER] = 0;
+				return -1;
+			}
+			return i;
+		}
+		print("[plugin.sql][warning] No more free space in `SQL_callbacks`.");
+		return -1;
+	}
+
+	/**
+	 * <summary>The Interface between the plugin and y_inline, which loads the callback data and executes it.</summary>
+	 * <remarks>This function also recycles data.</remarks>
+	 * <param name="idx">Callback's index from `SQL_callbacks`.</param>
+	 */
+	forward SQL_OnInlineCallback(idx, {Float,_}:...);
+	public SQL_OnInlineCallback(idx, {Float,_}:...) {
+		if (idx == -1) {
+			return;
+		}
+		new numArgs = numargs(), addresses[MAX_SQL_INLINE_PARAMETERS];
+		if (numArgs > 1) {
+			#emit CONST.alt			16
+			#emit LCTRL				5
+			#emit ADD
+			#emit STOR.S.pri		addresses
+			for (new i = 1; i != numArgs; ++i) {
+				addresses[i] = addresses[0] + (i * 4); // BYTES_PER_CELL = 4
+			}
+		}
+		Callback_Array(SQL_callbacks[idx], addresses);
+		SQL_callbacks[idx][E_CALLBACK_DATA_POINTER] = 0;
+	}
+	
+#endif
