@@ -462,11 +462,13 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
  * y_inline interface
  */
 
-// NOTE: #emit ignores pre-processor's directives.
-// So, if we disable y_inline support, the #emit instructions below still
-// requirea variable to store the address of the first passed parameter.
-new SQL_tmp;
-#pragma unused SQL_tmp
+#if !defined SQL_USE_Y_INLINE
+	// NOTE: #emit ignores pre-processor's directives.
+	// So, if we disable y_inline support, the #emit instructions below still
+	// requirea variable to store the address of the first passed parameter.
+	new SQL_addr;
+	#pragma unused SQL_addr
+#endif
 
 #if defined SQL_USE_Y_INLINE
 
@@ -533,18 +535,18 @@ new SQL_tmp;
 		if (idx == -1) {
 			return;
 		}
-		new numArgs = numargs(), addresses[SQL_MAX_INLINE_PARAMETERS];
+		new numArgs = numargs(), SQL_addr[SQL_MAX_INLINE_PARAMETERS];
 		if (numArgs > 1) {
 			#emit CONST.alt			16
 			#emit LCTRL				5
 			#emit ADD
-			#emit STOR.S.pri		SQL_tmp
+			#emit STOR.S.pri		SQL_addr
 			--numArgs;
-			for (new i = 0; i != numArgs; ++i) {
-				addresses[i] = SQL_tmp + (i * 4); // BYTES_PER_CELL = 4
+			for (new i = 1; i != numArgs; ++i) {
+				SQL_addr[i] = SQL_addr[0] + (i * 4); // BYTES_PER_CELL = 4
 			}
 		}
-		Callback_Array(SQL_callbacks[idx], addresses);
+		Callback_Array(SQL_callbacks[idx], SQL_addr);
 		SQL_callbacks[idx][E_CALLBACK_DATA_POINTER] = 0;
 	}
 	
