@@ -461,6 +461,13 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 /**
  * y_inline interface
  */
+
+// NOTE: #emit ignores pre-processor's directives.
+// So, if we disable y_inline support, the #emit instructions below still
+// requirea variable to store the address of the first passed parameter.
+new SQL_tmp;
+#pragma unused SQL_tmp
+
 #if defined SQL_USE_Y_INLINE
 
 	#if !defined SQL_MAX_INLINE_CALLBACKS
@@ -531,10 +538,10 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 			#emit CONST.alt			16
 			#emit LCTRL				5
 			#emit ADD
-			#emit STOR.S.pri		addresses
+			#emit STOR.S.pri		SQL_tmp
 			--numArgs;
-			for (new i = 1; i != numArgs; ++i) {
-				addresses[i] = addresses[0] + (i * 4); // BYTES_PER_CELL = 4
+			for (new i = 0; i != numArgs; ++i) {
+				addresses[i] = SQL_tmp + (i * 4); // BYTES_PER_CELL = 4
 			}
 		}
 		Callback_Array(SQL_callbacks[idx], addresses);
