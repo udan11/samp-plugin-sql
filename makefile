@@ -73,7 +73,6 @@ endif
 
 # Compiling!
 all:
-	$(GPP) $(COMPILE_FLAGS) src/sdk/amx/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sdk/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GPP) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
