@@ -45,10 +45,7 @@
     <ClInclude Include="src\sql\pgsql\pgsql.h">
       <Filter>sql\pgsql</Filter>
     </ClInclude>
-    <ClInclude Include="src\sdk\plugincommon.h">
-      <Filter>sdk</Filter>
-    </ClInclude>
-    <ClInclude Include="src\sdk\amx\amx_ex.h">
+    <ClInclude Include="src\sdk\amx\amx2.h">
       <Filter>sdk\amx</Filter>
     </ClInclude>
     <ClInclude Include="src\sdk\amx\sclinux.h">
@@ -56,6 +53,9 @@
     </ClInclude>
     <ClInclude Include="src\sdk\amx\amx.h">
       <Filter>sdk\amx</Filter>
+    </ClInclude>
+    <ClInclude Include="src\sdk\plugincommon.h">
+      <Filter>sdk</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -96,8 +96,8 @@
     <ClCompile Include="src\sdk\amxplugin.cpp">
       <Filter>sdk</Filter>
     </ClCompile>
-    <ClCompile Include="src\sdk\amx\amx_ex.cpp">
-      <Filter>sdk\amx</Filter>
+    <ClCompile Include="src\sdk\amxplugin2.cpp">
+      <Filter>sdk</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

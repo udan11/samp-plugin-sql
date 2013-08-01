@@ -31,7 +31,7 @@
 #include <boost/lockfree/queue.hpp>
 
 #include "../sdk/amx/amx.h"
-#include "../sdk/amx/amx_ex.h"
+#include "../sdk/amx/amx2.h"
 
 #define ERROR_CALLBACK					"OnSQLError"
 

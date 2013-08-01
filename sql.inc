@@ -27,7 +27,7 @@
  * <version>2.6</version>
  * <remarks>
  * Data types:
- * 		SQL	- a SQL database handle
+ * 		SQL	- a SQL connection
  * 		Result	- the result of a query, whether it returns or not rows
  * </remarks>
  */
@@ -143,10 +143,21 @@
 /**
  * <summary>Aliases of natives defined below.</summary>
  */
-#define sql_open						sql_connect
-#define sql_close						sql_disconnect
+#define sql_log							sql_debug
+//
 #define mysql_connect(%0)				sql_connect(SQL_HANDLER_MYSQL,%0)
 #define pgsql_connect(%0)				sql_connect(SQL_HANDLER_POSTGRESQL,%0)
+//
+#define mysql_disconnect(%0)			sql_disconnect(%0)
+#define pgsql_disconnect(%0)			sql_disconnect(%0)
+//
+#define sql_open						sql_connect
+#define mysql_open(%0)					mysql_connect(%0)
+#define mysql_close(%0)					mysql_disconnect(%0)
+//
+#define sql_close						sql_disconnect
+#define pgsql_open(%0)					pgsql_connect(%0)
+#define pgsql_close(%0)					pgsql_disconnect(%0)
 
 /**
  * <summary>Called when a SQL error occurs during the execution of a query.</summary>

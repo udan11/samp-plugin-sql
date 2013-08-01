@@ -29,7 +29,7 @@
 #include <cstdlib>
 
 #include "sdk/amx/amx.h"
-#include "sdk/amx/amx_ex.h"
+#include "sdk/amx/amx2.h"
 #include "sdk/plugincommon.h"
 
 #define PLUGIN_VERSION					"v2.6"

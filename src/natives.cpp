@@ -26,7 +26,7 @@
 #include <cstdio>
 
 #include "sdk/amx/amx.h"
-#include "sdk/amx/amx_ex.h"
+#include "sdk/amx/amx2.h"
 
 #include "sql/sql.h"
 #include "sql/SQL_Connection.h"
