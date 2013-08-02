@@ -477,6 +477,8 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 	// NOTE: #emit ignores pre-processor's directives.
 	// So, if we disable y_inline support, the #emit instructions below still
 	// requirea variable to store the address of the first passed parameter.
+	// 
+	// @Y_Less suggested that #endinput can be used here aswell.
 	new SQL_addr;
 	#pragma unused SQL_addr
 #endif
@@ -503,7 +505,12 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 	 * <summary>Executes a SQL query and calls an inline callback on return.</summary>
 	 * <remarks>The "format" parameter must be static.</remarks>
 	 */
-	//native Result:sql_query_inline(SQL:handle, query[], flag, callback:callback, format[] = "", {Float,_}:...);
+	/*
+	 * NOTE: This is a fake native. It has been put here to be detected by Pawno, the SA-MP's bundled IDE.
+	
+	native Result:sql_query_inline(SQL:handle, query[], flag, callback:callback, format[] = "", {Float,_}:...);
+	
+	 */
 	#define sql_query_inline(%0,%1,%2,%3,"%4"%5) \
 		sql_query(%0,%1,%2,"SQL_OnInlineCallback","i"#%4,SQL_SaveCallback(%3)%5)
 
@@ -548,10 +555,12 @@ native Float:sql_get_field_assoc_float_ex(Result:result, row, field[]);
 		}
 		new numArgs = numargs(), SQL_addr[SQL_MAX_INLINE_PARAMETERS];
 		if (numArgs > 1) {
+			// Storing the address of the first dynamic parameter in SQL_addr[0].
 			#emit CONST.alt			16
 			#emit LCTRL				5
 			#emit ADD
 			#emit STOR.S.pri		SQL_addr
+			// 
 			--numArgs;
 			for (new i = 1; i != numArgs; ++i) {
 				SQL_addr[i] = SQL_addr[0] + (i * 4); // BYTES_PER_CELL = 4
