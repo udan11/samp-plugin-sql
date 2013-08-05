@@ -53,6 +53,7 @@ const AMX_NATIVE_INFO NATIVES[] = {
 	{"sql_ping", Natives::sql_ping},
 	{"sql_get_stat", Natives::sql_get_stat},
 	{"sql_escape_string", Natives::sql_escape_string},
+	{"sql_format", Natives::sql_format},
 	{"sql_query", Natives::sql_query},
 	{"sql_store_result", Natives::sql_store_result},
 	{"sql_free_result", Natives::sql_free_result},

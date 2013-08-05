@@ -215,6 +215,101 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 	return 0;
 }
 
+cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
+	if (params[0] < 4 * 4) {
+		return 0;
+	}
+	if (!SQL_Pools::isValidConnection(params[1])) {
+		log(LOG_WARNING, "Natives::sql_format: Invalid connection! (conn->id = %d)", params[1]);
+		return 0;
+	}
+	char *format = NULL;
+	amx_StrParam(amx, params[4], format);
+	log(LOG_DEBUG, "Natives::sql_format: Formatting string %s using conn->id = %d.", format, params[1]);
+	if (format != NULL) {
+		int dest_len = params[3];
+		if (dest_len < 2) { // Probably a multi-dimensional array.
+			// dest_len = (params[0] / 4) * 128;
+			dest_len = params[0] * 32; // 128 bytes for each parameter.
+		}
+		char *output = (char*) malloc(params[3] * sizeof(char));
+		memset(output, NULL, params[3] * sizeof(char));
+		for (int i = 0, len = strlen(format), p = 4; i != len; ++i) {
+			if ((format[i] == '%') && (i + 1 < len)) {
+				cell *ptr;
+				char *tmp, *tmp2;
+				switch (format[++i]) {
+					// Standard specifiers.
+					case 'd':
+					case 'i':
+						amx_GetAddr(amx, params[++p], &ptr);
+						tmp = (char*) malloc(16 * sizeof(char));
+						itoa(*ptr, tmp, 10);
+						strcat(output, tmp);
+						free(tmp);
+						break;
+					case 'x':
+						amx_GetAddr(amx, params[++p], &ptr);
+						tmp = (char*) malloc(16 * sizeof(char));
+						sprintf(tmp, "%x", *ptr);
+						strcat(output, tmp);
+						free(tmp);
+						break;
+					case 'X':
+						amx_GetAddr(amx, params[++p], &ptr);
+						tmp = (char*) malloc(16 * sizeof(char));
+						sprintf(tmp, "%X", *ptr);
+						strcat(output, tmp);
+						free(tmp);
+						break;
+					case 'f':
+						amx_GetAddr(amx, params[++p], &ptr);
+						tmp = (char*) malloc(16 * sizeof(char));
+						sprintf(tmp, "%f", amx_ctof(*ptr));
+						strcat(output, tmp);
+						free(tmp);
+						break;
+					case 'F':
+						amx_GetAddr(amx, params[++p], &ptr);
+						tmp = (char*) malloc(16 * sizeof(char));
+						sprintf(tmp, "%F", amx_ctof(*ptr));
+						strcat(output, tmp);
+						free(tmp);
+						break;
+					case 'c':
+						amx_GetAddr(amx, params[++p], &ptr);
+						output[strlen(output)] = *ptr;
+						break;
+					case 's': 
+						amx_StrParam(amx, params[++p], tmp);
+						strcat(output, tmp);
+						break;
+					// Custom specifiers.
+					case 'e':
+						amx_StrParam(amx, params[++p], tmp);
+						tmp2 = (char*) malloc(2 * sizeof(char) * strlen(tmp));
+						if (SQL_Pools::connections[params[1]]->escapeString(tmp, tmp2)) {
+							strcat(output, tmp2);
+						}
+						free(tmp2);
+						break;
+					// Unknown specifier.
+					default:
+						log(LOG_WARNING, "Natives::sql_format: Unknown specifier: %%%c.", format[i]);
+						break;
+				}
+			} else {
+				output[strlen(output)] = format[i];
+			}
+		}
+		amx_SetString_(amx, params[2], output, dest_len);
+		free(output);
+		return strlen(output);
+	}
+	amx_SetString_(amx, params[2], "", 1);
+	return 0;
+}
+
 cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	if (params[0] < 5 * 4) {
 		return 0;
@@ -234,7 +329,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	stmt->flags = params[3];
 	amx_GetString_(amx, params[4], stmt->callback);
 	amx_GetString_(amx, params[5], stmt->format);
-	for (int i = 0, len = strlen(stmt->format), p = 6; i != len; ++i, ++p) {
+	for (int i = 0, len = strlen(stmt->format), p = 6; i < len; ++i, ++p) {
 		switch (stmt->format[i]) {
 			case 'a':
 			case 'A':

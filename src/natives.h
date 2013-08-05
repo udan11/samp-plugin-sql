@@ -41,6 +41,7 @@ class Natives {
 		static cell AMX_NATIVE_CALL sql_ping(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_get_stat(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_escape_string(AMX *amx, cell *params);
+		static cell AMX_NATIVE_CALL sql_format(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_query(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_free_result(AMX *amx, cell *params);
 		static cell AMX_NATIVE_CALL sql_store_result(AMX *amx, cell *params);

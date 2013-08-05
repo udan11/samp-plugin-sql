@@ -245,6 +245,16 @@ native sql_get_stat(SQL:handle, dest[], dest_len = sizeof(dest));
 native sql_escape_string(SQL:handle, src[], dest[], dest_len = sizeof(dest));
 
 /**
+ * <summary>Formats the string.</summary>
+ * <param name="handle">The SQL handle used for escaping some string.</param>
+ * <param name="dest">The destination where the formatted string will be stored.</param>
+ * <param name="dest_len">The capacity of the destination.</param>
+ * <param name="format">The format of the string.</param>
+ * <returns>The length of the formatted string.</returns>
+ */
+native sql_format(handle, dest[], dest_len = sizeof(dest), format[], {Float, _}:...);
+
+/**
  * <summary>Executes a SQL query and returns the result.</summary>
  * <param name="handle">The SQL handle used for execution of the query.</param>
  * <param name="query">The query.</param>
