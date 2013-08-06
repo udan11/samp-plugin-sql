@@ -36,8 +36,8 @@
 	#include "sql/pgsql/pgsql.h"
 #endif
 
-#include "log.h"
-#include "natives.h"
+#include "Logger.h"
+#include "Natives.h"
 
 #include "main.h"
 
@@ -89,21 +89,21 @@ PLUGIN_EXPORT unsigned int PLUGIN_CALL Supports() {
 }
 
 PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
-	logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
+	Logger::logprintf = (logprintf_t) ppData[PLUGIN_DATA_LOGPRINTF];
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	#ifdef PLUGIN_SUPPORTS_MYSQL
 		if (mysql_library_init(0, NULL, NULL)) {
-			logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
+			Logger::logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
 			exit(0);
 			return false;
 		}
 	#endif
-	logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
+	Logger::logprintf("  >> SQL plugin " PLUGIN_VERSION " successfully loaded.");
 	#ifdef PLUGIN_SUPPORTS_MYSQL
-		logprintf("      + MySQL support is enabled.");
+		Logger::logprintf("      + MySQL support is enabled.");
 	#endif
 	#ifdef PLUGIN_SUPPORTS_PGSQL
-		logprintf("      + PostgreSQL support is enabled.");
+		Logger::logprintf("      + PostgreSQL support is enabled.");
 	#endif
 	return true;
 }
@@ -137,7 +137,7 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload() {
 	#ifdef PLUGIN_SUPPORTS_MYSQL
 		mysql_library_end();
 	#endif
-	logprintf("[plugin.sql] Plugin succesfully unloaded!");
+	Logger::logprintf("[plugin.sql] Plugin succesfully unloaded!");
 }
 
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
@@ -145,7 +145,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 		++next;
 		SQL_Statement *stmt = it->second;
 		if ((stmt->flags & STATEMENT_FLAGS_THREADED) && (stmt->status == STATEMENT_STATUS_EXECUTED)) {
-			log(LOG_DEBUG, "ProccessTick: Executing query callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
+			Logger::log(LOG_DEBUG, "ProccessTick: Executing query callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
 			int id = stmt->id;
 			stmt->executeCallback();
 			if (!SQL_Pools::isValidStatement(id)) {
@@ -153,7 +153,7 @@ PLUGIN_EXPORT void PLUGIN_CALL ProcessTick() {
 			}
 		}
 		if ((!SQL_Pools::isValidConnection(stmt->connectionId)) || (stmt->status == STATEMENT_STATUS_PROCESSED)) {
-			log(LOG_DEBUG, "ProccessTick: Erasing query (stmt->id = %d)...", stmt->id);
+			Logger::log(LOG_DEBUG, "ProccessTick: Erasing query (stmt->id = %d)...", stmt->id);
 			SQL_Pools::statements.erase(it);
 			delete stmt;
 		}

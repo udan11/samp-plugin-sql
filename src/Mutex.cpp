@@ -23,22 +23,43 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
+#include "Mutex.h"
 
-#define LOG_FILE						"sql_log.txt"
+Mutex::Mutex() {
+	#ifdef _WIN32
+		InitializeCriticalSection(&handle);
+	#else
+		pthread_mutexattr_t attr;
+		pthread_mutexattr_init(&attr);
+		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+		pthread_mutex_init(&handle, &attr);
+	#endif
+	isEnabled = true;
+}
 
-#define LOG_ALL							0
-#define LOG_DEBUG						1
-#define LOG_INFO						2
-#define LOG_WARNING						3
-#define LOG_ERROR						4
-#define LOG_NONE						5
+Mutex::~Mutex() {
+	isEnabled = false;
+	#ifdef _WIN32
+		DeleteCriticalSection(&handle);
+	#else
+		pthread_mutex_destroy(&handle);
+	#endif
+}
 
-typedef void (*logprintf_t) (char *format, ...);
+void Mutex::lock() {
+	if (isEnabled) {
+		#ifdef _WIN32
+			EnterCriticalSection(&handle);
+		#else
+			pthread_mutex_lock(&handle);
+		#endif
+	}
+}
 
-extern logprintf_t logprintf;
-
-extern int logFile;
-extern int logConsole;
-
-extern void log(int level, char *format, ...);
+void Mutex::unlock() {
+	#ifdef _WIN32
+		LeaveCriticalSection(&handle);
+	#else
+		pthread_mutex_unlock(&handle);
+	#endif
+}

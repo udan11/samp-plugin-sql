@@ -23,7 +23,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "../../log.h"
+#include "../../Logger.h"
 
 #include "PgSQL_Connection.h"
  
@@ -36,7 +36,7 @@
 		type = PLUGIN_SUPPORTS_PGSQL;
 		conn = NULL;
 		if (!PQisthreadsafe()) {
-			log(LOG_WARNING, "libpq is not thread-safe! Crashes may occur!");
+			Logger::log(LOG_WARNING, "libpq is not thread-safe! Crashes may occur!");
 		}
 	}
 

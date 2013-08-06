@@ -29,37 +29,16 @@
 #include <cstring>
 #include <ctime>
 
-//#include "mutex.h"
+#include "Logger.h"
 
-#include "log.h"
+logprintf_t Logger::logprintf = NULL;
 
-/**
- * logprintf
- */
-logprintf_t logprintf;
+int Logger::fileLevel = LOG_ALL;
 
-/** 
- * The minimum level of logs tha are saved into LOG_FILE.
- */
-int logFile = LOG_ALL;
+int Logger::consoleLevel = LOG_WARNING;
 
-/**
- * The minimum level of logs that are printed to the console.
- */
-int logConsole = LOG_WARNING;
-
-// NOTE: This logging system is not thread-safe. Using it in multiple threads
-// requires a mutex, which decreases the performance significantly.
-
-//Mutex logMutex;
-
-/**
- * Formats and logs a message (in file or console).
- * @param level
- * @param format
- */
-void log(int level, char *format, ...) {
-	if ((level < logFile) && (level < logConsole)) {
+void Logger::log(int level, char *format, ...) {
+	if ((level < fileLevel) && (level < consoleLevel)) {
 		return;
 	}
 	char prefix[16] = "";
@@ -84,18 +63,18 @@ void log(int level, char *format, ...) {
 		timeinfo = localtime(&rawtime);
 		strftime(timestamp, sizeof(timestamp), "%X", timeinfo);
 		vsnprintf(msg, len, format, args);
-		//logMutex.lock();
-		if (level >= logFile) {
+		//mutex.lock();
+		if (level >= fileLevel) {
 			FILE *file = fopen(LOG_FILE, "a");
 			if (file != NULL) {
 				fprintf(file, "[%s]%s %s\n", timestamp, prefix, msg);
 				fclose(file);
 			}
 		}
-		if (level >= logConsole) {
+		if (level >= consoleLevel) {
 			logprintf("[plugin.sql]%s %s", prefix, msg);
 		}
-		//logMutex.unlock();
+		//mutex.unlock();
 		free(msg);
 	}
 	va_end(args);

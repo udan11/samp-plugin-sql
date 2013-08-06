@@ -23,43 +23,71 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "mutex.h"
+#pragma once
 
-Mutex::Mutex() {
-	#ifdef _WIN32
-		InitializeCriticalSection(&handle);
-	#else
-		pthread_mutexattr_t attr;
-		pthread_mutexattr_init(&attr);
-		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
-		pthread_mutex_init(&handle, &attr);
-	#endif
-	isEnabled = true;
-}
+//#include "Mutex.h"
 
-Mutex::~Mutex() {
-	isEnabled = false;
-	#ifdef _WIN32
-		DeleteCriticalSection(&handle);
-	#else
-		pthread_mutex_destroy(&handle);
-	#endif
-}
+#define LOG_FILE						"sql_log.txt"
 
-void Mutex::lock() {
-	if (isEnabled) {
-		#ifdef _WIN32
-			EnterCriticalSection(&handle);
-		#else
-			pthread_mutex_lock(&handle);
-		#endif
-	}
-}
+#define LOG_ALL							0
+#define LOG_DEBUG						1
+#define LOG_INFO						2
+#define LOG_WARNING						3
+#define LOG_ERROR						4
+#define LOG_NONE						5
 
-void Mutex::unlock() {
-	#ifdef _WIN32
-		LeaveCriticalSection(&handle);
-	#else
-		pthread_mutex_unlock(&handle);
-	#endif
-}
+typedef void (*logprintf_t) (char *format, ...);
+
+class Logger {
+
+	/**
+	 * Exported AMX natives.
+	 */
+	public:
+
+		/**
+		 * This logging system is not thread-safe. Using it in multiple threads
+		 * requires a mutex, which decreases the performance significantly.
+		 *
+		Mutex mutex;
+		 */
+
+		/**
+		 * SA-MP server's internal logging method.
+		 */
+		static logprintf_t logprintf;
+
+		/**
+		 * The minimum level of the messages that are saved in `LOG_FILE`.
+		 * By default, it is set to `LOG_ALL`.
+		 */
+		static int fileLevel;
+
+		/**
+		 * The minimum level of the messages that are printed to the console.
+		 * By default, it is set to `LOG_WARNING`.
+		 */
+		static int consoleLevel;
+
+		/**
+		 * Formats and outputs the log message.
+		 * @param level
+		 * @param format
+		 */
+		static void log(int level, char *format, ...);
+
+	/**
+	 * Static class.
+	 */
+	private:
+		
+		/**
+		 * Constructor.
+		 */
+		Logger();
+
+		/**
+		 * Destructor.
+		 */
+		~Logger();
+};

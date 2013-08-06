@@ -34,17 +34,17 @@
 #include "sql/SQL_ResultSet.h"
 #include "sql/SQL_Statement.h"
 
-#include "log.h"
+#include "Logger.h"
 
-#include "natives.h"
+#include "Natives.h"
 
 cell AMX_NATIVE_CALL Natives::sql_debug(AMX *amx, cell *params) {
 	if (params[0] < 2 * 4) {
 		return 0;
 	}
-	logFile = params[1];
-	logConsole = params[2];
-	log(LOG_WARNING, "Natives::sql_debug: Switching the log levels to (%d, %d)...", logFile, logConsole);
+	Logger::fileLevel = params[1];
+	Logger::consoleLevel = params[2];
+	Logger::log(LOG_WARNING, "Natives::sql_debug: Switching the log levels to (%d, %d)...", Logger::fileLevel, Logger::consoleLevel);
 	return 1;
 }
 
@@ -54,7 +54,7 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	}
 	SQL_Connection *conn = SQL_Pools::newConnection(amx, params[1]);
 	if (conn == NULL) {
-		log(LOG_ERROR, "Natives::sql_connect: Unknown SQL type (%d)!", params[1]);
+		Logger::log(LOG_ERROR, "Natives::sql_connect: Unknown SQL type (%d)!", params[1]);
 		return 0;
 	}
 	int id = conn->id;
@@ -64,24 +64,24 @@ cell AMX_NATIVE_CALL Natives::sql_connect(AMX *amx, cell *params) {
 	amx_StrParam(amx, params[4], pass);
 	amx_StrParam(amx, params[5], db);
 	if (host == NULL) {
-		log(LOG_WARNING, "Natives::sql_connect: The `host` field is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_connect: The `host` field is empty.");
 	}
 	if (user == NULL) {
-		log(LOG_WARNING, "Natives::sql_connect: The `user` field is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_connect: The `user` field is empty.");
 	}
 	if (pass == NULL) {
-		log(LOG_WARNING, "Natives::sql_connect: The `pass` field is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_connect: The `pass` field is empty.");
 	}
 	if (db == NULL) {
-		log(LOG_WARNING, "Natives::sql_connect: The `db` field is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_connect: The `db` field is empty.");
 	}
-	log(LOG_INFO, "Natives::sql_connect: Connecting to database (type = %d) %s:***@%s:%d/%s...", params[1], user, host, params[6], db);
+	Logger::log(LOG_INFO, "Natives::sql_connect: Connecting to database (type = %d) %s:***@%s:%d/%s...", params[1], user, host, params[6], db);
 	if (conn->connect(host, user, pass, db, params[6])) {
-		log(LOG_INFO, "Natives::sql_connect: Connection (conn->id = %d) was succesful!", id);
+		Logger::log(LOG_INFO, "Natives::sql_connect: Connection (conn->id = %d) was succesful!", id);
 		SQL_Pools::connections[id] = conn;
 		conn->startWorker();
 	} else {
-		log(LOG_WARNING, "Natives::sql_connect: Connection (conn->id = %d) failed! (error = %d, %s)", id, conn->getErrorId(), conn->getError());
+		Logger::log(LOG_WARNING, "Natives::sql_connect: Connection (conn->id = %d) failed! (error = %d, %s)", id, conn->getErrorId(), conn->getError());
 		delete conn;
 		id = 0;
 	}
@@ -99,7 +99,7 @@ cell AMX_NATIVE_CALL Natives::sql_disconnect(AMX *amx, cell *params) {
 	SQL_Pools::connections.erase(params[1]);
 	conn->stopWorker();
 	delete conn;
-	log(LOG_INFO, "Natives::sql_disconnect: Connection (conn->id = %d) was destroyed!", params[1]);
+	Logger::log(LOG_INFO, "Natives::sql_disconnect: Connection (conn->id = %d) was destroyed!", params[1]);
 	return 1;
 }
 
@@ -127,10 +127,10 @@ cell AMX_NATIVE_CALL Natives::sql_set_charset(AMX *amx, cell *params) {
 	char *charset = NULL;
 	amx_StrParam(amx, params[2], charset);
 	if (charset == NULL) {
-		log(LOG_WARNING, "Natives::sql_set_charset: New charset is null.");
+		Logger::log(LOG_WARNING, "Natives::sql_set_charset: New charset is null.");
 		return false;
 	}
-	log(LOG_INFO, "Natives::sql_set_charset: Setting conn's charset (conn->id = %d) to %s.", params[1], charset);
+	Logger::log(LOG_INFO, "Natives::sql_set_charset: Setting conn's charset (conn->id = %d) to %s.", params[1], charset);
 	return SQL_Pools::connections[params[1]]->setCharset(charset);
 }
 
@@ -142,10 +142,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) SQL_Pools::connections[params[1]]->getCharset();
-	log(LOG_DEBUG, "Natives::sql_get_charset: Getting conn's charset (conn->id = %d, conn->getCharset() = %s)...", params[1], tmp);
+	Logger::log(LOG_DEBUG, "Natives::sql_get_charset: Getting conn's charset (conn->id = %d, conn->getCharset() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
-		log(LOG_DEBUG, "Natives::sql_get_charset: Specified destination size is smaller than 2, setting it to %d.", len);
+		Logger::log(LOG_DEBUG, "Natives::sql_get_charset: Specified destination size is smaller than 2, setting it to %d.", len);
 		amx_SetString_(amx, params[2], tmp, len);
 	} else {
 		amx_SetString_(amx, params[2], tmp, params[3]);
@@ -160,7 +160,7 @@ cell AMX_NATIVE_CALL Natives::sql_ping(AMX *amx, cell *params) {
 	if (!SQL_Pools::isValidConnection(params[1])) {
 		return -1;
 	}
-	log(LOG_DEBUG, "Natives::sql_ping: Pinging conn (conn->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_ping: Pinging conn (conn->id = %d)...", params[1]);
 	return SQL_Pools::connections[params[1]]->ping();
 }
 
@@ -172,10 +172,10 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 		return 0;
 	}
 	char *tmp = (char*) SQL_Pools::connections[params[1]]->getStat();
-	log(LOG_DEBUG, "Natives::sql_get_stat: Getting conn's statistics (conn->id = %d, conn->getStat() = %s)...", params[1], tmp);
+	Logger::log(LOG_DEBUG, "Natives::sql_get_stat: Getting conn's statistics (conn->id = %d, conn->getStat() = %s)...", params[1], tmp);
 	int len = strlen(tmp);
 	if (params[3] < 2) {
-		log(LOG_DEBUG, "Natives::sql_get_stat: Specified destination size is smaller than 2, setting it to %d.", len);
+		Logger::log(LOG_DEBUG, "Natives::sql_get_stat: Specified destination size is smaller than 2, setting it to %d.", len);
 		amx_SetString_(amx, params[2], tmp, len);
 	} else {
 		amx_SetString_(amx, params[2], tmp, params[3]);
@@ -190,20 +190,20 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 	char *src = NULL;
 	amx_StrParam(amx, params[2], src);
 	if (src == NULL) {
-		log(LOG_DEBUG, "Natives::sql_escape_string: Escaping null string...");
+		Logger::log(LOG_DEBUG, "Natives::sql_escape_string: Escaping null string...");
 		amx_SetString_(amx, params[3], "", params[4]);
 		return 0;
 	}
 	if (!SQL_Pools::isValidConnection(params[1])) {
 		return -1;
 	}
-	log(LOG_DEBUG, "Natives::sql_escape_string: Escaping (conn->id = %d) string '%s'...", params[1], src);
+	Logger::log(LOG_DEBUG, "Natives::sql_escape_string: Escaping (conn->id = %d) string '%s'...", params[1], src);
 	char *dest = (char*) malloc(sizeof(char) * strlen(src) * 2); // *2 in case every character is escaped
 	if (dest != NULL) {
 		int len = SQL_Pools::connections[params[1]]->escapeString(src, dest);
 		if (len != 0) {
 			if (params[4] < 2) {
-				log(LOG_DEBUG, "Natives::sql_escape_string: Specified destination size is smaller than 2, setting it to %d.", len);
+				Logger::log(LOG_DEBUG, "Natives::sql_escape_string: Specified destination size is smaller than 2, setting it to %d.", len);
 				amx_SetString_(amx, params[3], dest, len);
 			} else {
 				amx_SetString_(amx, params[3], dest, params[4]);
@@ -221,12 +221,12 @@ cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
 		return 0;
 	}
 	if (!SQL_Pools::isValidConnection(params[1])) {
-		log(LOG_WARNING, "Natives::sql_format: Invalid connection! (conn->id = %d)", params[1]);
+		Logger::log(LOG_WARNING, "Natives::sql_format: Invalid connection! (conn->id = %d)", params[1]);
 		return 0;
 	}
 	char *format = NULL;
 	amx_StrParam(amx, params[4], format);
-	log(LOG_DEBUG, "Natives::sql_format: Formatting string %s using conn->id = %d.", format, params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_format: Formatting string %s using conn->id = %d.", format, params[1]);
 	if (format == NULL) {
 		amx_SetString_(amx, params[2], "", 1);
 		return 0;
@@ -304,7 +304,7 @@ cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
 						free(tmp2);
 						break;
 					default:
-						log(LOG_WARNING, "Natives::sql_format: Unknown specifier: %s.", specifier);
+						Logger::log(LOG_WARNING, "Natives::sql_format: Unknown specifier: %s.", specifier);
 						break;
 				}
 			}
@@ -328,12 +328,12 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 		return 0;
 	}
 	if (!SQL_Pools::isValidConnection(params[1])) {
-		log(LOG_WARNING, "Natives::sql_query: Invalid connection! (conn->id = %d)", params[1]);
+		Logger::log(LOG_WARNING, "Natives::sql_query: Invalid connection! (conn->id = %d)", params[1]);
 		return 0;
 	}
 	SQL_Statement *stmt = SQL_Pools::newStatement(amx, params[1]);
 	if (stmt == NULL) {
-		log(LOG_WARNING, "Natives::sql_query: Invalid connection! (conn->id = %d, conn->type = %d)", params[1], SQL_Pools::connections[params[1]]->type);
+		Logger::log(LOG_WARNING, "Natives::sql_query: Invalid connection! (conn->id = %d, conn->type = %d)", params[1], SQL_Pools::connections[params[1]]->type);
 		return 0;
 	}
 	int id = stmt->id;
@@ -385,23 +385,23 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 				++i; // Skipping next specifier (&x).
 				break;
 			default: 
-				log(LOG_WARNING, "Natives::sql_query: Format '%c' is not recognized.", stmt->format[i]);
+				Logger::log(LOG_WARNING, "Natives::sql_query: Format '%c' is not recognized.", stmt->format[i]);
 				break;
 		}
 	}
 	SQL_Pools::statements[stmt->id] = stmt;
 	SQL_Connection *conn = SQL_Pools::connections[stmt->connectionId];
 	if (stmt->flags & STATEMENT_FLAGS_THREADED) {
-		log(LOG_DEBUG, "Natives::sql_query: Scheduling statement (stmt->id = %d, stmt->query = %s, stmt->callback = %s) for execution...", stmt->id, stmt->query, stmt->callback);
+		Logger::log(LOG_DEBUG, "Natives::sql_query: Scheduling statement (stmt->id = %d, stmt->query = %s, stmt->callback = %s) for execution...", stmt->id, stmt->query, stmt->callback);
 		conn->pending.push(stmt);
 	} else {
-		log(LOG_DEBUG, "Natives::sql_query: Executing statement (stmt->id = %d, stmt->query = %s)...", stmt->id, stmt->query);
+		Logger::log(LOG_DEBUG, "Natives::sql_query: Executing statement (stmt->id = %d, stmt->query = %s)...", stmt->id, stmt->query);
 		conn->executeStatement(stmt);
 		if ((strlen(stmt->callback)) || (stmt->error != 0)) {
-			log(LOG_DEBUG, "Natives::sql_query: Executing statement callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
+			Logger::log(LOG_DEBUG, "Natives::sql_query: Executing statement callback (stmt->id = %d, stmt->error = %d, stmt->callback = %s)...", stmt->id, stmt->error, stmt->callback);
 			stmt->executeCallback();
 		} else {
-			log(LOG_DEBUG, "Natives::sql_query: Statement executed (stmt->id = %d, stmt->error = %d). No callback found!", stmt->id, stmt->error);
+			Logger::log(LOG_DEBUG, "Natives::sql_query: Statement executed (stmt->id = %d, stmt->error = %d). No callback found!", stmt->id, stmt->error);
 		}
 	}
 	return id;
@@ -418,7 +418,7 @@ cell AMX_NATIVE_CALL Natives::sql_free_result(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_free_result: Freeing statement (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_free_result: Freeing statement (stmt->id = %d)...", params[1]);
 	SQL_Pools::statements.erase(params[1]);
 	delete stmt;
 	return 1;
@@ -435,7 +435,7 @@ cell AMX_NATIVE_CALL Natives::sql_store_result(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_store_result: Storing statement (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_store_result: Storing statement (stmt->id = %d)...", params[1]);
 	// Switching the state of this statement to non-threaded (it has to be freed manually).
 	stmt->flags &= ~STATEMENT_FLAGS_THREADED;
 	stmt->status = STATEMENT_STATUS_EXECUTED;
@@ -453,7 +453,7 @@ cell AMX_NATIVE_CALL Natives::sql_insert_id(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_insert_id: Retrieving insert ID (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_insert_id: Retrieving insert ID (stmt->id = %d)...", params[1]);
 	return stmt->resultSets[stmt->lastResultIdx]->insertId;
 }
 
@@ -468,7 +468,7 @@ cell AMX_NATIVE_CALL Natives::sql_affected_rows(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_affected_rows: Retrieving the count of affected rows (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_affected_rows: Retrieving the count of affected rows (stmt->id = %d)...", params[1]);
 	return stmt->resultSets[stmt->lastResultIdx]->affectedRows;
 }
 
@@ -483,7 +483,7 @@ cell AMX_NATIVE_CALL Natives::sql_error(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_error: Retrieving error code (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_error: Retrieving error code (stmt->id = %d)...", params[1]);
 	return stmt->error;
 }
 
@@ -506,13 +506,13 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 		char *error = (char*) malloc(sizeof(char) * len);
 		strcpy(error, stmt->errorMsg);
 		if (params[3] < 2) {
-			log(LOG_DEBUG, "Natives::sql_error_string: Specified destination size is smaller than 2, setting it to %d.", len);
+			Logger::log(LOG_DEBUG, "Natives::sql_error_string: Specified destination size is smaller than 2, setting it to %d.", len);
 			amx_SetString_(amx, params[2], error, len);
 		} else {
 			amx_SetString_(amx, params[2], error, params[3]);
 		}
 	}
-	log(LOG_DEBUG, "Natives::sql_error_string: Retrieving error string (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_error_string: Retrieving error string (stmt->id = %d)...", params[1]);
 	return len;
 }
 
@@ -527,7 +527,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_rows(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_num_rows: Retrieving the count of rows (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_num_rows: Retrieving the count of rows (stmt->id = %d)...", params[1]);
 	return stmt->resultSets[stmt->lastResultIdx]->numRows;
 }
 
@@ -542,7 +542,7 @@ cell AMX_NATIVE_CALL Natives::sql_num_fields(AMX *amx, cell *params) {
 	if (stmt->status == STATEMENT_STATUS_NONE) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_num_fields: Retrieving the count of fields (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_num_fields: Retrieving the count of fields (stmt->id = %d)...", params[1]);
 	return stmt->resultSets[stmt->lastResultIdx]->numFields;
 }
 
@@ -560,7 +560,7 @@ cell AMX_NATIVE_CALL Natives::sql_next_result(AMX *amx, cell* params) {
 	if (!SQL_Pools::isValidConnection(stmt->connectionId)) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_next_result: Retrieving next result (stmt->id = %d, next_result = %d)...", params[1], params[2]);
+	Logger::log(LOG_DEBUG, "Natives::sql_next_result: Retrieving next result (stmt->id = %d, next_result = %d)...", params[1], params[2]);
 	return SQL_Pools::connections[stmt->connectionId]->seekResult(stmt, params[2]);
 }
 
@@ -583,7 +583,7 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	bool isCopy = SQL_Pools::connections[stmt->connectionId]->fetchField(stmt, params[2], tmp, len);
 	if (len != 0) {
 		if (params[4] < 2) {
-			log(LOG_DEBUG, "Natives::sql_field_name: Specified destination size is smaller than 2, setting it to %d.", len);
+			Logger::log(LOG_DEBUG, "Natives::sql_field_name: Specified destination size is smaller than 2, setting it to %d.", len);
 			amx_SetString_(amx, params[3], tmp, len);
 		} else {
 			amx_SetString_(amx, params[3], tmp, params[4]);
@@ -592,7 +592,7 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_field_name: Can't find field %d or result is empty.", params[2]);
+		Logger::log(LOG_WARNING, "Natives::sql_field_name: Can't find field %d or result is empty.", params[2]);
 	}
 	return len;
 }
@@ -612,7 +612,7 @@ cell AMX_NATIVE_CALL Natives::sql_fetch_row(AMX *amx, cell *params) {
 		return 0;
 	}
 	SQL_Connection *conn = SQL_Pools::connections[stmt->connectionId];
-	log(LOG_DEBUG, "Natives::sql_fetch_row: Fetching a row (stmt->id = %d)...", params[1]);
+	Logger::log(LOG_DEBUG, "Natives::sql_fetch_row: Fetching a row (stmt->id = %d)...", params[1]);
 	char *sep;
 	amx_StrParam(amx, params[2], sep);
 	char *ret = (char*) malloc(4096 * sizeof(char));
@@ -629,14 +629,14 @@ cell AMX_NATIVE_CALL Natives::sql_fetch_row(AMX *amx, cell *params) {
 	int len = strlen(ret);
 	if (len != 0) {
 		if (params[4] < 2) { // Probably a multi-dimensional array.
-			log(LOG_DEBUG, "Natives::sql_fetch_row: Specified destination size is smaller than 2, setting it to %d.", len);
+			Logger::log(LOG_DEBUG, "Natives::sql_fetch_row: Specified destination size is smaller than 2, setting it to %d.", len);
 			amx_SetString_(amx, params[3], ret, len);
 		} else {
 			amx_SetString_(amx, params[3], ret, params[4]);
 		}
 		free(ret);
 	} else {
-		log(LOG_WARNING, "Natives::sql_fetch_row: This row is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_fetch_row: This row is empty.");
 	}
 	return 0;
 }
@@ -655,7 +655,7 @@ cell AMX_NATIVE_CALL Natives::sql_next_row(AMX *amx, cell *params) {
 	if (!SQL_Pools::isValidConnection(stmt->connectionId)) {
 		return 0;
 	}
-	log(LOG_DEBUG, "Natives::sql_next_row: Retrieving next row (stmt->id = %d, next_row = %d)...", params[1], params[2]);
+	Logger::log(LOG_DEBUG, "Natives::sql_next_row: Retrieving next row (stmt->id = %d, next_row = %d)...", params[1], params[2]);
 	return SQL_Pools::connections[stmt->connectionId]->seekRow(stmt, params[2]);
 }
 
@@ -693,7 +693,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	bool isCopy = conn->fetchNum(stmt, fieldidx, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) { // Probably a multi-dimensional array.
-			log(LOG_DEBUG, "Natives::sql_get_field: Specified destination size is smaller than 2, setting it to %d.", len);
+			Logger::log(LOG_DEBUG, "Natives::sql_get_field: Specified destination size is smaller than 2, setting it to %d.", len);
 			amx_SetString_(amx, dest_str, tmp, len);
 		} else {
 			amx_SetString_(amx, dest_str, tmp, dest_len);
@@ -702,7 +702,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field: Can't find field %d or result is empty.", fieldidx);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field: Can't find field %d or result is empty.", fieldidx);
 	}
 	return len;
 }
@@ -739,7 +739,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		amx_SetString_(amx, dest_str, "", dest_len);
 		return 0;
 	}
@@ -748,7 +748,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	bool isCopy = conn->fetchAssoc(stmt, fieldname, tmp, len);
 	if (len != 0) {
 		if (dest_len < 2) {
-			log(LOG_DEBUG, "Natives::sql_get_field_assoc: Specified destination size is smaller than 2, setting it to %d.", len);
+			Logger::log(LOG_DEBUG, "Natives::sql_get_field_assoc: Specified destination size is smaller than 2, setting it to %d.", len);
 			amx_SetString_(amx, dest_str, tmp, len);
 		} else {
 			amx_SetString_(amx, dest_str, tmp, dest_len);
@@ -757,7 +757,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc: Can't find field %s or result is empty.", fieldname);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc: Can't find field %s or result is empty.", fieldname);
 	}
 	return len;
 }
@@ -796,7 +796,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_int(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", fieldidx);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", fieldidx);
 	}
 	return val;
 }
@@ -829,7 +829,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		return 0;
 	}
 	char *tmp = NULL;
@@ -841,7 +841,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_int(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	return val;
 }
@@ -881,7 +881,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_float(AMX *amx, cell *params) {
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", fieldidx);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_int: Can't find field %d or result is empty.", fieldidx);
 	}
 	return amx_ftoc(val);
 }
@@ -914,7 +914,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 	char *fieldname = NULL;
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
 		return 0;
 	}
 	char *tmp = NULL;
@@ -927,7 +927,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc_float(AMX *amx, cell *params) 
 			free(tmp);
 		}
 	} else {
-		log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
+		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc_int: Can't find field %s or result is empty.", fieldname);
 	}
 	return amx_ftoc(val);
 }

@@ -134,10 +134,10 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\log.h" />
+    <ClInclude Include="src\Logger.h" />
     <ClInclude Include="src\main.h" />
-    <ClInclude Include="src\mutex.h" />
-    <ClInclude Include="src\natives.h" />
+    <ClInclude Include="src\Mutex.h" />
+    <ClInclude Include="src\Natives.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\sdk\amx\amx.h" />
     <ClInclude Include="src\sdk\amx\amx2.h" />
@@ -158,10 +158,10 @@
     <ClInclude Include="src\sql\SQL_Statement.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\log.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\mutex.cpp" />
-    <ClCompile Include="src\natives.cpp" />
+    <ClCompile Include="src\Mutex.cpp" />
+    <ClCompile Include="src\Natives.cpp" />
     <ClCompile Include="src\sdk\amxplugin.cpp" />
     <ClCompile Include="src\sdk\amxplugin2.cpp" />
     <ClCompile Include="src\sql\mysql\MySQL_Connection.cpp" />

@@ -29,7 +29,7 @@
 
 #ifdef PLUGIN_SUPPORTS_MYSQL
 
-	#include "../../mutex.h"
+	#include "../../Mutex.h"
 
 	#ifdef _WIN32
 		#include <Windows.h>

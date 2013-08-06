@@ -28,6 +28,7 @@
 #include "sdk/amx/amx.h"
 
 class Natives {
+
 	/**
 	 * Exported AMX natives.
 	 */
