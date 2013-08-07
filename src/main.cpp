@@ -93,7 +93,7 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData) {
 	pAMXFunctions = ppData[PLUGIN_DATA_AMX_EXPORTS];
 	#ifdef PLUGIN_SUPPORTS_MYSQL
 		if (mysql_library_init(0, NULL, NULL)) {
-			Logger::logprintf("  >> Coudln't initalize the MySQL library (libmysql.dll). It's probably missing.");
+			Logger::logprintf("  >> Couldn't initalize the MySQL library (libmysql.dll). It's probably missing.");
 			exit(0);
 			return false;
 		}
