@@ -270,7 +270,7 @@ cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
 					case 'a':
 					case 'A':
 						amx_GetAddr(amx, params[++p], &ptr);
-						tmp = (char*) malloc(16 * sizeof(char));
+						tmp = (char*) malloc(128 * sizeof(char));
 						sprintf(tmp, specifier, amx_ctof(*ptr));
 						strcat(output, tmp);
 						free(tmp);
