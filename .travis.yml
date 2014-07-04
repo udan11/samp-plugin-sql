@@ -9,4 +9,4 @@ env:
 install:
   - sudo apt-get install gcc-multilib g++-multilib
 script:
-  - make $(BUILD)
+  - make
