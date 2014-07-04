@@ -2,13 +2,13 @@ language: cpp
 compiler:
   - gcc
 env:
-  - BUILD='MYSQL=1'
-  - BUILD='MYSQL=1 STATIC=1'
-  - BUILD='PGSQL=1'
-  - BUILD='MYSQL=1 PGSQL=1'
+  - MYSQL=true
+  - MYSQL=true STATIC=true
+  - PGSQL=true
+  - MYSQL=true PGSQL=true
 install:
   - sudo apt-get install gcc-multilib g++-multilib
 before_script:
   - mkdir bin
 script:
-  - make $BUILD
+  - make $(BUILD)
