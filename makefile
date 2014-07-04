@@ -31,10 +31,10 @@
 #
 
 ifndef CC
-  CC = gcc
+	CC = gcc
 endif
 ifndef GXX
-  GXX = g++
+	GXX = g++
 endif
 
 # Compilation flags.
@@ -46,44 +46,44 @@ OUTFILE = bin/sql.so
 
 # 1: Linking MySQL library (if it's necessary).
 ifneq ($(MYSQL),)
-  COMPILE_FLAGS += -DPLUGIN_SUPPORTS_MYSQL=1
-  ifneq ($(STATIC),)
-    LIBRARIES += -ldl ./lib/mysql/libmysql.a
-    OUTFILE := bin/mysql_static.so
-  else
-    LIBRARIES += ./lib/mysql/libmysql.so
-    OUTFILE := bin/mysql.so
-  endif
+	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_MYSQL=1
+	ifneq ($(STATIC),)
+		LIBRARIES += -ldl ./lib/mysql/libmysql.a
+		OUTFILE := bin/mysql_static.so
+	else
+		LIBRARIES += ./lib/mysql/libmysql.so
+		OUTFILE := bin/mysql.so
+	endif
 endif
 
 # 2: Linking PostgreSQL library (if it's necessary).
 ifneq ($(PGSQL),)
-  COMPILE_FLAGS += -DPLUGIN_SUPPORTS_PGSQL=2
-  # There is no way to link statically `libpq`.
-  LIBRARIES += ./lib/pgsql/libpq.so
-  OUTFILE := bin/pgsql.so
+	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_PGSQL=2
+	# There is no way to link statically `libpq`.
+	LIBRARIES += ./lib/pgsql/libpq.so
+	OUTFILE := bin/pgsql.so
 endif
 
 # It has both (or neither) MySQL and PgSQL support.
 ifneq ($(MYSQL),)
-  ifneq ($(PGSQL),)
-    ifneq ($(STATIC),)
-      OUTFILE := bin/sql_static.so
-    else
-      OUTFILE := bin/sql.so
-    endif
-  endif
+	ifneq ($(PGSQL),)
+		ifneq ($(STATIC),)
+			OUTFILE := bin/sql_static.so
+		else
+			OUTFILE := bin/sql.so
+		endif
+	endif
 endif
 
 # Compiling!
 all:
-  mkdir -p foo
-  $(GXX) $(COMPILE_FLAGS) src/sdk/*.cpp
-  $(GXX) $(COMPILE_FLAGS) src/sql/*.cpp
-  $(GXX) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
-  $(GXX) $(COMPILE_FLAGS) src/sql/pgsql/*.cpp
-  $(GXX) $(COMPILE_FLAGS) src/*.cpp
-  $(GXX) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES) 
-  
+	mkdir -p foo
+	$(GXX) $(COMPILE_FLAGS) src/sdk/*.cpp
+	$(GXX) $(COMPILE_FLAGS) src/sql/*.cpp
+	$(GXX) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
+	$(GXX) $(COMPILE_FLAGS) src/sql/pgsql/*.cpp
+	$(GXX) $(COMPILE_FLAGS) src/*.cpp
+	$(GXX) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES) 
+	
 clean:
-  rm -f *.o
+	rm -f *.o
