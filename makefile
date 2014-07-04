@@ -32,8 +32,10 @@
 
 ifndef CC
 	GCC = gcc
+endif
 ifndef GXX
 	GXX = g++
+endif
 
 # Compilation flags.
 COMPILE_FLAGS = -c -fPIC -m32 -O3 -w -Wall -Iinclude/ -DLINUX
