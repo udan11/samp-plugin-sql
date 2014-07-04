@@ -77,7 +77,7 @@ endif
 
 # Compiling!
 all:
-	mkdir -p foo
+	mkdir -p bin
 	$(GXX) $(COMPILE_FLAGS) src/sdk/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
