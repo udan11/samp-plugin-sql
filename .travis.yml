@@ -6,5 +6,7 @@ env:
   - BUILD='MYSQL=1 STATIC=1'
   - BUILD='PGSQL=1'
   - BUILD='MYSQL=1 PGSQL=1'
+install:
+  - sudo apt-get install gcc-multilib g++-multilib
 script:
   - make $BUILD
