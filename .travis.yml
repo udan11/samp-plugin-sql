@@ -1,0 +1,10 @@
+language: cpp
+compiler:
+  - gcc
+env:
+  - BUILD='MYSQL=1'
+  - BUILD='MYSQL=1 STATIC=1'
+  - BUILD='PGSQL=1'
+  - BUILD='MYSQL=1 PGSQL=1'
+script:
+  - make $BUILD

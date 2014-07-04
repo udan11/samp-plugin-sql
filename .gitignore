@@ -136,6 +136,7 @@ App_Data/*.ldf
 
 .*
 !.gitignore
+!.travis.yml
 *~
 
 # =========================
