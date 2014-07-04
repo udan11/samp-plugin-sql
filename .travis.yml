@@ -8,7 +8,5 @@ env:
   - MYSQL=true PGSQL=true
 install:
   - sudo apt-get install gcc-multilib g++-multilib
-before_script:
-  - mkdir bin
 script:
   - make $(BUILD)

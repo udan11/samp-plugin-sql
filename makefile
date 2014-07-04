@@ -31,7 +31,7 @@
 #
 
 ifndef CC
-	GCC = gcc
+	CC = gcc
 endif
 ifndef GXX
 	GXX = g++
@@ -77,6 +77,7 @@ endif
 
 # Compiling!
 all:
+	mkdir -p foo
 	$(GXX) $(COMPILE_FLAGS) src/sdk/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/sql/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
