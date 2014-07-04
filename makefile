@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Dan
+# Copyright (c) 2013-2014, Dan
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -23,16 +23,18 @@
 
 #
 # make <flags>
+#   e.g. make MYSQL=true
 #
 # Flag list:
-# MYSQL=true  - adds support for MySQL 
-# PGSQL=true  - adds support for PostgreSQL
-# STATIC=true - links statically MySQL library (only!)
+#   MYSQL  - adds support for MySQL 
+#   PGSQL  - adds support for PostgreSQL
+#   STATIC - links statically MySQL library (only!)
 #
 
 ifndef CC
 	CC = gcc
 endif
+
 ifndef GXX
 	GXX = g++
 endif
