@@ -146,9 +146,9 @@ cell AMX_NATIVE_CALL Natives::sql_get_charset(AMX *amx, cell *params) {
 	int len = strlen(tmp);
 	if (params[3] < 2) {
 		Logger::log(LOG_DEBUG, "Natives::sql_get_charset: Specified destination size is smaller than 2, setting it to %d.", len);
-		amx_SetString_(amx, params[2], tmp, len);
+		amx_SetCString(amx, params[2], tmp, len);
 	} else {
-		amx_SetString_(amx, params[2], tmp, params[3]);
+		amx_SetCString(amx, params[2], tmp, params[3]);
 	}
 	return 1;
 }
@@ -176,9 +176,9 @@ cell AMX_NATIVE_CALL Natives::sql_get_stat(AMX *amx, cell *params) {
 	int len = strlen(tmp);
 	if (params[3] < 2) {
 		Logger::log(LOG_DEBUG, "Natives::sql_get_stat: Specified destination size is smaller than 2, setting it to %d.", len);
-		amx_SetString_(amx, params[2], tmp, len);
+		amx_SetCString(amx, params[2], tmp, len);
 	} else {
-		amx_SetString_(amx, params[2], tmp, params[3]);
+		amx_SetCString(amx, params[2], tmp, params[3]);
 	}
 	return 1;
 }
@@ -191,7 +191,7 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 	amx_StrParam(amx, params[2], src);
 	if (src == NULL) {
 		Logger::log(LOG_DEBUG, "Natives::sql_escape_string: Escaping null string...");
-		amx_SetString_(amx, params[3], "", params[4]);
+		amx_SetCString(amx, params[3], "", params[4]);
 		return 0;
 	}
 	if (!SQL_Pools::isValidConnection(params[1])) {
@@ -204,9 +204,9 @@ cell AMX_NATIVE_CALL Natives::sql_escape_string(AMX *amx, cell *params) {
 		if (len != 0) {
 			if (params[4] < 2) {
 				Logger::log(LOG_DEBUG, "Natives::sql_escape_string: Specified destination size is smaller than 2, setting it to %d.", len);
-				amx_SetString_(amx, params[3], dest, len);
+				amx_SetCString(amx, params[3], dest, len);
 			} else {
-				amx_SetString_(amx, params[3], dest, params[4]);
+				amx_SetCString(amx, params[3], dest, params[4]);
 			}
 			free(dest);
 		}
@@ -228,7 +228,7 @@ cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
 	amx_StrParam(amx, params[4], format);
 	Logger::log(LOG_DEBUG, "Natives::sql_format: Formatting string %s using conn->id = %d.", format, params[1]);
 	if (format == NULL) {
-		amx_SetString_(amx, params[2], "", 1);
+		amx_SetCString(amx, params[2], "", 1);
 		return 0;
 	}
 	int dest_len = params[3];
@@ -317,7 +317,7 @@ cell AMX_NATIVE_CALL Natives::sql_format(AMX *amx, cell *params) {
 			output[strlen(output)] = format[i];
 		}
 	}
-	amx_SetString_(amx, params[2], output, dest_len);
+	amx_SetCString(amx, params[2], output, dest_len);
 	int outputLen = strlen(output);
 	free(output);
 	return outputLen;
@@ -338,10 +338,10 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 	}
 	int id = stmt->id;
 	stmt->connectionId = params[1];
-	amx_GetString_(amx, params[2], stmt->query);
+	amx_GetCString(amx, params[2], stmt->query);
 	stmt->flags = params[3];
-	amx_GetString_(amx, params[4], stmt->callback);
-	amx_GetString_(amx, params[5], stmt->format);
+	amx_GetCString(amx, params[4], stmt->callback);
+	amx_GetCString(amx, params[5], stmt->format);
 	for (int i = 0, len = strlen(stmt->format), p = 6; i < len; ++i, ++p) {
 		switch (stmt->format[i]) {
 			case 'a':
@@ -377,7 +377,7 @@ cell AMX_NATIVE_CALL Natives::sql_query(AMX *amx, cell *params) {
 			case 's':
 			case 'S':
 				char *str;
-				amx_GetString_(amx, params[p], str);
+				amx_GetCString(amx, params[p], str);
 				stmt->paramsStr.push_back(str);
 				break;
 			case '&': 
@@ -507,9 +507,9 @@ cell AMX_NATIVE_CALL Natives::sql_error_string(AMX *amx, cell *params) {
 		strcpy(error, stmt->errorMsg);
 		if (params[3] < 2) {
 			Logger::log(LOG_DEBUG, "Natives::sql_error_string: Specified destination size is smaller than 2, setting it to %d.", len);
-			amx_SetString_(amx, params[2], error, len);
+			amx_SetCString(amx, params[2], error, len);
 		} else {
-			amx_SetString_(amx, params[2], error, params[3]);
+			amx_SetCString(amx, params[2], error, params[3]);
 		}
 	}
 	Logger::log(LOG_DEBUG, "Natives::sql_error_string: Retrieving error string (stmt->id = %d)...", params[1]);
@@ -584,9 +584,9 @@ cell AMX_NATIVE_CALL Natives::sql_field_name(AMX *amx, cell *params) {
 	if (len != 0) {
 		if (params[4] < 2) {
 			Logger::log(LOG_DEBUG, "Natives::sql_field_name: Specified destination size is smaller than 2, setting it to %d.", len);
-			amx_SetString_(amx, params[3], tmp, len);
+			amx_SetCString(amx, params[3], tmp, len);
 		} else {
-			amx_SetString_(amx, params[3], tmp, params[4]);
+			amx_SetCString(amx, params[3], tmp, params[4]);
 		}
 		if (isCopy) {
 			free(tmp);
@@ -630,9 +630,9 @@ cell AMX_NATIVE_CALL Natives::sql_fetch_row(AMX *amx, cell *params) {
 	if (len != 0) {
 		if (params[4] < 2) { // Probably a multi-dimensional array.
 			Logger::log(LOG_DEBUG, "Natives::sql_fetch_row: Specified destination size is smaller than 2, setting it to %d.", len);
-			amx_SetString_(amx, params[3], ret, len);
+			amx_SetCString(amx, params[3], ret, len);
 		} else {
-			amx_SetString_(amx, params[3], ret, params[4]);
+			amx_SetCString(amx, params[3], ret, params[4]);
 		}
 		free(ret);
 	} else {
@@ -694,9 +694,9 @@ cell AMX_NATIVE_CALL Natives::sql_get_field(AMX *amx, cell *params) {
 	if (len != 0) {
 		if (dest_len < 2) { // Probably a multi-dimensional array.
 			Logger::log(LOG_DEBUG, "Natives::sql_get_field: Specified destination size is smaller than 2, setting it to %d.", len);
-			amx_SetString_(amx, dest_str, tmp, len);
+			amx_SetCString(amx, dest_str, tmp, len);
 		} else {
-			amx_SetString_(amx, dest_str, tmp, dest_len);
+			amx_SetCString(amx, dest_str, tmp, dest_len);
 		}
 		if (isCopy) {
 			free(tmp);
@@ -740,7 +740,7 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	amx_StrParam(amx, fieldidx, fieldname);
 	if (fieldname == NULL) {
 		Logger::log(LOG_WARNING, "Natives::sql_get_field_assoc: Field name is empty.");
-		amx_SetString_(amx, dest_str, "", dest_len);
+		amx_SetCString(amx, dest_str, "", dest_len);
 		return 0;
 	}
 	char *tmp = NULL;
@@ -749,9 +749,9 @@ cell AMX_NATIVE_CALL Natives::sql_get_field_assoc(AMX *amx, cell *params) {
 	if (len != 0) {
 		if (dest_len < 2) {
 			Logger::log(LOG_DEBUG, "Natives::sql_get_field_assoc: Specified destination size is smaller than 2, setting it to %d.", len);
-			amx_SetString_(amx, dest_str, tmp, len);
+			amx_SetCString(amx, dest_str, tmp, len);
 		} else {
-			amx_SetString_(amx, dest_str, tmp, dest_len);
+			amx_SetCString(amx, dest_str, tmp, dest_len);
 		}
 		if (isCopy) {
 			free(tmp);
