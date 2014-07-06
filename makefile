@@ -40,13 +40,13 @@ ifndef GXX
 endif
 
 # Compilation flags.
-COMPILE_FLAGS = -c -fPIC -m32 -O3 -w -Wall -Iinclude/ -DLINUX
+COMPILE_FLAGS = -c -fPIC -m32 -O3 -w -Wall -Iinclude/ -Isrc/sdk/amx/ -DLINUX
 LIBRARIES = -lpthread -lrt
 
 # Output file name.
 OUTFILE = bin/sql.so
 
-# 1: Linking MySQL library (if it's necessary).
+# 1: MySQL support is enabled.
 ifneq ($(MYSQL),)
 	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_MYSQL=1
 	ifneq ($(STATIC),)
@@ -58,7 +58,7 @@ ifneq ($(MYSQL),)
 	endif
 endif
 
-# 2: Linking PostgreSQL library (if it's necessary).
+# 2: PostgreSQL support is enabled.
 ifneq ($(PGSQL),)
 	COMPILE_FLAGS += -DPLUGIN_SUPPORTS_PGSQL=2
 	# There is no way to link statically `libpq`.
@@ -66,7 +66,7 @@ ifneq ($(PGSQL),)
 	OUTFILE := bin/pgsql.so
 endif
 
-# It has both (or neither) MySQL and PgSQL support.
+# Both MySQL and PostgreSQL support is enabled.
 ifneq ($(MYSQL),)
 	ifneq ($(PGSQL),)
 		ifneq ($(STATIC),)
@@ -85,7 +85,7 @@ all:
 	$(GXX) $(COMPILE_FLAGS) src/sql/mysql/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/sql/pgsql/*.cpp
 	$(GXX) $(COMPILE_FLAGS) src/*.cpp
-	$(GXX) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES) 
+	$(GXX) -m32 -shared -o $(OUTFILE) *.o $(LIBRARIES)
 	
 clean:
 	rm -f *.o
